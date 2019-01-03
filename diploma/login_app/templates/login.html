@@ -1,0 +1,51 @@
+{% load bootstrap4 %}
+{% bootstrap_javascript %}
+{% bootstrap_css %}
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+
+        <title>SeaBattle-Signin</title>
+
+        <style type="text/css">
+            .formsize {
+                width: 500px;
+                padding: 5px;
+                padding-right: 20px;
+                border: solid 1px blue;
+            }
+            .formalign {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                height: 30%;
+                width: 50%;
+                margin: -15% 0 0 -25%;
+            }
+        </style>
+    </head>
+
+    <body class="text-center">
+
+        <form class="form-signin" action="playerlist.html" method="post" class="form">
+            {% csrf_token %}
+            <div class="formalign" align="center">
+                <div class="formsize">
+                    <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+                    <label for="inputUsername" class="sr-only">Email address</label>
+                    <input type="text" id="inputUsername" class="form-control" placeholder="Username" required autofocus>
+                    <label for="inputPassword" class="sr-only">Password</label>
+                    <input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
+                    <div class="checkbox mb-3">
+                    <label>
+                        <input type="checkbox" value="remember-me"> Remember me
+                    </label>
+                    </div>
+                    <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+                </div>
+            </div>
+        </form>
+    </body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Preparing...</title>
+    <style type="text/css">
+       table {
+        background: black;
+        color: black;
+        border-collapse: collapse; /*removing double borders between cells*/
+       }
+       th {
+        background: white;
+        cursor: pointer;
+        height: 25px;
+        width: 25px;
+       }
+    </style>
+    <script language="JavaScript">
+        function change(element){
+            if (element.style.backgroundColor != 'lime') {
+                element.style.backgroundColor = 'lime';
+            } else {
+                element.style.backgroundColor = 'white';
+                }
+        }
+    </script>
+</head>
+<body>
+   <p>The field of {{user}}</p>
+   <form action="/game/" method="POST">
+       {% csrf_token %}
+       <table id="{{user}}_table" border="1" cellspacing="1">
+            {% for i in sizeiterator  %}
+                <tr>
+                    {% for j in sizeiterator %}
+                        <th id="{{i}},{{j}}" onclick="change(this)">
+
+                        </th>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+       </table>
+       <p><button onclick="collecting()">Let's go, when ready</button></p>
+   </form>
+</body>
+</html>
