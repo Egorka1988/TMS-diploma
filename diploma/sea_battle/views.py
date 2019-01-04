@@ -51,7 +51,7 @@ def gameplay(request, *args, **kwargs):
     return render(
         request,
         'sea_battle/battle.html',
-        {}
+        {h}
     )
 
 
