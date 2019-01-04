@@ -47,14 +47,14 @@ def see_users(request,*args,**kwargs):
     )
 @login_required
 def gameplay(request, *args, **kwargs):
-    pass
+    print(request.POST)
     return render(
         request,
         'sea_battle/battle.html',
-        {h}
+        {}
     )
 
-
+@login_required
 def game_new(request):
     size = int(request.POST.get('fld_size'))
     sizeiterator = list(range(size))

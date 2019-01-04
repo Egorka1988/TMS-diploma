@@ -24,11 +24,54 @@
                 element.style.backgroundColor = 'white';
                 }
         }
+        var result =[];
+        alert("go1");
+        function collection(){
+            alert("go2");
+            var cell_id, color;
+            for ( var i = 0; i < size; i++) {
+                for (var j = 0; j < size; j++) {
+                    if (document.getElementById("{{i}},{{j}}") != null){
+                        cell_id = "{{i}},{{j}}";
+                        color = document.getElementById("{{i}},{{j}}".getAttribute("style");
+                        result = result + [cell_id, color];
+                    }
+                }
+            }
+            var json_result = JSON.stringify(result);
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open("POST", "http://127.0.0.1:8000/game/");
+            xmlhttp.setRequestHeader("Content-Type", "application/json");
+            xmlhttp.send(json_result);
+        }
+    </script>
+
+    <script language="JavaScript">
+        var result =[];
+        alert("go1");
+        function collection(){
+            alert("go2");
+            var cell_id, color;
+            for ( var i = 0; i < size; i++) {
+                for (var j = 0; j < size; j++) {
+                    if (document.getElementById("{{i}},{{j}}") != null){
+                        cell_id = "{{i}},{{j}}";
+                        color = document.getElementById("{{i}},{{j}}".getAttribute("style");
+                        result = result + [cell_id, color];
+                    }
+                }
+            }
+            var json_result = JSON.stringify(result);
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open("POST", "http://127.0.0.1:8000/game/");
+            xmlhttp.setRequestHeader("Content-Type", "application/json");
+            xmlhttp.send(json_result);
+        }
     </script>
 </head>
 <body>
    <p>The field of {{user}}</p>
-   <form action="/game/" method="POST">
+   <button action="/game/" method="POST">
        {% csrf_token %}
        <table id="{{user}}_table" border="1" cellspacing="1">
             {% for i in sizeiterator  %}
@@ -41,7 +84,8 @@
                 </tr>
             {% endfor %}
        </table>
-       <p><button onclick="collecting()">Let's go, when ready</button></p>
+       <button type="button" onclick="collecting()">test json</button>
+       <p><button onmousedown="collecting()">Let's go, when ready</button></p>
    </form>
 </body>
 </html>
