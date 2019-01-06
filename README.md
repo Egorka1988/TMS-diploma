@@ -16,7 +16,7 @@ linux system recommended.
 5. Activate your enviroment: <code>source env1/bin/activate</code> (for unix-based systems), for Windows - <code>cd env1/scripts activate</code>
 6. Install ipython - <code>pip install ipython</code> Interactive mode - in ipython console.
 7. Download the project: https://github.com/Egorka1988/TMS-diploma.git
-8. Change your directory to dir, where requirements.txt is located. 
+8. Change your directory to dir, where <code>requirements.txt</code> is located. 
 9. Run:  <code>pip install -r requirements.txt</code> to install all packages you need for proper start the project.
 10. In project is used PostgreSQL database. Let's install it:
 <pre><code>$ sudo apt-get update
