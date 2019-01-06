@@ -8,12 +8,34 @@ Finally, when the opponent accepted inviting and set his ships up the battle beg
 # List ToDo for trying at localhost:
 
 linux system recommended.
-<ol>
-<li>Download python https://www.python.org/downloads/</li>
-<li>Setup pip. https://pip.pypa.io/en/stable/installing/</li>
-<li>Setup virtualenv - <code>pip install virtualenv</code> https://virtualenv.pypa.io/en/stable/installation/</li>
-<li>Create enviroment variable. (Try to remember its location) <code>virtualenv env1</code></li>
-<li>Activate your enviroment: <code>env1/bin/activate</code> (for unix-based systems), for Windows - <code>cd env1/scripts activate</code></li>
-<li>Install ipython - <code>pip install ipython</code>
-Interactive mode - in ipython console.</li>
-</ol>
+
+1. Download python https://www.python.org/downloads/</li>
+2. Setup pip. https://pip.pypa.io/en/stable/installing/
+3. Setup virtualenv - <code>pip install virtualenv</code> https://virtualenv.pypa.io/en/stable/installation/
+4. Create enviroment variable. (Try to remember its location) <code>virtualenv env1</code>
+5. Activate your enviroment: <code>source env1/bin/activate</code> (for unix-based systems), for Windows - <code>cd env1/scripts activate</code>
+6. Install ipython - <code>pip install ipython</code> Interactive mode - in ipython console.
+7. Download the project: https://github.com/Egorka1988/TMS-diploma.git
+8. Change your directory to dir, where <code>requirements.txt</code> is located. 
+9. Run:  <code>pip install -r requirements.txt</code> to install all packages you need for proper start the project.
+10. In project is used PostgreSQL database. Let's install it:
+<pre><code>$ sudo apt-get update
+$ sudo apt-get install postgresql postgresql-contrib</code></pre>
+Additional information you can find here: https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-16-04 <br>
+11. Do not keep so sensitive data like name and password to your database in settings.py. Follow next steps:<br>
+-Find your <code>activate</code> file and open it for edit.<br>
+-Add to the end of file next code:<pre><code>  
+export DB_NAME=your_db_name
+export DB_USER=your_role
+export DB_PASSWORD=your_password</code></pre>
+12. Change your dir to dir, where <code>manage.py</code> file is located.<br>
+13. Run: <pre><code>
+$ python manage.py makemigrations
+$ python manage.py migrate
+$ python manage.py runserver
+</code></pre>
+14. If everything is well, you recieve a link http://127.0.0.1:8000/ and I hope, it works. Enjoy!
+
+
+
+
