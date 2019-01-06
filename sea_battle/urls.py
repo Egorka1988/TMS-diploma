@@ -1,10 +1,10 @@
 from django.urls import path
-from diploma.sea_battle.views import RegisterFormView, HelloView, GameView
+from sea_battle.views import RegisterFormView, HelloView, GameView
 
 urlpatterns = [
-    path('', HelloView, name='index'),
-    path('accounts/logged_in/', RegisterFormView.as_view(), name='see_users'),
+    path('', HelloView.index, name='index'),
+    path('accounts/logged_in/', GameView.see_users, name='see_users'),
     path('accounts/signup/', RegisterFormView.as_view()),
-    path('game_create/', GameView, name='game_new'),
-    path('game/', GameView, name='gameplay'),
+    path('game_create/', GameView.game_new, name='game_new'),
+    path('game/', GameView.gameplay, name='gameplay'),
 ]

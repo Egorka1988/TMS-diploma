@@ -23,13 +23,12 @@ class RegisterFormView(FormView):
         form.save()
         return super(RegisterFormView, self).form_valid(form)
 
-
 @login_required
 class GameView(TemplateView):
 
     #your opponents in game. You point the user that you want to create a game with
     #https://stackoverflow.com/questions/29663777/how-to-check-whether-a-user-is-online-in-django-template
-    def see_users(request,*args,**kwargs):
+    def see_users(request, *args,**kwargs):
         user_status = online_users.models.OnlineUserActivity.get_user_activities(timedelta(seconds=60))
         users = (user for user in user_status)
         return render(
@@ -40,7 +39,7 @@ class GameView(TemplateView):
             }
         )
 
-    def game_new(self, request):
+    def game_new(request, *args, **kwargs):
         size = int(request.POST.get('fld_size'))
         sizeiterator = list(range(size))
         opponent = request.POST.get('opponent_username')
@@ -52,7 +51,7 @@ class GameView(TemplateView):
              'opponent': opponent}
         )
 
-    def gameplay(self, request, *args, **kwargs):
+    def gameplay(request, *args, **kwargs):
         print(request.POST)
         size = request.POST.get('data')
         print(size)
@@ -64,4 +63,3 @@ class GameView(TemplateView):
             {'sizeiterator': sizeiterator,
              'json_place': json_place}
         )
-

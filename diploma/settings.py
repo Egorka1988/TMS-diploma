@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'django_registration',
     'bootstrap4',
     'login_app',
-    'sea_battle'
+    'sea_battle',
 ]
 
 MIDDLEWARE = [
