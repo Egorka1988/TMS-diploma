@@ -134,3 +134,6 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = 'static'
 LOGIN_REDIRECT_URL = '/accounts/logged_in/'
+HTMLVALIDATOR_ENABLED = False
+if HTMLVALIDATOR_ENABLED:
+    MIDDLEWARE += ["htmlvalidator.middleware.HTMLValidator",]

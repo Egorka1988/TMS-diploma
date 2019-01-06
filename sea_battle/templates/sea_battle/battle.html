@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Battle!</title>
+    <style type="text/css">
+       table {
+        color: black;
+        border-collapse: collapse; /*removing double borders between cells*/
+       }
+       th {
+        border: 1px solid black;
+        cursor: pointer;
+        height: 25px;
+        width: 25px;
+       }
+    </style>
+    <script>
+        var cell_style = JSON.parce({{json_place}});
+        console.log(cell_style);
+        function filling_data(element){
+            document.getElementById(element.Id).style = cell_style;
+        }
+    </script>
+</head>
+<body>
+here must be two fields in one session
+ <p>The field of {{user}}</p>
+    <form method="GET" name="field1">
+       <table id="{{user}}_table">
+            {% for i in sizeiterator  %}
+                <tr>
+                    {% for j in sizeiterator %}
+                        <th id="{{i}},{{j}}"></th>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+       </table>
+    </form>
+    <form method="GET" name="field1">
+       <table id="{{user}}_table">
+            {% for i in sizeiterator  %}
+                <tr>
+                    {% for j in sizeiterator %}
+                        <th id="{{i}},{{j}}" onclick="change(this)"></th>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+       </table>
+       <p><button type="button" onclick="collecting()">Let's go, when ready</button></p>
+   </form>
+</body>
+</html>

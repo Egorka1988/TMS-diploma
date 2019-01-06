@@ -10,7 +10,7 @@
     <form action="/game_create/" method="POST">
         {% csrf_token %}
         {% for user in users %}
-            <input type="radio" name="username" value="{{user.user}}"> {{user.user}}<br>
+            <input type="radio" name="opponent_username" value="{{user.user}}"> {{user.user}}<br>
         {% endfor %}
         <h1>Choose size of the battlefield (20 max)</h1>
         <input type="number"

@@ -15,19 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.conf.urls import url
-from django.contrib import auth as auth_views
-from sea_battle.views import index, see_users, RegisterFormView, game_new, gameplay
-
 
 urlpatterns = [
-    path('', index, name='index'),
     path('admin/', admin.site.urls),
     path('auth/', include('login_app.urls')),
-    path('accounts/logged_in/', see_users, name='users_list'),
     path('accounts/', include('django.contrib.auth.urls'), name='login_page'),
-    # path('', include('sea_battle.urls')),
-    path('accounts/signup/', RegisterFormView.as_view()),
-    path('game_create/', game_new, name='game_new'),
-    path('game/', gameplay, name='gameplay')
+    path('', include('sea_battle.urls')),
 ]
