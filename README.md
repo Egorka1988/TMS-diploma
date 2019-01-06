@@ -19,8 +19,8 @@ linux system recommended.
 8. Change your directory to dir, where requirements.txt is located. 
 9. Run:  <code>pip install -r requirements.txt</code> to install all packages you need for proper start the project.
 10.In project is used PostgreSQL database. Let's install it:
-<code>$ sudo apt-get update
-$ sudo apt-get install postgresql postgresql-contrib</code>
+<pre><code>$ sudo apt-get update
+$ sudo apt-get install postgresql postgresql-contrib</code></pre>
 Additional information you can find here: https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-16-04
 11. Do not keep so sensitive data like name and password to your database in settings.py. Follow next:
 -find your activate file and open it for edit.
