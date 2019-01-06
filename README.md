@@ -23,11 +23,19 @@ linux system recommended.
 $ sudo apt-get install postgresql postgresql-contrib</code></pre>
 Additional information you can find here: https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-16-04 <br>
 11. Do not keep so sensitive data like name and password to your database in settings.py. Follow next steps:<br>
--find your activate file and open it for edit.<br>
--add to the end of file next code:<pre><code>  
+-Find your activate file and open it for edit.<br>
+-Add to the end of file next code:<pre><code>  
 export DB_NAME=your_db_name
 export DB_USER=your_role
 export DB_PASSWORD=your_password</code></pre>
+12. Change your dir to dir, where <code>manage.py</code> file is located.
+13. Run: <pre><code>
+$ python manage.py makemigrations
+$ python manage.py migrate
+$ python manage.py runserver
+</code>
+14. If everything is well, you recieve a link http://127.0.0.1:8000/ and I hope, it works. Enjoy!
+
 
 
 
