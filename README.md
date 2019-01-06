@@ -23,7 +23,7 @@ linux system recommended.
 $ sudo apt-get install postgresql postgresql-contrib</code></pre>
 Additional information you can find here: https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-16-04 <br>
 11. Do not keep so sensitive data like name and password to your database in settings.py. Follow next steps:<br>
--Find your activate file and open it for edit.<br>
+-Find your <code>activate</code> file and open it for edit.<br>
 -Add to the end of file next code:<pre><code>  
 export DB_NAME=your_db_name
 export DB_USER=your_role
