@@ -8,12 +8,12 @@ Finally, when the opponent accepted inviting and set his ships up the battle beg
 # List ToDo for trying at localhost:
 
 linux system recommended.
-<ol>
-<li>Download python https://www.python.org/downloads/</li>
-<li>Setup pip. https://pip.pypa.io/en/stable/installing/</li>
-<li>Setup virtualenv - <code>pip install virtualenv</code> https://virtualenv.pypa.io/en/stable/installation/</li>
-<li>Create enviroment variable. (Try to remember its location) <code>virtualenv env1</code></li>
-<li>Activate your enviroment: <code>env1/bin/activate</code> (for unix-based systems), for Windows - <code>cd env1/scripts activate</code></li>
-<li>Install ipython - <code>pip install ipython</code>
-Interactive mode - in ipython console.</li>
-</ol>
+
+1. Download python https://www.python.org/downloads/</li>
+2. Setup pip. https://pip.pypa.io/en/stable/installing/
+3. Setup virtualenv - <code>pip install virtualenv</code> https://virtualenv.pypa.io/en/stable/installation/
+4. Create enviroment variable. (Try to remember its location) <code>virtualenv env1</code>
+5. Activate your enviroment: <code>env1/bin/activate</code> (for unix-based systems), for Windows - <code>cd env1/scripts activate</code>
+6. Install ipython - <code>pip install ipython</code> Interactive mode - in ipython console.
+
+
