@@ -26,6 +26,8 @@
         function collecting(){
             var cell_id, color;
             var result ={};
+            result["size"] = {{size}};
+            result["opponent_username"] = "{{opponent}}";
             for ( var i = 0; i < {{size}}; i++) {
                 for (var j = 0; j < {{size}}; j++) {
                     cell_id = i+","+j;
@@ -36,21 +38,16 @@
                 }
             }
             var json_result = JSON.stringify(result);
-            var formData = new FormData(document.forms.field);
-            formData.append("size", "{{size}}");
-            formData.append("opponent_username", "{{opponent}}");
-            formData.append("json_place", json_result);
-            var xmlhttp = new XMLHttpRequest();
-            xmlhttp.open("POST", "http://127.0.0.1:8000/game/");
-            xmlhttp.send(formData);
-            window.location.pathname = '/game/';
+            document.getElementById("json_place").value = json_result;
+            document.getElementById("field").submit();
         }
     </script>
 </head>
 <body>
    <p>The field of {{user}}</p>
-   <form method="POST" name="field">
+   <form method="post" id="field" action="/game/">
        {% csrf_token %}
+       <input type="text" id="json_place" name="json_form" hidden>
        <table id="{{user}}_table">
             {% for i in sizeiterator  %}
                 <tr>

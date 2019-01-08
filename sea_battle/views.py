@@ -1,9 +1,15 @@
+import json
 from django.contrib.auth.forms import UserCreationForm
-from django.shortcuts import render
+from django.core import serializers
+from django.http import HttpResponse, HttpRequest, HttpResponseRedirect
+from django.shortcuts import render, render_to_response
 from django.contrib.auth.decorators import login_required
 from django.views.generic import FormView, TemplateView
 import online_users.models
 from datetime import timedelta
+
+from sea_battle.forms import GameAttrForm
+from .models import BattleMap
 
 class HelloView(TemplateView):
 
@@ -23,8 +29,9 @@ class RegisterFormView(FormView):
         form.save()
         return super(RegisterFormView, self).form_valid(form)
 
+
 @login_required
-class GameView(TemplateView):
+class GameView(FormView):
 
     #your opponents in game. You point the user that you want to create a game with
     #https://stackoverflow.com/questions/29663777/how-to-check-whether-a-user-is-online-in-django-template
@@ -39,10 +46,13 @@ class GameView(TemplateView):
             }
         )
 
+
     def game_new(request, *args, **kwargs):
         size = int(request.POST.get('fld_size'))
         sizeiterator = list(range(size))
         opponent = request.POST.get('opponent_username')
+        a = dict(request.POST)
+        print('a1: ', a)
         return render(
             request,
             'sea_battle/pre_battle.html',
@@ -51,15 +61,43 @@ class GameView(TemplateView):
              'opponent': opponent}
         )
 
-    def gameplay(request, *args, **kwargs):
-        print(request.POST)
-        size = request.POST.get('data')
-        print(size)
-        sizeiterator = list(range(int(size)))
-        json_place = request.POST.get('json_place')
+    def gameplay1(request, *args, **kwargs):
+        a= dict(request.POST)
+        print('a: ', a)  # если аяксом отпр
+        if BattleMap.objects.values_list("map1_of_btlfld", flat=True):
+            BattleMap.objects.update(map1_of_btlfld=request.POST.get('json_place'))
+        else:
+            BattleMap.objects.create(map1_of_btlfld=request.POST.get('json_place')).save()
+
+        def json_view(request):
+            qs = BattleMap.objects.all()
+            qs_json = serializers.serialize('json', qs)
+            print('qs_json: ', qs_json)
+            return qs_json
+        map1 = json.loads(json_view(request))
+        print(12345)
+        dict_map1 = json.loads(map1[0]['fields']['map1_of_btlfld'])
+        print(type(dict_map1['size']))
         return render(
             request,
             'sea_battle/battle.html',
-            {'sizeiterator': sizeiterator,
-             'json_place': json_place}
+            {'dict_map1': dict_map1}
         )
+    def gameplay(request):
+        if request.method == 'POST': # If the form has been submitted...
+            form = GameAttrForm(request.POST) # A form bound to the POST data
+            if form.is_valid(): # All validation rules pass
+                # Process the data in form.cleaned_data
+                # ...
+                print('form is ok')
+                print(form.cleaned_data['map1_of_btlfld'])
+            else:
+                print('form is invalid')
+            return HttpResponseRedirect('/game/') # Redirect after POST
+        else:
+
+            form = GameAttrForm() # An unbound form
+        print(form.fields)
+        return render_to_response('sea_battle/battle.html', {
+            'form': form,
+        })
