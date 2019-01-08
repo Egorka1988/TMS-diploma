@@ -1,5 +1,7 @@
+
+from django.contrib.postgres.fields import JSONField
 from django.db import models
-from jsonfield import JSONField
+
 
 
 class GameData(models.Model): # creating usertable for using it`s data in game
@@ -12,21 +14,20 @@ class GameData(models.Model): # creating usertable for using it`s data in game
 
 class BattleMap(models.Model):
 
-    field_size = models.PositiveSmallIntegerField(default=10)
-    map_of_btlfld = JSONField()
-    userfld = models.OneToOneField(
-        GameData,
-        related_name='user_btlfld',
-        on_delete=models.CASCADE,
-        default=None
-    )
+    map1_of_btlfld = JSONField(default=dict, null=True)
+    map2_of_btlfld = JSONField(default=dict, null=True)
+    # userfld = models.OneToOneField(
+    #     GameData,
+    #     related_name='owner_of_map1',
+    #     on_delete=models.CASCADE,
+    #     default=None
+    # )
 
-class GamePlay(models.Model):
-
-    battleship = JSONField()
-    battlemap = models.ForeignKey(
-        BattleMap,
-        on_delete=models.CASCADE,
-        related_name='gameplay'
-    )
+# class GamePlay(models.Model):
+#
+#     battlemap = models.ForeignKey(
+#         BattleMap,
+#         on_delete=models.CASCADE,
+#         related_name='gameplay'
+#     )
 

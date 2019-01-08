@@ -5,27 +5,25 @@
     <title>Playerlist</title>
 </head>
 <body>
-<div class="container">
-    <h1>Userslist</h1>
-    <form action="/game_create/" method="POST">
-        {% csrf_token %}
-        {% for user in users %}
-            <input type="radio" name="opponent_username" value="{{user.user}}"> {{user.user}}<br>
-        {% endfor %}
-        <h1>Choose size of the battlefield (20 max)</h1>
-        <input type="number"
-               min="10"
-               max="20"
-               step="1"
-               maxlength="2"
-               size="10"
-               value="10"
-               name="fld_size"
-               required><br>
-        <p><button>Create game and send inviting</button></p>
-    </form>
-</div>
-
-
+    <div class="container">
+        <h1>Userslist</h1>
+        <form action="/game_create/" method="POST">
+            {% csrf_token %}
+            {% for user in users %}
+                <input type="radio" name="opponent_username" value="{{user.user}}"> {{user.user}}<br>
+            {% endfor %}
+            <h1>Choose size of the battlefield (20 max)</h1>
+            <input type="number"
+                   min="10"
+                   max="20"
+                   step="1"
+                   maxlength="2"
+                   size="10"
+                   value="10"
+                   name="fld_size"
+                   required><br>
+            <p><button>Create game</button></p>
+        </form>
+    </div>
 </body>
 </html>
