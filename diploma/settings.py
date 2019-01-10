@@ -19,11 +19,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework', # api for acting with extended apps
+    'rest_framework',  # api for acting with extended apps
     'online_users',
     'django_registration',
     'bootstrap4',
-    'login_app',
     'sea_battle',
 ]
 
@@ -65,7 +64,6 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('DB_NAME'),
-        #'HOST': 'localhost',
         'PORT': '5432',
         'USER': os.getenv('DB_USER'),
         'PASSWORD': os.getenv('DB_PASSWORD')

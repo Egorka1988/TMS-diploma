@@ -1,5 +1,10 @@
 from django.urls import path
-from sea_battle.views import RegisterFormView, HelloView, SeeUsersView, GameNewView, GamePlayView
+from sea_battle.views import \
+                                RegisterFormView, \
+                                HelloView, \
+                                SeeUsersView, \
+                                GameNewView, \
+                                GamePlayView
 
 urlpatterns = [
     path('', HelloView.as_view(), name='index'),

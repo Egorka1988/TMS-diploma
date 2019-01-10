@@ -1,42 +1,47 @@
+
+
 import json
 from django.contrib.auth.forms import UserCreationForm
-from django.core import serializers
-from django.http import HttpResponse, HttpRequest, HttpResponseRedirect
-from django.shortcuts import render, render_to_response
+from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-from django.views import View
 from django.views.generic import FormView, TemplateView
 import online_users.models
 from datetime import timedelta
 from sea_battle.forms import GameAttrForm
-from .models import BattleMap
+
 
 class HelloView(TemplateView):
 
     template_name = 'index.html'
-    def get(self,request, *args, **kwargs):
+
+    def get(self, request, *args, **kwargs):
+
         template = HelloView.template_name
+
         return render(
             request,
             template)
 
+
 class RegisterFormView(FormView):
 
     form_class = UserCreationForm
-    success_url = '../login/' #не знаю, как реализовать более изящно. reverse and redirect не помогли
+    success_url = '../login/'   # не знаю, как реализовать более изящно. reverse and redirect не помогли
     template_name = "registration/signup.html"
 
     def form_valid(self, form):
         form.save()
         return super(RegisterFormView, self).form_valid(form)
 
+
 class SeeUsersView(FormView):
 
     template_name = 'playerlist.html'
 
-    #your opponents in game. You point the user that you want to create a game with
-    #https://stackoverflow.com/questions/29663777/how-to-check-whether-a-user-is-online-in-django-template
+    # your opponents in game.
+    # You point the user that you want to create a game with
+    # https://stackoverflow.com/questions/29663777/how-to-check-whether-a-user-is-online-in-django-template
     @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
         user_status = online_users.models.OnlineUserActivity.get_user_activities(timedelta(seconds=60))
@@ -48,6 +53,7 @@ class SeeUsersView(FormView):
                  "users": users,
             }
         )
+
 
 class GameNewView(FormView):
 
@@ -63,9 +69,9 @@ class GameNewView(FormView):
             request,
             GameNewView.template_name,
             context={
-            'size': size,
-            'sizeiterator': sizeiterator,
-            'opponent': opponent,
+                'size': size,
+                'sizeiterator': sizeiterator,
+                'opponent': opponent,
             }
         )
 
@@ -93,22 +99,24 @@ class GameNewView(FormView):
     #         {'dict_map1': dict_map1}
     #     )
 
+
 class GamePlayView(FormView):
 
     template_name = 'battle.html'
-    #https://www.findclip.net/video/oNhNzH8FCIM/7-uroki.html  form custom validation
+    # https://www.findclip.net/video/oNhNzH8FCIM/7-uroki.html  form custom validation
+
     @method_decorator(login_required)
-    def post(self, request,*args,**kwargs):
+    def post(self, request, *args, **kwargs):
         if request.method == 'POST':
-            req1= request.POST  # для удобства подстановки в form
+            req1 = request.POST  # для удобства подстановки в form
             req = dict(request.POST)
             print(req)
             form = GameAttrForm(req)
-            #print(json.loads(request.POST['json_form']))  # мои игры с жсоном. Пробовал и JSONEncoder, и  JSONDecoder. эти ваще не работают на моем кейсе
+            # print(json.loads(request.POST['json_form']))  # мои игры с жсоном. Пробовал и JSONEncoder, и  JSONDecoder. эти ваще не работают на моем кейсе
             # qs_json = serializers.serialize('json', qs)
             print('request.POST_json_dumps: ', json.dumps(dict(request.POST)))
             print('request.POST[\'json_form\']: ', request.POST['json_form'])
-            if form.is_valid(): # All validation rules pass
+            if form.is_valid():  # All validation rules pass
                 # Process the data in form.cleaned_data
                 form.clean()
                 print('form is ok')
