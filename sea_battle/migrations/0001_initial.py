@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(
                     auto_created=True,
                     primary_key=True,
-                    serialize=False, 
+                    serialize=False,
                     verbose_name='ID')),
                 ('map_of_bf', django.contrib.postgres.fields.hstore.HStoreField(default=dict)),
                 ('user', models.OneToOneField(

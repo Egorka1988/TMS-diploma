@@ -100,8 +100,9 @@ STATIC_URL = '/static/'
 STATIC_ROOT = 'static'
 
 LOGIN_REDIRECT_URL = '/accounts/logged_in/'
+LOGOUT_REDIRECT_URL = '/'
 
 HTMLVALIDATOR_ENABLED = False
 
 if HTMLVALIDATOR_ENABLED:
-    MIDDLEWARE += ["htmlvalidator.middleware.HTMLValidator",]
+    MIDDLEWARE += ["htmlvalidator.middleware.HTMLValidator", ]
