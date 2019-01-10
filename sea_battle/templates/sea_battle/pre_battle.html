@@ -1,63 +1,88 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Preparing...</title>
-    <style type="text/css">
-       table {
-        color: black;
-        border-collapse: collapse; /*removing double borders between cells*/
-       }
-       th {
-        border: 1px solid black;
-        cursor: pointer;
-        height: 25px;
-        width: 25px;
-       }
-    </style>
-    <script>
-        function change(element){
-            if (element.style.backgroundColor != 'lime') {
-                element.style.backgroundColor = 'lime';
-            } else {
-                element.style.backgroundColor = 'white';
-                }
-        }
-        function collecting(){
-            var cell_id, color;
-            var result ={};
-            result["size"] = {{size}};
-            result["opponent_username"] = "{{opponent}}";
-            for ( var i = 0; i < {{size}}; i++) {
-                for (var j = 0; j < {{size}}; j++) {
-                    cell_id = i+","+j;
-                    if (document.getElementById(cell_id) != null){
-                        color = document.getElementById(cell_id).getAttribute("style");
-                        result[cell_id] = color;
-                    }
+{% extends 'base.html' %}
+
+{% block title %}SeaBattle-Preparing...{% endblock %}
+
+{% block indexcont %}
+        body {
+            background-color: #6698FA;
+            }
+        .box {
+            position: absolute;
+            top: 60px;
+            left: 20%;
+            ransform: translate(-50%, -50%);
+            }
+        .menu{
+            background: #BBCDF0;
+            width: 100%;
+            border-bottom-style: solid;
+            }
+        th{
+            border: 1px solid black;
+            cursor: pointer;
+            height: 25px;
+            width: 25px;
+            }
+
+{% endblock %}
+
+{% block content %}
+<table class="box">
+    <tr>
+        <td>
+            <b>The field of {{user}}</b>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <form  method="post" id="field" action="/game/">
+               {% csrf_token %}
+               <input type="text" id="json_place" name="json_form" hidden>
+               <table id="{{user}}_table">
+                    {% for i in sizeiterator  %}
+                        <tr>
+                            {% for j in sizeiterator %}
+                                <th id="{{i}},{{j}}" onclick="change(this)"></th>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+               </table>
+               <p>&nbsp;</p>
+                <p><button class="btn btn-primary btn-lg btn-block" type="button" onclick="collecting()"><b>Let's go, when ready</b></button></p>
+            </form>
+        </td>
+    </tr>
+</table>
+{% endblock %}
+
+{% block script %}
+
+<script>
+    function change(element){
+        if (element.style.backgroundColor != 'lime') {
+            element.style.backgroundColor = 'lime';
+        } else {
+            element.style.backgroundColor = 'transparent';
+            }
+    }
+    function collecting(){
+        var cell_id, color;
+        var result ={};
+        result["size"] = {{size}};
+        result["opponent_username"] = "{{opponent}}";
+        for ( var i = 0; i < {{size}}; i++) {
+            for (var j = 0; j < {{size}}; j++) {
+                cell_id = i+","+j;
+                if (document.getElementById(cell_id) != null){
+                    color = document.getElementById(cell_id).getAttribute("style");
+                    result[cell_id] = color;
                 }
             }
-            var json_result = JSON.stringify(result);
-            document.getElementById("json_place").value = json_result;
-            document.getElementById("field").submit();
         }
-    </script>
-</head>
-<body>
-   <p>The field of {{user}}</p>
-   <form method="post" id="field" action="/game/">
-       {% csrf_token %}
-       <input type="text" id="json_place" name="json_form" hidden>
-       <table id="{{user}}_table">
-            {% for i in sizeiterator  %}
-                <tr>
-                    {% for j in sizeiterator %}
-                        <th id="{{i}},{{j}}" onclick="change(this)"></th>
-                    {% endfor %}
-                </tr>
-            {% endfor %}
-       </table>
-       <p><button type="button" onclick="collecting()">Let's go, when ready</button></p>
-   </form>
-</body>
-</html>
+        var json_result = JSON.stringify(result);
+        document.getElementById("json_place").value = json_result;
+        document.getElementById("field").submit();
+    }
+</script>
+
+{% endblock %}

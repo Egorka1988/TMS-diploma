@@ -1,29 +1,63 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Playerlist</title>
-</head>
-<body>
-    <div class="container">
-        <h1>Userslist</h1>
-        <form action="/game_create/" method="POST">
-            {% csrf_token %}
-            {% for user in users %}
-                <input type="radio" name="opponent_username" value="{{user.user}}"> {{user.user}}<br>
-            {% endfor %}
-            <h1>Choose size of the battlefield (20 max)</h1>
-            <input type="number"
-                   min="10"
-                   max="20"
-                   step="1"
-                   maxlength="2"
-                   size="10"
-                   value="10"
-                   name="fld_size"
-                   required><br>
-            <p><button>Create game</button></p>
-        </form>
-    </div>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}SeaBattle-Playerlist{% endblock %}
+
+{% block indexcont %}
+        body {
+            background-color: #6698FA;
+            }
+        .box {
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            }
+        .menu{
+            background: #BBCDF0;
+            width: 100%;
+            border-bottom-style: solid;
+            }
+
+{% endblock %}
+
+{% block content %}
+
+<table>
+    <tr>
+        <td>
+            <h3>Choose your opponent from list below:</h3>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <form action="/game_create/" method="POST">
+                {% csrf_token %}
+                {% for user in users %}
+                <input type="radio" name="opponent_username" value="{{user.user}}"> <b>{{user.user}}</b><br>
+                {% endfor %}
+                <p>&nbsp;</p>
+                <h3>Choose size of the battlefield (15 max)</h3>
+                <div class="input-group input-group-sm mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="inputGroup-sizing-sm">Size:</span>
+                    </div>
+                    <input
+                            type="number"
+                            class="form-control"
+                            aria-label="Small"
+                            aria-describedby="inputGroup-sizing-sm"
+                            min="10"
+                            max="15"
+                            step="1"
+                            value="10"
+                            name="fld_size"
+                            required>
+                </div>
+                <p>&nbsp;</p>
+                <p><button class="btn btn-primary btn-lg btn-block">Create game</button></p>
+            </form>
+        </td>
+    </tr>
+</table>
+
+{% endblock %}

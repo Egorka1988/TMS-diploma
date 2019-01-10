@@ -1,8 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Battle!</title>
+{% extends 'base.html' %}
+
+{% block title %}SeaBattle-Battle!{% endblock %}
+
+{% block indexcont %}
+        body {
+            background-color: #6698FA;
+            }
+        .box {
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            }
+        .menu{
+            background: #BBCDF0;
+            width: 100%;
+            border-bottom-style: solid;
+            }
+
+{% endblock %}
+
+{% block content %}
     <style type="text/css">
        table1 {
         color: black;
@@ -67,5 +85,4 @@ here must be two fields in one session
             {% endfor %}
        </table>
    </form>
-</body>
-</html>
+{% endblock %}

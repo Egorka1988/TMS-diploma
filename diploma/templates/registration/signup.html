@@ -1,15 +1,42 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>SeaBattle-SignUp</title>
-</head>
-<body>
-<h2>Sign up</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Sign up</button>
-  </form>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}SeaBattle-Sign up{% endblock %}
+
+{% block indexcont %}
+        body {
+            background-color: #6698FA;
+            }
+        .box {
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            }
+        .menu{
+            background: #BBCDF0;
+            width: 100%;
+            border-bottom-style: solid;
+            }
+
+{% endblock %}
+
+{% block content %}
+
+<table>
+    <tr>
+        <td>
+            <h2>Sign up</h2>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary btn-lg">Sign up</button>
+            </form>
+        </td>
+    </tr>
+</table>
+
+{% endblock %}
