@@ -19,7 +19,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',  
+    'rest_framework',
     'online_users',
     'django_registration',
     'bootstrap4',
@@ -106,3 +106,5 @@ HTMLVALIDATOR_ENABLED = False
 
 if HTMLVALIDATOR_ENABLED:
     MIDDLEWARE += ["htmlvalidator.middleware.HTMLValidator", ]
+
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
