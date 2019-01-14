@@ -1,7 +1,6 @@
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import HStoreField
 from django.db import models
-# from django_registration.forms import User
 
 
 class BattleMap(models.Model):

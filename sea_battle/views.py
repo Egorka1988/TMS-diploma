@@ -65,6 +65,7 @@ class GameNewView(FormView):
         size = int(request.POST.get('fld_size'))
         sizeiterator = list(range(size))
         opponent = request.POST.get('opponent_username')
+
         return render(
             request,
             GameNewView.template_name,
@@ -75,30 +76,6 @@ class GameNewView(FormView):
             }
         )
 
-    # памятник моим мучениям
-    # def gameplay1(request, *args, **kwargs):
-    #     a= dict(request.POST)
-    #     print('a: ', a)
-    #     if BattleMap.objects.values_list("map1_of_btlfld", flat=True):
-    #         BattleMap.objects.update(map1_of_btlfld=request.POST.get('json_place'))
-    #     else:
-    #         BattleMap.objects.create(map1_of_btlfld=request.POST.get('json_place')).save()
-    #
-    #     def json_view(request):
-    #         qs = BattleMap.objects.all()
-    #         qs_json = serializers.serialize('json', qs)
-    #         print('qs_json: ', qs_json)
-    #         return qs_json
-    #     map1 = json.loads(json_view(request))
-    #     print(12345)
-    #     dict_map1 = json.loads(map1[0]['fields']['map1_of_btlfld'])
-    #     print(type(dict_map1['size']))
-    #     return render(
-    #         request,
-    #         'sea_battle/battle.html',
-    #         {'dict_map1': dict_map1}
-    #     )
-
 
 class GamePlayView(FormView):
 
@@ -107,25 +84,22 @@ class GamePlayView(FormView):
 
     @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
+
         if request.method == 'POST':
-            req1 = request.POST  # для удобства подстановки в form
-            req = dict(request.POST)
-            print(req)
-            form = GameAttrForm(req)
-            # print(json.loads(request.POST['json_form']))  # мои игры с жсоном. Пробовал и JSONEncoder, и  JSONDecoder. эти ваще не работают на моем кейсе
-            # qs_json = serializers.serialize('json', qs)
-            print('request.POST_json_dumps: ', json.dumps(dict(request.POST)))
-            print('request.POST[\'json_form\']: ', request.POST['json_form'])
-            if form.is_valid():  # All validation rules pass
-                # Process the data in form.cleaned_data
-                form.clean()
-                print('form is ok')
-                print(dir(form))
-                print(form.map1_of_btl)
-                print(dir(form.cleaned_data))
-                print(form.cleaned_data)
+            form = GameAttrForm({
+                'map_of_bf': request.POST.get('json_form')
+            })
+
+            if form.is_valid():
+
+                print('form of ',request.user,' is ok')
+                battlemap = form.save(commit=False)
+                battlemap.user = request.user
+                battlemap.save()
+
             else:
-                print('form is invalid')
+
+                print('form is invalid: ',form.errors)
 
             return render(
                 request,

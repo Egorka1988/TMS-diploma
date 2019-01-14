@@ -19,7 +19,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',  # api for acting with extended apps
+    'rest_framework',  
     'online_users',
     'django_registration',
     'bootstrap4',
