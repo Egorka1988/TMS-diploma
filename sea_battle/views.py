@@ -4,6 +4,9 @@ import json
 
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import UserCreationForm
+from django.core import serializers
+from django.db.models import F
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
@@ -12,6 +15,7 @@ from django.views.generic import FormView, TemplateView
 import online_users.models
 from datetime import timedelta
 from sea_battle.forms import GameAttrForm
+from sea_battle.models import BattleMap
 
 
 class HelloView(TemplateView):
@@ -30,7 +34,7 @@ class HelloView(TemplateView):
 class RegisterFormView(FormView):
 
     form_class = UserCreationForm
-    template_name = 'signup.html'
+    template_name = 'registration/signup.html'
     success_url = reverse_lazy('see_users')
 
     def form_valid(self, form):
@@ -102,18 +106,34 @@ class GamePlayView(FormView):
             if form.is_valid():
 
                 print('form of ',request.user,' is ok')
-                battlemap = form.save(commit=False)
-                battlemap.user = request.user
-                battlemap.save()
 
+
+                if not BattleMap.objects.filter(user=request.user):
+                    battlemap = form.save(commit=False)
+                    battlemap.user = request.user
+                    battlemap.save()
+                    print("Created!")
+                else:
+                    battlemap = form.save(commit=False)
+                    battlemap.user = request.user
+                    # battlemap.save()
+                    tmp = BattleMap.objects.filter(user=request.user)
+                    tmp.update(map_of_bf=form.cleaned_data['map_of_bf'])
+                    print("Updated!")
             else:
 
                 print('form is invalid: ',form.errors)
 
+            respjson = BattleMap.objects.get(user=request.user).map_of_bf
+            sizeiterator = list(range(int(respjson['size'])))
+            data = json.dumps(respjson)
             return render(
                 request,
                 GamePlayView.template_name,
+
                 context={
-                    'form': form,
+                    'form': data,
+                    'sizeiterator': sizeiterator,
+                    'size': respjson['size'],
                 }
             )

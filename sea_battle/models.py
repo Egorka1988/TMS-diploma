@@ -6,8 +6,7 @@ from django.db import models
 class BattleMap(models.Model):
 
     map_of_bf = HStoreField(default=dict)
-    user = models.OneToOneField(
+    user = models.ForeignKey(
         User,
-        unique=True,
         on_delete=models.CASCADE,
         verbose_name='player', null=True)

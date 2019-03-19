@@ -17,6 +17,11 @@
             width: 100%;
             border-bottom-style: solid;
             }
+        td{
+            border: 1px solid black;
+            height: 25px;
+            width: 25px;
+            }
 
 {% endblock %}
 
@@ -35,54 +40,34 @@
         height: 25px;
         width: 25px;
        }
+
+
     </style>
     <script>
-        <!--function change {-->
-            <!--for ( var i = 0; i < int(dict_map1['size']); i++) {-->
-                <!--for (var j = 0; j < int(dict_map1['size']); j++) {-->
-                    <!--cell_id = i+","+j;-->
-                    <!--if (document.getElementById(cell_id) != null){-->
-                        <!--document.getElementById(cell_id).setAttribute("style")=dict_map1[cell_id];-->
-                        <!--// result[cell_id] = color;-->
-                    <!--}-->
-                <!--}-->
-        <!--}-->
-        <!--var cell_style = JSON.parce({{json_place}});-->
-        <!--console.log(cell_style);-->
-        <!--function filling_data(element){-->
-            <!--document.getElementById(element.Id).style = cell_style;-->
-        <!--}-->
+    window.onload = function display(){
+                        var cell_id, color;
+                        var data = '{{form}}'.replace(/&quot;/g,'"');
+                        var result = JSON.parse(data);
+                        for (var i=0; i < {{size}}; i++) {
+                            for (var j=0; j < {{size}}; j++) {
+                                cell_id =i+","+j;
+                                color = result[cell_id];
+                                document.getElementById(cell_id).style = color;
+                            }
+                        }
+                    }
     </script>
 </head>
 <body>
 here must be two fields in one session
  <p>The field of {{user}}</p>
-    <form method="POST" name="field1">
-       {%csrf_token%}
-        <table id="{{user}}_table" style="table1">
+        <table id="{{user}}_table">
             {% for i in sizeiterator  %}
                 <tr>
                     {% for j in sizeiterator %}
-                        <td id="{{i}},{{j}}">
-                            <!--<script>-->
-                                <!--cell_id = i+","+j;-->
-                                <!--this.setAttribute("style") = dict_map1[cell_id];-->
-                            <!--</script>-->
-                        </td>
+                        <td id="{{i}},{{j}}"></td>
                     {% endfor %}
                 </tr>
             {% endfor %}
        </table>
-    </form>
-    <form method="POST" name="field1">
-       <table id="{{user}}_table">
-            {% for i in sizeiterator  %}
-                <tr>
-                    {% for j in sizeiterator %}
-                        <th id="{{i}},{{j}}" onclick="change(this)"></th>
-                    {% endfor %}
-                </tr>
-            {% endfor %}
-       </table>
-   </form>
 {% endblock %}
