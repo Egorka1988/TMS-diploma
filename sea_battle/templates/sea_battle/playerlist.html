@@ -22,21 +22,23 @@
 
 {% block content %}
 
-<table>
+<table border="solid">
     <tr>
         <td>
-            <h3>Choose your opponent from list below:</h3>
+            <h3>New game:</h3>
+        </td>
+        <td width="50px"></td>
+        <td>
+            <h3>Available games:</h3>
         </td>
     </tr>
     <tr>
-        <td>
+        <td valign="bottom">
             <form action="/game_create/" method="POST">
                 {% csrf_token %}
-                {% for user in users %}
-                <input type="radio" name="opponent_username" value="{{user.user}}"> <b>{{user.user}}</b><br>
-                {% endfor %}
                 <p>&nbsp;</p>
-                <h3>Choose size of the battlefield (15 max)</h3>
+                <h5>Choose size</h5>
+                <h5>of the battlefield (15 max)</h5>
                 <div class="input-group input-group-sm mb-3">
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="inputGroup-sizing-sm">Size:</span>
@@ -55,6 +57,17 @@
                 </div>
                 <p>&nbsp;</p>
                 <p><button class="btn btn-primary btn-lg btn-block">Create game</button></p>
+            </form>
+        </td>
+        <td></td>
+        <td valign="bottom">
+            <form action="/game_join/" method="POST">
+                {% csrf_token %}
+                {% for player in online_users %}
+                <input type="radio" name="opponent_username" value="{{player}}"> <b>{{player}}</b><br>
+                {% endfor %}
+                <p> </p>
+                <p><button class="btn btn-primary btn-lg btn-block">Join game</button></p>
             </form>
         </td>
     </tr>
