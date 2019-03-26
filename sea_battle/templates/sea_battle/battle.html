@@ -12,62 +12,103 @@
             left: 50%;
             transform: translate(-50%, -50%);
             }
-        .menu{
+        .menu {
             background: #BBCDF0;
             width: 100%;
             border-bottom-style: solid;
             }
-        td{
+        .td_map1 {
             border: 1px solid black;
             height: 25px;
             width: 25px;
+            }
+        .td_map2 {
+            border: 1px solid black;
+            height: 25px;
+            width: 25px;
+            cursor: pointer;
             }
 
 {% endblock %}
 
 {% block content %}
+{% load static %}
     <style type="text/css">
-       table1 {
-        color: black;
-        border-collapse: collapse; /*removing double borders between cells*/
        table2 {
         color: black;
         border-collapse: collapse;
         cursor: pointer;
        }
-       td {
-        border: 1px solid black;
-        height: 25px;
-        width: 25px;
-       }
-
-
     </style>
     <script>
-    window.onload = function display(){
-                        var cell_id, color;
-                        var data = '{{form}}'.replace(/&quot;/g,'"');
-                        var result = JSON.parse(data);
-                        for (var i=0; i < {{size}}; i++) {
-                            for (var j=0; j < {{size}}; j++) {
-                                cell_id =i+","+j;
-                                color = result[cell_id];
-                                document.getElementById(cell_id).style = color;
-                            }
-                        }
-                    }
+        var size = {{size}};
+        var opponent = '{{opponent}}';
+        var form = '{{form}}'.replace(/&quot;/g,'"');
+
+        if ("{{joined_map}}" == "{}") {
+
+            var data2 = {};
+
+        } else {
+
+            var data2 = "{{joined_map}}".replace(/&quot;/g,'"');
+
+            console.log("joined map", data2);
+
+        };
+    </script>
+    <script type="text/javascript" src="{% static 'sea_battle/script.js' %}">
+
+        var map2 = document.getElementById("{{opponent}}_table")
+
+        <!--function shoot(e) {-->
+
+            <!--console.log(e.target.id)-->
+            <!--&lt;!&ndash;color = map2.getAttribute("style");&ndash;&gt;-->
+            <!--&lt;!&ndash;result[cell_id] = color;&ndash;&gt;-->
+        <!--};-->
+
+        <!--map2.addEventListener('click', shoot);-->
+
     </script>
 </head>
 <body>
-here must be two fields in one session
- <p>The field of {{user}}</p>
-        <table id="{{user}}_table">
-            {% for i in sizeiterator  %}
-                <tr>
-                    {% for j in sizeiterator %}
-                        <td id="{{i}},{{j}}"></td>
-                    {% endfor %}
-                </tr>
-            {% endfor %}
-       </table>
+It's gonna be gorgeous battle!
+Here are the pages of the annals of sea battles
+<table>
+    <tr>
+        <td>
+            <p>Your fleet!</p>
+            <table id="{{user}}_table">
+                {% for i in sizeiterator  %}
+                    <tr>
+                        {% for j in sizeiterator %}
+                            <td id="{{i}},{{j}}" class="td_map1"></td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+           </table>
+        </td>
+        <td> animation </td>
+        <td>
+            <p>Your enemy's fleet!</p>
+            <table id="{{opponent}}_table">
+                {% for i in sizeiterator  %}
+                    <tr>
+                        {% for j in sizeiterator %}
+                            <td id="{{i}},{{j}}" class="td_map2">
+                            </td>
+                        {% endfor %}
+                    </tr>
+
+                {% endfor %}
+           </table>
+        </td>
+    </tr>
+    <tr>
+        <td></td>
+        <td id="state_msg" width="150"></td>
+        <td></td>
+    </tr>
+</table>
 {% endblock %}
