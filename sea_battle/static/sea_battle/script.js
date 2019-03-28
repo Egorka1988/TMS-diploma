@@ -1,7 +1,5 @@
-var data2_for_creator = {};
-var ship_loc = [];
-var map2_keys = [];
 
+var map2_for_creator_keys = [];
 
 function cleaning_db() {
 
@@ -20,33 +18,34 @@ function cleaning_db() {
 
     };
 
-function display(){
+function display(){ /* displays ships of player 1 after he has created his map */
 
         var cell_id, color;
-        var result = form;
         for (var i=0; i < size; i++) {
             for (var j=0; j < size; j++) {
                 cell_id = i+","+j;
-                color = result[cell_id];
+                color = form[cell_id];
                 cell_id_a = cell_id+"-a";
                 document.getElementById(cell_id_a).style = color;
             };
         };
     };
 
-function querying() {
+function querying() { /* asks the server if player-joiner created his fleet and returns data if yes */
 
-        console.log("we are in loop");
+        console.log("waiting...");
         document.getElementById("state_msg").innerHTML = "We are\
             still waiting for enemy's fleet...";
 
         var xhr = new XMLHttpRequest();
         xhr.addEventListener("load", e => {
-            data2 = JSON.parse(e.target.responseText);
+
+            data2_for_creator = JSON.parse(e.target.responseText);
+
         });
         xhr.open('GET', "/awaited_fleet/", true); /* true => async */
         xhr.send();
-        return data2;
+        return data2_for_creator;
     };
 
 function sleep(ms) {
@@ -57,18 +56,17 @@ function sleep(ms) {
 
 
 async function waiting_with_delay() {
-        var i = 500;
-        var tmp = [];
 
-        while (i<501) {
+        var i = 500;
+
+        while (i < 501) {
             i--;
             await sleep(5000);
 
-            if (tmp.length == 0) {
+            if (map2_for_creator_keys.length == 0) {
 
-                data2_for_creator = querying()
-                tmp = Object.keys(data2);
-                console.log("arrived fleet :", data2_for_creator);
+                data2_for_creator = querying();
+                map2_for_creator_keys = Object.keys(data2_for_creator);
 
             } else {
 
@@ -80,12 +78,14 @@ async function waiting_with_delay() {
 
                     /* global var map2. Need for work with removing Listener after miss */
 
-                    map2 = document.getElementById("opponent_table");
-                    map2.addEventListener('click', shoot);
-                    fleet_location();
+                    map2_for_creator = document.getElementById("opponent_table");
+                    map2_for_creator.addEventListener('click', shoot);
+
+                    ship_loc_for_creator = fleet_location(map2_for_creator_keys, data2_for_creator);
                     break;
 
               };
+
             if (i == 0) {
 
                 document.getElementById("state_msg").innerHTML = "Your fleet\
@@ -95,22 +95,32 @@ async function waiting_with_delay() {
         };
     };
 
+function joiner_fleet() {
 
-function fleet_location() {
+        map2_for_joiner = document.getElementById("opponent_table");
+        map2_for_joiner_keys = Object.keys(data2_for_joiner);
 
-        map2_keys = Object.keys(data2_for_creator);
+        ship_loc_for_joiner = fleet_location(map2_for_joiner_keys, data2_for_joiner);
 
-        for (let i = 0; i < map2_keys.length; i++) {
+    };
 
-            if (data2_for_creator[map2_keys[i]] == "background-color: lime;") {
+function fleet_location(map_keys, data2) {
 
-                ship_loc[i] = map2_keys[i];
+        var ship_loc = [];
+
+        for (let i = 0; i < map_keys.length; i++) {
+
+            if (data2[map_keys[i]] == "background-color: lime;") {
+
+                ship_loc[i] = map_keys[i];
 
             };
         };
+
+        return ship_loc;
     };
 
-function ext_location_foo(elem) {
+function ext_location_foo(elem) { /* get indexes of cells, that surround current cell */
         var up = (Number(elem[0]) - 1) + "," + elem[2];
         var right = elem[0] + "," + (Number(elem[2]) + 1);
         var left = elem[0] + "," + (Number(elem[2]) - 1);
@@ -123,21 +133,23 @@ function ext_location_foo(elem) {
         return ext_location
     };
 
-function check_surround (elem) {
+function check_surround (map, elem, map_keys, ship_loc) {
 
         var loc = ext_location_foo(elem);
 
         var result = "";
 
         for (let i=0; i < loc.length; i++) {
-            if (map2_keys.includes(loc[i])) {  /* checks if ext index is within margins */
 
-                var cell = loc[i];
-                var cell_color = document.getElementById(loc[i]).style.backgroundColor
+            var cell_id = loc[i];
 
-                /* if cell from surround belongs to enemy's ship and is not shooted yet... */
+            if (map_keys.includes(cell_id)) {  /* checks if ext index is within margins */
 
-                if (ship_loc.includes(cell) && cell_color != "red") {
+                var cell_color = document.getElementById(cell_id).style.backgroundColor
+
+                /* if cell_id from surround belongs to enemy's ship and is not shooted yet... */
+
+                if (ship_loc.includes(cell_id) && cell_color != "red") {
 
                     result = "Hurt";
                     return;
@@ -152,13 +164,13 @@ function check_surround (elem) {
 
         if (result == "Killed") {
 
-            killed_paint(elem);
-            check_if_win();
+            killed_paint(elem, map_keys);
+            check_if_win(map, map_keys, ship_loc);
 
         };
     };
 
-function killed_paint(elem) {
+function killed_paint(elem, map_keys) {
 
         /* painting cells surround killed ship */
 
@@ -168,13 +180,13 @@ function killed_paint(elem) {
 
         for (let i=0; i < loc.length; i++) {
 
-            if (map2_keys.includes(loc[i])) { /* elem should be within edges battlemap */
+            if (map_keys.includes(loc[i])) { /* elem should be within edges battlemap */
 
                  var cell_color = document.getElementById(loc[i]).style.backgroundColor;
                  var cell_content
                  if (cell_color == "red" && document.getElementById(loc[i]).innerHTML != "&nbsp;") { /* if neighbour of current elem is red */
 
-                    killed_paint(loc[i]);
+                    killed_paint(loc[i], map_keys);
 
                  } else {
 
@@ -186,19 +198,19 @@ function killed_paint(elem) {
         };
     };
 
-async function check_if_win() {
+async function check_if_win(map, map_keys, ship_loc) {
 
         var killed_cells = [];
 
-        for (let i = 0; i < map2_keys.length; i++) {
+        for (let i = 0; i < map_keys.length; i++) {
 
             try {
 
-                var elem = document.getElementById(map2_keys[i]).innerHTML;
+                var elem = document.getElementById(map_keys[i]).innerHTML;
 
                 if (elem == "&nbsp;") {
 
-                    killed_cells[i] = map2_keys[i];
+                    killed_cells[i] = map_keys[i];
 
                 };
 
@@ -213,39 +225,53 @@ async function check_if_win() {
             await sleep(1000);
             alert("Nice job, bro!");
             document.getElementById("state_msg").innerHTML = "You win! Congratulations!!!"
-            map2.removeEventListener('click', shoot);
+            map.removeEventListener('click', shoot);
 
         };
+    };
+
+function shoot_field(map, data2, tmp, map_keys, ship_loc) {
+
+        if (data2[tmp] == "background-color: lime;"){
+
+                document.getElementById(tmp).style.backgroundColor = "red";
+                document.getElementById("state_msg").innerHTML = "Gotcha!"
+
+                check_surround(map, tmp, map_keys, ship_loc);
+
+            } else {
+
+                document.getElementById(tmp).innerHTML = "X";
+                document.getElementById("state_msg").innerHTML = "Good try!"
+
+                map.removeEventListener('click', shoot);
+             };
     };
 
 function shoot(e) {
 
-        var tmp = e.target.id;
-        var style = data2_for_creator[tmp];
-        if (style == "background-color: lime;"){
+        var id = e.target.id;
 
-            document.getElementById(e.target.id).style.backgroundColor = "red";
-            document.getElementById("state_msg").innerHTML = "Gotcha!"
-            check_surround(tmp);
+        if (Object.keys(data2_for_joiner).length == 0) {
+
+            shoot_field(map2_for_creator, data2_for_creator, id, map2_for_creator_keys, ship_loc_for_creator);
 
         } else {
 
-            document.getElementById(e.target.id).innerHTML = "X";
-            document.getElementById("state_msg").innerHTML = "Good try!"
-            map2.removeEventListener('click', shoot);
-        };
-    };
+            shoot_field(map2_for_joiner, data2_for_joiner, id, map2_for_joiner_keys, ship_loc_for_joiner);
 
-window.onload = function target_for_shooting () {
-
-
+         };
     };
 
 if (opponent == "None") {
 
         document.addEventListener('DOMContentLoaded', waiting_with_delay);
 
-};
+} else {
+
+    document.addEventListener('DOMContentLoaded', joiner_fleet);
+
+ };
 
 document.addEventListener('DOMContentLoaded', display);
 
