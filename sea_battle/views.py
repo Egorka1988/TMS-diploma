@@ -6,16 +6,19 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.http import JsonResponse
+from django.http.response import HttpResponseBase, HttpResponse
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import FormView, TemplateView
 import online_users.models
 from datetime import timedelta
 from django.db import models
-from sea_battle.forms import GameAttrForm
+from sea_battle.forms import GameAttrForm, StatementForm
 from sea_battle.models import BattleMap
+from django_postgres_extensions.models.functions import *
 
 
 class HelloView(TemplateView):
@@ -132,6 +135,7 @@ class GamePlayView(FormView):
 
     template_name = 'battle.html'
 
+    # @ensure_csrf_cookie
     @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
 
@@ -188,6 +192,7 @@ class AwaitedFleetView(FormView):
     # class is being used by player, who creates game
 
     def get(self,request, *args, **kwargs):
+
         opponent = BattleMap.objects.get(user=request.user).map_of_bf['opponent_username']
         print("Waiting for a fleet of ", opponent, " by ", request.user)
         try:
@@ -207,3 +212,66 @@ class CleaningView(FormView):
         print("Map of ", request.user, " deleted from db")
         resp = {"window.onclose event": "Deleting map successfully completed"}
         return JsonResponse(resp)
+
+
+class StatementSendView(FormView):
+
+    def post(self, request, *args, **kwargs):
+
+        if request.method == 'POST':
+
+            data = json.loads(json.loads(request.body))['cell']
+            shoot_form = StatementForm({
+
+                'shoots': data
+
+            })
+            if shoot_form.is_valid():
+
+                print('statement ', request.user, ' is ok')
+
+                ins = shoot_form.cleaned_data['shoots']
+                res = ins[0]+","+ ins[1]
+
+                tmp = BattleMap.objects.filter(user=request.user)
+                tmp.update(shoots=ArrayAppend(BattleMap.shoots.field_name, res))
+
+                print("shoots of", request.user, " Updated!")
+
+            else:
+                print('statement is invalid: ', shoot_form.errors)
+
+        return HttpResponse('shoot was stored')
+
+class StatementGetView(FormView):
+
+    def post(self, request, *args, **kwargs):
+
+        if request.method == 'POST':
+
+            got_shoot = []
+
+            try:
+
+                tmp = BattleMap.objects.get(user=request.user)
+                opponent = tmp.map_of_bf['opponent_username']
+                print(opponent)
+                username_id = User.objects.get(username=opponent).id
+                got_shoot = BattleMap.objects.get(user=username_id).shoots
+                print(got_shoot)
+                resp = {}
+                tmp = {'shooted cells': got_shoot}
+                resp.update(tmp)
+
+            except:
+
+                if not opponent:
+
+                    print("Can't get opponent_username for ", request.user.username)
+
+                if not got_shoot:
+
+                    got_shoot = "no shoots yet"
+
+        return JsonResponse(resp)
+

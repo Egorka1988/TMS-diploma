@@ -18,14 +18,16 @@
             border-bottom-style: solid;
             }
         .td_map1 {
+            text-align: center;
             border: 1px solid black;
             height: 25px;
             width: 25px;
             }
         .td_map2 {
+            text-align: center;
             border: 1px solid black;
             height: 25px;
-            width: 25px;
+            width:  25px;
             cursor: pointer;
             }
 
@@ -41,40 +43,34 @@
        }
     </style>
     <script>
+        var got_statement = "no shoots yet";
         var size = {{size}};
         var opponent = '{{opponent}}';
-        var form = '{{form}}'.replace(/&quot;/g,'"');
+        var data2_for_creator = {};
+        var statement = {};
+        var form = JSON.parse('{{form}}'.replace(/&quot;/g,'"'));
 
         if ("{{joined_map}}" == "{}") {
 
-            var data2 = {};
+            var data2_for_joiner = {};
 
         } else {
 
-            var data2 = "{{joined_map}}".replace(/&quot;/g,'"');
+            var data2_for_joiner = JSON.parse("{{joined_map}}".replace(/&quot;/g,'"'));
 
-            console.log("joined map", data2);
+            console.log("joined map", data2_for_joiner);
 
         };
     </script>
-    <script type="text/javascript" src="{% static 'sea_battle/script.js' %}">
-
-        var map2 = document.getElementById("{{opponent}}_table")
-
-        <!--function shoot(e) {-->
-
-            <!--console.log(e.target.id)-->
-            <!--&lt;!&ndash;color = map2.getAttribute("style");&ndash;&gt;-->
-            <!--&lt;!&ndash;result[cell_id] = color;&ndash;&gt;-->
-        <!--};-->
-
-        <!--map2.addEventListener('click', shoot);-->
+<script type="text/javascript" src="{% static 'sea_battle/script.js' %}"></script>
+    <script>
 
     </script>
 </head>
 <body>
 It's gonna be gorgeous battle!
 Here are the pages of the annals of sea battles
+
 <table>
     <tr>
         <td>
@@ -83,7 +79,7 @@ Here are the pages of the annals of sea battles
                 {% for i in sizeiterator  %}
                     <tr>
                         {% for j in sizeiterator %}
-                            <td id="{{i}},{{j}}" class="td_map1"></td>
+                            <td id="{{i}},{{j}}-a" class="td_map1"></td>
                         {% endfor %}
                     </tr>
                 {% endfor %}
@@ -92,7 +88,7 @@ Here are the pages of the annals of sea battles
         <td> animation </td>
         <td>
             <p>Your enemy's fleet!</p>
-            <table id="{{opponent}}_table">
+            <table id="opponent_table">
                 {% for i in sizeiterator  %}
                     <tr>
                         {% for j in sizeiterator %}
@@ -107,7 +103,7 @@ Here are the pages of the annals of sea battles
     </tr>
     <tr>
         <td></td>
-        <td id="state_msg" width="150"></td>
+        <td id="state_msg" width="150" align="center"></td>
         <td></td>
     </tr>
 </table>

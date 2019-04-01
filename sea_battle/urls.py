@@ -7,7 +7,9 @@ from sea_battle.views import \
                                 GameJoinView, \
                                 GamePlayView, \
                                 AwaitedFleetView, \
-                                CleaningView
+                                CleaningView, \
+                                StatementSendView, \
+                                StatementGetView
 
 urlpatterns = [
     path('', HelloView.as_view(), name='index'),
@@ -17,5 +19,7 @@ urlpatterns = [
     path('game_join/', GameJoinView.as_view(), name='game_join'),
     path('game/', GamePlayView.as_view(), name='gameplay'),
     path('awaited_fleet/', AwaitedFleetView.as_view(), name='awaited_fleet'),
-    path('cleaning_db/', CleaningView.as_view(), name='deleting_fleet')
+    path('cleaning_db/', CleaningView.as_view(), name='deleting_fleet'),
+    path('statement_exchange/', StatementSendView.as_view(), name='statement_send'),
+    path('statement_get/', StatementGetView.as_view(), name='statement_get'),
 ]

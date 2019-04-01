@@ -15,6 +15,7 @@ ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'django.contrib.postgres',
+    'django_postgres_extensions',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -64,7 +65,8 @@ WSGI_APPLICATION = 'diploma.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        # 'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django_postgres_extensions.backends.postgresql',
         'NAME': os.getenv('DB_NAME'),
         'PORT': '5432',
         'USER': os.getenv('DB_USER'),
