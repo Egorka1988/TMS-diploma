@@ -5,6 +5,7 @@ confusable-homoglyphs==3.2.0
 Django==2.1.7
 django-bootstrap4==0.0.7
 django-online-users==0.3
+django-postgres-extensions==0.9.3
 django-registration==3.0
 djangorestframework==3.9.0
 flake8==3.6.0
