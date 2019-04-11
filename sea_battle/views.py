@@ -123,7 +123,7 @@ class GameJoinView(FormView):
 
         return render(
             request,
-            GameNewView.template_name,
+            GameJoinView.template_name,
             context={
                 'size': size,
                 'sizeiterator': sizeiterator,
@@ -135,7 +135,6 @@ class GamePlayView(FormView):
 
     template_name = 'battle.html'
 
-    # @ensure_csrf_cookie
     @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
 
@@ -152,6 +151,43 @@ class GamePlayView(FormView):
                     battlemap.user = request.user
                     battlemap.save()
                     print("map1 Created!")
+                    fleet = {k: v for k, v in battlemap.map_of_bf.items() if v == "background-color: lime;"}
+
+                    fleet_keys = fleet.keys()
+
+                    fleet_keys_list = []
+                    for coord in fleet_keys:
+                        tmp = coord.partition(",")
+                        part_list = []
+                        part_list.append(int(tmp[0]))
+                        part_list.append(int(tmp[2]))
+                        fleet_keys_list.append(part_list)
+                        print("list_keys: ", fleet_keys_list)
+                    ship = []
+                    sorted_fleet_list = []
+
+                    def sorted_fleet(item):
+                        vp_item = [item[0]+1, item[1]]
+                        hp_item = [item[0], item[1]+1]
+                        vn_item = [item[0]-1, item[1]]
+                        hn_item = [item[0], item[1]-1]
+
+                        surround = [vp_item, hp_item, vn_item, hn_item]
+                        k = 0
+                        for i in surround:
+                            if i in fleet_keys_list:
+                                sorted_fleet(i)
+                                ship.append(i)
+                                fleet_keys_list.remove(i)
+                                k += 1
+                        if k > 0:
+                            ship.append(item)
+                            fleet_keys_list.remove(item)
+
+                    sorted_fleet(fleet_keys_list[0])
+
+
+
                 else:
                     battlemap = form.save(commit=False)
                     battlemap.user = request.user
@@ -166,6 +202,8 @@ class GamePlayView(FormView):
             sizeiterator = list(range(int(respjson['size'])))
             data = json.dumps(respjson)
             try:
+                # for joiner this block has success, as joiner has particular opponent
+                # here we try to get enemy's map
                 username_id = User.objects.get(username=opponent).id
                 joined_resp = BattleMap.objects.get(user=username_id).map_of_bf
                 joined_resp = json.dumps(joined_resp)
@@ -243,6 +281,7 @@ class StatementSendView(FormView):
 
         return HttpResponse('shoot was stored')
 
+
 class StatementGetView(FormView):
 
     def post(self, request, *args, **kwargs):
@@ -272,6 +311,9 @@ class StatementGetView(FormView):
                 if not got_shoot:
 
                     got_shoot = "no shoots yet"
+                    resp = {}
+                    tmp = {'shooted cells': got_shoot}
+                    resp.update(tmp)
 
         return JsonResponse(resp)
 
