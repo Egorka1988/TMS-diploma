@@ -11,6 +11,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+
         migrations.AlterField(
             model_name='battlemap',
             name='shoots',

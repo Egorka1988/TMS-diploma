@@ -144,47 +144,67 @@ class GamePlayView(FormView):
             })
             if form.is_valid():
 
-                print('form of ',request.user,' is ok')
+                print('form of ', request.user, ' is ok')
 
                 if not BattleMap.objects.filter(user=request.user):
                     battlemap = form.save(commit=False)
                     battlemap.user = request.user
                     battlemap.save()
                     print("map1 Created!")
-                    fleet = {k: v for k, v in battlemap.map_of_bf.items() if v == "background-color: lime;"}
+                    fleet = {k: v for k, v in battlemap.map_of_bf.items() if v and ',' in k}
 
                     fleet_keys = fleet.keys()
 
                     fleet_keys_list = []
                     for coord in fleet_keys:
-                        tmp = coord.partition(",")
-                        part_list = []
-                        part_list.append(int(tmp[0]))
-                        part_list.append(int(tmp[2]))
-                        fleet_keys_list.append(part_list)
-                        print("list_keys: ", fleet_keys_list)
-                    ship = []
-                    sorted_fleet_list = []
+                        fleet_keys_list.append([int(c) for c in coord.split(",")])
+                        print("fleet_list_keys: ", fleet_keys_list)
 
-                    def sorted_fleet(item):
-                        vp_item = [item[0]+1, item[1]]
-                        hp_item = [item[0], item[1]+1]
-                        vn_item = [item[0]-1, item[1]]
-                        hn_item = [item[0], item[1]-1]
+                    sorted_fleet_list = list()
 
-                        surround = [vp_item, hp_item, vn_item, hn_item]
-                        k = 0
-                        for i in surround:
-                            if i in fleet_keys_list:
-                                sorted_fleet(i)
-                                ship.append(i)
-                                fleet_keys_list.remove(i)
-                                k += 1
-                        if k > 0:
-                            ship.append(item)
-                            fleet_keys_list.remove(item)
+                    def sorted_fleet(item1):
 
-                    sorted_fleet(fleet_keys_list[0])
+                        if len(sorted_fleet_list) == 0:
+
+                            ship = list()
+                            ship.append(item1)
+                            print("ship1:", ship)
+
+                            sorted_fleet_list.append(ship)
+
+                        else:
+                            for ship in sorted_fleet_list:
+                                for item in ship:
+
+                                    vnl_item = [item[0]-1, item[1]-1]
+                                    vnr_item = [item[0]-1, item[1]+1]
+                                    vn_item = [item[0]-1, item[1]]
+                                    hn_item = [item[0], item[1]-1]
+
+                                    surround = [vnl_item, vnr_item, vn_item, hn_item]
+                                    print("ship: ", ship, "surround: ", surround)
+
+                                    for i in surround:
+                                        if i in fleet_keys_list:
+
+                                            ship.append(i)
+
+                                            print("sorted_ship:", ship)
+                                        else:
+                                            continue
+
+                                        ship = list()
+
+                                        ship.append(item1)
+                                        print("ship2:", ship)
+
+                                        sorted_fleet_list.append(ship)
+
+                    for i in fleet_keys_list:
+                        sorted_fleet(i)
+
+                    print(sorted_fleet_list)
+
 
 
 

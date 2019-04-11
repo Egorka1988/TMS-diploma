@@ -2,6 +2,7 @@
 
 from django.conf import settings
 import django.contrib.postgres.fields.hstore
+from django.contrib.postgres.operations import HStoreExtension
 from django.db import migrations, models
 import django.db.models.deletion
 
@@ -15,6 +16,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+
+        HStoreExtension(),
         migrations.CreateModel(
             name='BattleMap',
             fields=[
