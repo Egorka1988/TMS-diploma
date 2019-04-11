@@ -17,3 +17,10 @@ class BattleMap(models.Model):
         models.CharField(max_length=10),
         default=list
     )
+
+    # fleet = ArrayField(
+    #     ArrayField(
+    #         models.CharField(max_length=10),
+    #         default=list
+    #     )
+    # )

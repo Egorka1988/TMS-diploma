@@ -1,6 +1,16 @@
 
 var map2_for_creator_keys = [];
-var map2_for_creator = document;
+var map2_for_creator = document; /* default value */
+var temp_self_loc = [];
+var form_keys = Object.keys(form);
+var j = 0;
+    for (var i = 0; i < form_keys.length; i++) {
+        if (form[form_keys[i]] == "background-color: lime;") {
+            temp_self_loc[j] = form_keys[i];
+            j++;
+        }
+    }
+var self_ship_loc = temp_self_loc;
 
 function cleaning_db() {
 
@@ -137,6 +147,7 @@ async function display_destroy(map, map_keys, ship_loc) {
 
                         map.removeEventListener('click', shoot);
                         document.getElementById(cell_id_a).style.backgroundColor = "#B51A78";
+                        check_surround(map, cell_id_a, map_keys, ship_loc)
 
                         if (check_if_loose () == "You loose") {
 
@@ -147,7 +158,7 @@ async function display_destroy(map, map_keys, ship_loc) {
                         }
 
                         document.getElementById("state_msg").innerHTML = "Alarm! \
-                        Hurt! Keep the defence!";
+                            Hurt! Keep the defence!";
 
                     } else {
 
@@ -178,7 +189,8 @@ function fleet_location(map_keys, data2) {
         return ship_loc;
     }
 
-function ext_location_foo(elem) { /* get indexes of cells, that surround current cell */
+function ext_location_foo(elem, map_keys) { /* get indexes of cells, that surround current cell */
+
         var up = (Number(elem[0]) - 1) + "," + elem[2];
         var right = elem[0] + "," + (Number(elem[2]) + 1);
         var left = elem[0] + "," + (Number(elem[2]) - 1);
@@ -187,36 +199,57 @@ function ext_location_foo(elem) { /* get indexes of cells, that surround current
         var left_up = (Number(elem[0]) - 1) + "," + (Number(elem[2]) - 1);
         var right_bottom = (Number(elem[0]) + 1) + "," + (Number(elem[2]) + 1);
         var left_bottom = (Number(elem[0]) + 1) + "," + (Number(elem[2]) - 1);
-        var ext_location = [up, right ,left, bottom, right_up, right_bottom, left_bottom, left_up];
-        return ext_location
+        var tmp = [up, right ,left, bottom, right_up, right_bottom, left_bottom, left_up];
+        var ext_location = [];
+        var count = 0;
+        for (let i = 0; i < tmp.length; i++) {
+
+            if (map_keys.includes(tmp[i])) {
+
+                /* checks if ext index is within margins */
+                ext_location[count] = tmp[i];
+                count++;
+
+            }
+        }
+
+        if (elem.indexOf('-a') > 0) {
+
+            for (let i=0; i < ext_location.length; i++) {
+
+                ext_location[i] = ext_location[i] + '-a';
+
+            }
+        }
+        return ext_location;
     }
 
 function check_surround (map, elem, map_keys, ship_loc) {
 
-        var loc = ext_location_foo(elem);
-        var result = "";
-
+        var loc = ext_location_foo(elem, map_keys);
+        /* defining array of indexes of surround cells for current one */
+        var result = ""; /* marker, if ship is killed or hurt */
         for (let i=0; i < loc.length; i++) {
 
-            var cell_id = loc[i];
+            var cell_color = document.getElementById(loc[i]).style.backgroundColor
 
-            if (map_keys.includes(cell_id)) {  /* checks if ext index is within margins */
+            /* if cell_id from surround belongs to enemy's ship and is not shooted yet... */
 
-                var cell_color = document.getElementById(cell_id).style.backgroundColor
+            var cond_enemy = ship_loc.includes(loc[i]) && cell_color != "red";
+            var cond_self = self_ship_loc.includes(loc[i].substr(0,3)) && cell_color != "rgb(181, 26, 120)";
+            console.log("cond_enemy", cond_enemy, "cond_self", cond_self, "cell_color", cell_color, "cell", loc[i]);
 
-                /* if cell_id from surround belongs to enemy's ship and is not shooted yet... */
+            if (cond_enemy || cond_self) {
 
-                if (ship_loc.includes(cell_id) && cell_color != "red" && cell_color != "#B51A78") {
+                result = "Hurt";
+                console.log(result);
+                return;
 
-                    result = "Hurt";
-                    return;
+            } else {
 
-                } else {
-
-                    result = "Killed";
-
-                 }
-            }
+                result = "Killed";
+                console.log(result);
+             }
         }
 
         if (result == "Killed") {
@@ -228,9 +261,6 @@ function check_surround (map, elem, map_keys, ship_loc) {
                 alert("Nice job, bro!");
 
             }
-
-
-
         }
     }
 
@@ -238,27 +268,29 @@ function killed_paint(elem, map_keys) {
 
         /* painting cells surround killed ship */
 
-        var loc = ext_location_foo(elem); /* pick up indexes, surrounding current elem */
+        var loc = ext_location_foo(elem, map_keys); /* pick up indexes, surrounding current elem */
+        console.log("loc in killed: ", loc);
+        console.log("elem", elem)
 
         document.getElementById(elem).innerHTML = "&nbsp;";
 
         for (let i=0; i < loc.length; i++) {
 
-            if (map_keys.includes(loc[i])) { /* elem should be within edges battlemap */
+             var cell_color = document.getElementById(loc[i]).style.backgroundColor;
+             console.log("cell_color", cell_color)
+             var cell_content = document.getElementById(loc[i]).innerHTML;
+             if ((cell_color == "red" || cell_color == "rgb(181, 26, 120)") && cell_content != "&nbsp;") {
 
-                 var cell_color = document.getElementById(loc[i]).style.backgroundColor;
-                 var cell_content
-                 if (cell_color == "red" && document.getElementById(loc[i]).innerHTML != "&nbsp;") { /* if neighbour of current elem is red */
+                /* if neighbour of current elem is red */
 
-                    killed_paint(loc[i], map_keys);
+                killed_paint(loc[i], map_keys);
 
-                 } else {
+             } else {
 
-                    if (document.getElementById(loc[i]).innerHTML != "&nbsp;") {
-                        document.getElementById(loc[i]).innerHTML = "X";
-                    }
-                  }
-            }
+                if (document.getElementById(loc[i]).innerHTML != "&nbsp;") {
+                    document.getElementById(loc[i]).innerHTML = "X";
+                }
+              }
         }
     }
 
@@ -277,7 +309,6 @@ function check_if_win(map, map_keys, ship_loc) {
                     killed_cells[i] = map_keys[i];
 
                 }
-
             } catch(err) {
 
                 continue;
@@ -285,8 +316,6 @@ function check_if_win(map, map_keys, ship_loc) {
         }
 
         if (String(ship_loc.sort()) == String(killed_cells.sort())) {
-
-//            await sleep(1000);
 
             document.getElementById("state_msg").innerHTML = "You win! Congratulations!!!"
             map.removeEventListener('click', shoot);
@@ -381,7 +410,6 @@ async function send_statement(shoot_id) {
 
         });
         xhr.send(json_result);
-        return statement;
     }
 
 function get_statement() {
