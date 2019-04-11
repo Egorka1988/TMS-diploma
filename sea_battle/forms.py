@@ -14,6 +14,8 @@ class GameAttrForm(forms.ModelForm):
         fields = ('map_of_bf',)  # tuple of fieldsnames, according to the model
 
 
+
+
 class StatementForm(forms.ModelForm):  # form for serving shoots' exchange
 
     class Meta:
