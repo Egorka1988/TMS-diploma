@@ -162,19 +162,18 @@ class GamePlayView(FormView):
 
                     sorted_fleet_list = list()
 
-                    def sorted_fleet(item1):
+                    def sorted_fleet(item):
 
-                        if len(sorted_fleet_list) == 0:
+                        if sorted_fleet_list:
 
                             ship = list()
-                            ship.append(item1)
+                            ship.append(item)
                             print("ship1:", ship)
 
                             sorted_fleet_list.append(ship)
 
                         else:
                             for ship in sorted_fleet_list:
-                                for item in ship:
 
                                     vnl_item = [item[0]-1, item[1]-1]
                                     vnr_item = [item[0]-1, item[1]+1]
@@ -185,7 +184,7 @@ class GamePlayView(FormView):
                                     print("ship: ", ship, "surround: ", surround)
 
                                     for i in surround:
-                                        if i in fleet_keys_list:
+                                        if i in ship:
 
                                             ship.append(i)
 
