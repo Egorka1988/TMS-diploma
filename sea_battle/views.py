@@ -151,12 +151,13 @@ class GamePlayView(FormView):
                     battlemap.user = request.user
                     battlemap.save()
                     print("map1 Created!")
-                    fleet = {k: v for k, v in battlemap.map_of_bf.items() if v and ',' in k}
+                    fleet = {k: v for k, v in form.cleaned_data['map_of_bf'].items() if v and ',' in k}
 
                     fleet_keys = fleet.keys()
 
-                    fleet_keys_list = []
+                    fleet_keys_list = list()
                     for coord in fleet_keys:
+
                         fleet_keys_list.append([int(c) for c in coord.split(",")])
                         print("fleet_list_keys: ", fleet_keys_list)
 
@@ -164,48 +165,45 @@ class GamePlayView(FormView):
 
                     def sorted_fleet(item):
 
-                        if sorted_fleet_list:
+                        if not sorted_fleet_list:
 
                             ship = list()
                             ship.append(item)
-                            print("ship1:", ship)
-
                             sorted_fleet_list.append(ship)
 
                         else:
+
+                            vnl_item = [item[0]-1, item[1]-1]
+                            vnr_item = [item[0]-1, item[1]+1]
+                            vn_item = [item[0]-1, item[1]]
+                            hn_item = [item[0], item[1]-1]
+
+                            surround = [vnl_item, vnr_item, vn_item, hn_item]
+                            k = 0
+
                             for ship in sorted_fleet_list:
 
-                                    vnl_item = [item[0]-1, item[1]-1]
-                                    vnr_item = [item[0]-1, item[1]+1]
-                                    vn_item = [item[0]-1, item[1]]
-                                    hn_item = [item[0], item[1]-1]
+                                for i in surround:
 
-                                    surround = [vnl_item, vnr_item, vn_item, hn_item]
-                                    print("ship: ", ship, "surround: ", surround)
+                                    if i in ship:
 
-                                    for i in surround:
-                                        if i in ship:
+                                        ship.append(item)
+                                        k += 1
 
-                                            ship.append(i)
+                            # if there is no ships, that contain surround of item,
+                            # it means that it is new ship:
+                            if k == 0:
 
-                                            print("sorted_ship:", ship)
-                                        else:
-                                            continue
-
-                                        ship = list()
-
-                                        ship.append(item1)
-                                        print("ship2:", ship)
-
-                                        sorted_fleet_list.append(ship)
+                                newship = list()
+                                newship.append(item)
+                                sorted_fleet_list.append(newship)
 
                     for i in fleet_keys_list:
+
                         sorted_fleet(i)
 
                     print(sorted_fleet_list)
-
-
-
+                    form.cleaned_data['map_of_bf'] = sorted_fleet_list
 
                 else:
                     battlemap = form.save(commit=False)
