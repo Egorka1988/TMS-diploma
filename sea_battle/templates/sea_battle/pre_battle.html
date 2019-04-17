@@ -57,7 +57,7 @@
 {% block script %}
 
 <script>
-    window
+
     function change(element){
         if (element.style.backgroundColor != "lime") {
             element.style.backgroundColor = "lime";
@@ -67,15 +67,21 @@
     }
     function collecting(){
         var cell_id, color;
+        var cell_id_for_server = [];
         var result ={};
         result["size"] = {{size}};
+        result["game_name"] = "{{game_name}}";
         result["opponent_username"] = "{{opponent}}";
+        result["fleet"] = [];
         for ( var i = 0; i < {{size}}; i++) {
             for (var j = 0; j < {{size}}; j++) {
                 cell_id = i+","+j;
+                cell_id_for_server = [i,j];
                 if (document.getElementById(cell_id) != null){
                     color = document.getElementById(cell_id).getAttribute("style");
-                    result[cell_id] = color;
+                    if (color != null) {
+                        result["fleet"].push(cell_id_for_server);
+                    }
                 }
             }
         }

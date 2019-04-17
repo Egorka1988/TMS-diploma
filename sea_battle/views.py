@@ -1,24 +1,25 @@
 
 
 import json
+import online_users.models
 
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.utils.timezone import now
 from django.http import JsonResponse
-from django.http.response import HttpResponseBase, HttpResponse
+from django.http.response import HttpResponse
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import FormView, TemplateView
-import online_users.models
-from datetime import timedelta
-from django.db import models
-from sea_battle.forms import GameAttrForm, StatementForm
-from sea_battle.models import BattleMap
+from datetime import timedelta, datetime
+from sea_battle.forms import FleetForm, StatementForm
+from sea_battle.models import BattleMap, Game
 from django_postgres_extensions.models.functions import *
+
+from sea_battle.utils import sorted_fleet, prepare_to_store
 
 
 class HelloView(TemplateView):
@@ -57,23 +58,23 @@ class SeeUsersView(FormView):
 
     # your opponents in game.
     # You point the user that you want to create a game with
-    # https://stackoverflow.com/questions/29663777/how-to-check-whether-a-user-is-online-in-django-template
     @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
-        user_status = online_users.models.OnlineUserActivity.get_user_activities(timedelta(seconds=60))
-        users = (user for user in user_status)
-        cleared_users = []
-        # preventing view self username in available games list:
-        for user in users:
-            if user.user == request.user:
-                continue
-            else:
-                cleared_users.append(user.user)
+        starting_time = now() - timedelta(seconds=60)
+
+        online_users = User.objects.filter(onlineuseractivity__last_activity__gte=starting_time)
+
+        games = Game.objects.filter(creator__in=online_users, joiner=None).exclude(creator=request.user)
+
+        cleared_users = games.values_list('creator__username', 'id', 'size', 'game_name')
+
+        cleared_users = json.dumps(list(cleared_users))
+
         return render(
             request,
             SeeUsersView.template_name,
             context={
-                 "online_users": cleared_users,
+                "online_users": cleared_users,
             }
         )
 
@@ -86,6 +87,7 @@ class GameNewView(FormView):
     def post(self, request, *args, **kwargs):
 
         size = int(request.POST.get('fld_size'))
+        game_name = request.POST.get('Name_of_game')
         sizeiterator = list(range(size))
         opponent = request.POST.get('opponent_username')
 
@@ -96,6 +98,7 @@ class GameNewView(FormView):
                 'size': size,
                 'sizeiterator': sizeiterator,
                 'opponent': opponent,
+                'game_name': game_name,
             }
         )
 
@@ -112,13 +115,13 @@ class GameJoinView(FormView):
 
         # retrieving size of created game
 
-        size = BattleMap.objects.get(user=username_id).map_of_bf['size']
+        # size = BattleMap.objects.get(user=username_id).map_of_bf['size']
 
         # set joined username as opponent at user, who has created game
 
-        tmp = BattleMap.objects.get(user=username_id).map_of_bf
-        tmp['opponent_username'] = request.user.username
-        BattleMap.objects.filter(user=username_id).update(map_of_bf=tmp)
+        # tmp = BattleMap.objects.get(user=username_id).map_of_bf
+        # tmp['opponent_username'] = request.user.username
+        # BattleMap.objects.filter(user=username_id).update(map_of_bf=tmp)
         sizeiterator = list(range(int(size)))
 
         return render(
@@ -131,7 +134,8 @@ class GameJoinView(FormView):
             }
         )
 
-class GamePlayView(FormView):
+
+class GamePlayViewForCreator(FormView):
 
     template_name = 'battle.html'
 
@@ -139,105 +143,89 @@ class GamePlayView(FormView):
     def post(self, request, *args, **kwargs):
 
         if request.method == 'POST':
-            form = GameAttrForm({
-                'map_of_bf': request.POST.get('json_form')
-            })
-            if form.is_valid():
 
-                print('form of ', request.user, ' is ok')
+            data = json.loads(request.POST.get('json_form'))
 
-                if not BattleMap.objects.filter(user=request.user):
-                    battlemap = form.save(commit=False)
-                    battlemap.user = request.user
-                    battlemap.save()
-                    print("map1 Created!")
-                    fleet = {k: v for k, v in form.cleaned_data['map_of_bf'].items() if v and ',' in k}
-
-                    fleet_keys = fleet.keys()
-
-                    fleet_keys_list = list()
-                    for coord in fleet_keys:
-
-                        fleet_keys_list.append([int(c) for c in coord.split(",")])
-                        print("fleet_list_keys: ", fleet_keys_list)
-
-                    sorted_fleet_list = list()
-
-                    def sorted_fleet(item):
-
-                        if not sorted_fleet_list:
-
-                            ship = list()
-                            ship.append(item)
-                            sorted_fleet_list.append(ship)
-
-                        else:
-
-                            vnl_item = [item[0]-1, item[1]-1]
-                            vnr_item = [item[0]-1, item[1]+1]
-                            vn_item = [item[0]-1, item[1]]
-                            hn_item = [item[0], item[1]-1]
-
-                            surround = [vnl_item, vnr_item, vn_item, hn_item]
-                            k = 0
-
-                            for ship in sorted_fleet_list:
-
-                                for i in surround:
-
-                                    if i in ship:
-
-                                        ship.append(item)
-                                        k += 1
-
-                            # if there is no ships, that contain surround of item,
-                            # it means that it is new ship:
-                            if k == 0:
-
-                                newship = list()
-                                newship.append(item)
-                                sorted_fleet_list.append(newship)
-
-                    for i in fleet_keys_list:
-
-                        sorted_fleet(i)
-
-                    print(sorted_fleet_list)
-                    form.cleaned_data['map_of_bf'] = sorted_fleet_list
-
-                else:
-                    battlemap = form.save(commit=False)
-                    battlemap.user = request.user
-                    tmp = BattleMap.objects.filter(user=request.user)
-                    tmp.update(map_of_bf=form.cleaned_data['map_of_bf'])
-                    print("map1 Updated!")
+            sorted_fleet_list = sorted_fleet(data['fleet'])
+            size = data['size']
+            opponent = data['opponent_username']
+            if data['game_name'] == 'Name of your game':
+                game_name = "Noname"
             else:
-                print('form is invalid: ',form.errors)
+                game_name = data['game_name']
 
-            respjson = BattleMap.objects.get(user=request.user).map_of_bf
-            opponent = respjson['opponent_username']
-            sizeiterator = list(range(int(respjson['size'])))
+            game = Game.objects.create(
+                size=size,
+                turn=request.user,
+                date=datetime.now(),
+                creator=request.user,
+                joiner=None,
+                game_name=game_name,
+            )
+            a = prepare_to_store(sorted_fleet_list)
+            BattleMap.objects.create(
+                user=request.user,
+                fleet_new=a,
+                shoots=[],
+                game=game,
+            )
+
+            username_id = User.objects.get(username=request.user).pk
+            battlemap = BattleMap.objects.get(user=username_id, game=game)
+            respjson = battlemap.fleet_new
+            game_id = battlemap.game.pk
+            get_size = Game.objects.get(creator=username_id, pk=game_id).size
+            sizeiter = list(range(get_size))
             data = json.dumps(respjson)
             try:
                 # for joiner this block has success, as joiner has particular opponent
                 # here we try to get enemy's map
-                username_id = User.objects.get(username=opponent).id
-                joined_resp = BattleMap.objects.get(user=username_id).map_of_bf
+                username_id = User.objects.get(username=opponent).pk
+                joined_resp = BattleMap.objects.get(user=username_id).fleet_new
                 joined_resp = json.dumps(joined_resp)
             except:
                 joined_resp = {}
             return render(
                 request,
-                GamePlayView.template_name,
+                GamePlayViewForCreator.template_name,
 
                 context={
                     'form':         data,
-                    'sizeiterator': sizeiterator,
-                    'size':         respjson['size'],
+                    'sizeiterator': sizeiter,
+                    'size':         get_size,
                     'opponent':     opponent,
                     'joined_map':   joined_resp
                 }
             )
+
+
+class GamePlayViewForJoiner(FormView):
+
+    template_name = 'battle.html'
+
+    @method_decorator(login_required)
+    def post(self, request, *args, **kwargs):
+
+        if request.method == 'POST':
+
+            data = json.loads(request.POST.get('json_form'))
+
+            sorted_fleet_list = sorted_fleet(data['fleet'])
+            size = data['size']
+            opponent = data['opponent_username']
+            if data['game_name'] == 'Name of your game':
+                game_name = None
+            else:
+                game_name = data['game_name']
+
+            print("sorted_fleet:", sorted_fleet_list)
+
+            opponent_id = User.objects.get(username=opponent).pk
+            game = Game.objects.get(creator=opponent_id, game_name=game_name)
+
+            battlemap = BattleMap.objects.get(user=opponent_id, game=game)
+            respjson = battlemap.fleet
+            game_id = battlemap.game.pk
 
 
 class AwaitedFleetView(FormView):

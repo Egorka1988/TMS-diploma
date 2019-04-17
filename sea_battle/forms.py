@@ -6,13 +6,23 @@ from .models import BattleMap
 # form for keeping info about players and battlemaps
 
 
-class GameAttrForm(forms.ModelForm):
+class FleetForm(forms.Form):
 
-    class Meta:
+    def clean(self):
 
-        model = BattleMap
-        fields = ('map_of_bf',)  # tuple of fieldsnames, according to the model
+        cleaned_data = super().clean()
 
+
+    def clean_fleet(self):
+
+        fleet = self.data["fleet"]
+
+        print("cleaned_data:", fleet)
+
+
+
+
+        return fleet
 
 
 
