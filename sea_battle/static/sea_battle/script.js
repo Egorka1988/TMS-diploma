@@ -31,13 +31,10 @@ function cleaning_db() {
 
 function display(){ /* displays ships of player 1 after he has created his map */
 
-        var cell_id, color;
-        for (var i=0; i < size; i++) {
-            for (var j=0; j < size; j++) {
-                cell_id = i+","+j;
-                color = form[cell_id];
-                cell_id_a = cell_id+"-a";
-                document.getElementById(cell_id_a).style = color;
+        for (var k=0; k < form.length; k++) {
+            for (var i=0; i < form[k].length; i++) {
+            var cell_id = form[k][i][0] + "," + form[k][i][1]+"-a";
+            document.getElementById(cell_id).style = "background-color: lime;";
             }
         }
     }
@@ -51,12 +48,14 @@ function querying() { /* asks the server if player-joiner created his fleet and 
         var xhr = new XMLHttpRequest();
         xhr.addEventListener("load", e => {
 
-            data2_for_creator = JSON.parse(e.target.responseText);
+            var joiner = JSON.parse(e.target.responseText);
 
         });
-        xhr.open('GET', "/awaited_fleet/", true); /* true => async */
+        var url = "/awaited_fleet/" + game_id;
+        console.log(url);
+        xhr.open('GET', url, true); /* true => async */
         xhr.send();
-        return data2_for_creator;
+        return joiner;
     }
 
 function sleep(ms) {
@@ -67,32 +66,27 @@ function sleep(ms) {
 
 async function waiting_with_delay() {
 
-        var i = 500;
+        var i = 20;
 
         while (i < 501) {
             i--;
             await sleep(5000);
+            var joiner = querying()
+            if (joiner != "Nobody yet") {
 
-            if (map2_for_creator_keys.length == 0) {
+                console.log("break. Enemy's fleet has arrived");
+                document.getElementById("state_msg").innerHTML = "\
+                    {{joiner}}'s fleet has arrived. Get ready to fight!"
+                await sleep(3000);
+                document.getElementById("state_msg").innerHTML = "FIRE!!!"
 
-                data2_for_creator = querying();
-                map2_for_creator_keys = Object.keys(data2_for_creator);
+                /* global var map2. Need for work with removing Listener after miss */
 
-            } else {
+                map2_for_creator = document.getElementById("opponent_table");
+                map2_for_creator.addEventListener('click', shoot);
 
-                    console.log("break. Enemy's fleet has arrived");
-                    document.getElementById("state_msg").innerHTML = "\
-                        Enemy's fleet has arrived. Get ready to fight!"
-                    await sleep(3000);
-                    document.getElementById("state_msg").innerHTML = "FIRE!!!"
-
-                    /* global var map2. Need for work with removing Listener after miss */
-
-                    map2_for_creator = document.getElementById("opponent_table");
-                    map2_for_creator.addEventListener('click', shoot);
-
-                    ship_loc_for_creator = fleet_location(map2_for_creator_keys, data2_for_creator);
-                    break;
+                ship_loc_for_creator = fleet_location(map2_for_creator_keys, data2_for_creator);
+                break;
 
               }
 

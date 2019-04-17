@@ -2,28 +2,29 @@ import json
 
 from django.contrib.auth.models import User
 from django.http import JsonResponse, HttpResponse
+from django.urls import resolve
 from django.views import View
 
 from sea_battle.forms import StatementForm
-from sea_battle.models import BattleMap
+from sea_battle.models import BattleMap, Game
 
 
 class AwaitedFleetView(View):
 
     # class checks if enemy's fleet has arrived and gives
     # an answer to battle.html via ajax
-    # class is being used by player, who creates game
+    # class is being used by player, who created game
 
     def get(self,request, *args, **kwargs):
 
-        opponent = BattleMap.objects.get(user=request.user).map_of_bf['opponent_username']
-        print("Waiting for a fleet of ", opponent, " by ", request.user)
+        game_id = resolve(request.path_info).kwargs['game_id']
+
         try:
-            username_id = User.objects.get(username=opponent).id
-            respjson2 = BattleMap.objects.get(user=username_id).map_of_bf
-        except:
-            respjson2 = {}
-        return JsonResponse(respjson2)
+            joiner = Game.objects.get(pk=game_id).joiner.username
+        except AttributeError:
+            joiner = "Nobody yet"
+
+        return JsonResponse(joiner, safe=False)
 
 
 class CleaningView(View):
@@ -32,7 +33,6 @@ class CleaningView(View):
 
     def get(self, request, *args, **kwargs):
         BattleMap.objects.filter(user=request.user).delete()
-        print("Map of ", request.user, " deleted from db")
         resp = {"window.onclose event": "Deleting map successfully completed"}
         return JsonResponse(resp)
 

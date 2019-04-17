@@ -1,5 +1,5 @@
 
-def sorted_fleet(ship_indexes):
+def extract_ships_from(ship_indexes):
     # function for sorting ships by their coords
 
     ship_indexes = [tuple(idx) for idx in ship_indexes]
@@ -33,6 +33,7 @@ def sorted_fleet(ship_indexes):
 
 
 def prepare_to_store(fleet):
+    #  converting fleet to suitable format for JSONField
 
     fleet = [list(ship) for ship in fleet]
 

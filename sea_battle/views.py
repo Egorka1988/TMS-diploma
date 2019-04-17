@@ -1,6 +1,7 @@
 
 
 import json
+import logging
 
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import UserCreationForm
@@ -10,14 +11,16 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
-from django.views.generic import FormView, TemplateView
+from django.views.generic import View
 from datetime import timedelta, datetime
 from sea_battle.models import BattleMap, Game
 
-from sea_battle.utils import sorted_fleet, prepare_to_store
+from sea_battle.utils import extract_ships_from, prepare_to_store
+
+logging.basicConfig(filename='views.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
 
 
-class HelloView(TemplateView):
+class HelloView(View):
 
     template_name = 'index.html'
 
@@ -30,7 +33,7 @@ class HelloView(TemplateView):
             template)
 
 
-class RegisterFormView(FormView):
+class RegisterFormView(View):
 
     form_class = UserCreationForm
     template_name = 'registration/signup.html'
@@ -47,7 +50,7 @@ class RegisterFormView(FormView):
         return super(RegisterFormView, self).form_valid(form)
 
 
-class SeeUsersView(FormView):
+class SeeUsersView(View):
 
     template_name = 'playerlist.html'
 
@@ -61,7 +64,7 @@ class SeeUsersView(FormView):
 
         games = Game.objects.filter(creator__in=online_users, joiner=None).exclude(creator=request.user)
 
-        cleared_users = games.values_list('creator__username', 'id', 'size', 'game_name')
+        cleared_users = games.values_list('creator__username', 'id', 'size', 'name')
 
         cleared_users = json.dumps(list(cleared_users))
 
@@ -74,7 +77,7 @@ class SeeUsersView(FormView):
         )
 
 
-class GameNewView(FormView):
+class GameNewView(View):
 
     template_name = 'pre_battle.html'
 
@@ -82,55 +85,43 @@ class GameNewView(FormView):
     def post(self, request, *args, **kwargs):
 
         size = int(request.POST.get('fld_size'))
-        game_name = request.POST.get('Name_of_game')
-        sizeiterator = list(range(size))
-        opponent = request.POST.get('opponent_username')
 
         return render(
             request,
             GameNewView.template_name,
             context={
                 'size': size,
-                'sizeiterator': sizeiterator,
-                'opponent': opponent,
-                'game_name': game_name,
+                'sizeiterator': list(range(size)),
+                'identity': "creator",
+                'game_name': request.POST.get('Name_of_game'),
             }
         )
 
 
-class GameJoinView(FormView):
+class GameJoinView(View):
 
     template_name = 'pre_battle.html'
 
     @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
 
-        opponent = request.POST.get('opponent_username')
-        username_id = User.objects.get(username=opponent).id
-
-        # retrieving size of created game
-
-        # size = BattleMap.objects.get(user=username_id).map_of_bf['size']
-
-        # set joined username as opponent at user, who has created game
-
-        # tmp = BattleMap.objects.get(user=username_id).map_of_bf
-        # tmp['opponent_username'] = request.user.username
-        # BattleMap.objects.filter(user=username_id).update(map_of_bf=tmp)
-        sizeiterator = list(range(int(size)))
+        battlemap = BattleMap.objects.get(
+            game=request.POST.get('game_id'),
+        )
 
         return render(
             request,
             GameJoinView.template_name,
             context={
-                'size': size,
-                'sizeiterator': sizeiterator,
-                'opponent': opponent,
+                'size':         battlemap.game.size,
+                'sizeiterator': list(range(int(battlemap.game.size))),
+                'opponent':     battlemap.game.creator,
+                'game_id':      battlemap.game.pk,
             }
         )
 
 
-class GamePlayViewForCreator(FormView):
+class GamePlayViewForCreator(View):
 
     template_name = 'battle.html'
 
@@ -140,61 +131,43 @@ class GamePlayViewForCreator(FormView):
         if request.method == 'POST':
 
             data = json.loads(request.POST.get('json_form'))
+            sorted_fleet_list = extract_ships_from(data['fleet'])
 
-            sorted_fleet_list = sorted_fleet(data['fleet'])
-            size = data['size']
-            opponent = data['opponent_username']
             if data['game_name'] == 'Name of your game':
                 game_name = "Noname"
             else:
                 game_name = data['game_name']
 
             game = Game.objects.create(
-                size=size,
+                size=data['size'],
                 turn=request.user,
                 date=datetime.now(),
                 creator=request.user,
                 joiner=None,
-                game_name=game_name,
+                name=game_name,
             )
-            a = prepare_to_store(sorted_fleet_list)
-            BattleMap.objects.create(
+
+            battlemap = BattleMap.objects.create(
                 user=request.user,
-                fleet_new=a,
+                fleet=prepare_to_store(sorted_fleet_list),
                 shoots=[],
                 game=game,
             )
 
-            username_id = User.objects.get(username=request.user).pk
-            battlemap = BattleMap.objects.get(user=username_id, game=game)
-            respjson = battlemap.fleet_new
-            game_id = battlemap.game.pk
-            get_size = Game.objects.get(creator=username_id, pk=game_id).size
-            sizeiter = list(range(get_size))
-            data = json.dumps(respjson)
-            try:
-                # for joiner this block has success, as joiner has particular opponent
-                # here we try to get enemy's map
-                username_id = User.objects.get(username=opponent).pk
-                joined_resp = BattleMap.objects.get(user=username_id).fleet_new
-                joined_resp = json.dumps(joined_resp)
-            except:
-                joined_resp = {}
             return render(
                 request,
                 GamePlayViewForCreator.template_name,
-
                 context={
-                    'form':         data,
-                    'sizeiterator': sizeiter,
-                    'size':         get_size,
-                    'opponent':     opponent,
-                    'joined_map':   joined_resp
+                    'game_id':      game.pk,
+                    'fleet':        json.dumps(battlemap.fleet),
+                    'sizeiterator': list(range(game.size)),
+                    'size':         game.size,
+                    'identity':     "creator",
                 }
             )
 
 
-class GamePlayViewForJoiner(FormView):
+class GamePlayViewForJoiner(View):
 
     template_name = 'battle.html'
 
@@ -204,23 +177,27 @@ class GamePlayViewForJoiner(FormView):
         if request.method == 'POST':
 
             data = json.loads(request.POST.get('json_form'))
+            fleet = extract_ships_from(data['fleet'])
 
-            sorted_fleet_list = sorted_fleet(data['fleet'])
-            size = data['size']
-            opponent = data['opponent_username']
-            if data['game_name'] == 'Name of your game':
-                game_name = None
-            else:
-                game_name = data['game_name']
+            game = Game.objects.get(pk=data['game_id'])
+            game.joiner = request.user
+            game.save()
 
-            print("sorted_fleet:", sorted_fleet_list)
+            battlemap = BattleMap.objects.create(
+                user=request.user,
+                fleet=prepare_to_store(fleet),
+                shoots=[],
+                game=game,
+            )
 
-            opponent_id = User.objects.get(username=opponent).pk
-            game = Game.objects.get(creator=opponent_id, game_name=game_name)
-
-            battlemap = BattleMap.objects.get(user=opponent_id, game=game)
-            respjson = battlemap.fleet
-            game_id = battlemap.game.pk
-
-
-
+        return render(
+                request,
+                GamePlayViewForCreator.template_name,
+                context={
+                    'game_id':      game.pk,
+                    'fleet':        json.dumps(battlemap.fleet),
+                    'sizeiterator': list(range(game.size)),
+                    'size':         game.size,
+                    'identity':     "joiner",
+                }
+            )

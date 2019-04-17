@@ -115,7 +115,7 @@
                                             var cell0 = row.insertCell(0);
                                             var cell1 = row.insertCell(1);
                                             var cell2 = row.insertCell(2);
-                                            var radio = makeRadioButton(data[i][0], data[i][1], data[i][0]);
+                                            var radio = makeRadioButton("game_id", data[i][1], data[i][0]);
                                             cell0.appendChild(radio);
                                             cell1.innerHTML = data[i][3];
                                             cell2.innerHTML = data[i][2];
@@ -124,7 +124,6 @@
                                     }
 
                                     playerview();
-
                                 </script>
                             </table>
                         </td>

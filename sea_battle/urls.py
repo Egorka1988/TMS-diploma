@@ -6,12 +6,13 @@ from sea_battle.api import \
                             StatementSendView, \
                             StatementGetView
 from sea_battle.views import \
-                                RegisterFormView, \
-                                HelloView, \
-                                SeeUsersView, \
-                                GameNewView, \
-                                GameJoinView, \
-                                GamePlayViewForCreator
+                            RegisterFormView, \
+                            HelloView, \
+                            SeeUsersView, \
+                            GameNewView, \
+                            GameJoinView, \
+                            GamePlayViewForCreator, \
+                            GamePlayViewForJoiner
 
 urlpatterns = [
     path('', HelloView.as_view(), name='index'),
@@ -19,9 +20,10 @@ urlpatterns = [
     path('accounts/logged_in/', SeeUsersView.as_view(), name='see_users'),
     path('game_create/', GameNewView.as_view(), name='game_new'),
     path('game_join/', GameJoinView.as_view(), name='game_join'),
-    path('game/', GamePlayViewForCreator.as_view(), name='gameplay'),
+    path('c_game/', GamePlayViewForCreator.as_view(), name='gameplay_for_creator'),
+    path('j_game/', GamePlayViewForJoiner.as_view(), name='gameplay_for_joiner'),
 
-    path('awaited_fleet/', AwaitedFleetView.as_view(), name='awaited_fleet'),
+    path('awaited_fleet/<int:game_id>', AwaitedFleetView.as_view(), name='awaited_fleet'),
     path('cleaning_db/', CleaningView.as_view(), name='deleting_fleet'),
     path('statement_exchange/', StatementSendView.as_view(), name='statement_send'),
     path('statement_get/', StatementGetView.as_view(), name='statement_get'),
