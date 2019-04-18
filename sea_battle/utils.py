@@ -35,7 +35,8 @@ def extract_ships_from(ship_indexes):
 def prepare_to_store(fleet):
     #  converting fleet to suitable format for JSONField
 
-    fleet = [list(ship) for ship in fleet]
+    fleet = [tuple(tuple(part) for part in ship) for ship in fleet]
+    print(fleet)
 
     return fleet
 

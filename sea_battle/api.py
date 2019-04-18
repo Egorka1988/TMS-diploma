@@ -1,11 +1,13 @@
 import json
 
 from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Subquery
 from django.http import JsonResponse, HttpResponse
 from django.urls import resolve
 from django.views import View
 
-from sea_battle.forms import StatementForm
+
 from sea_battle.models import BattleMap, Game
 
 
@@ -37,34 +39,28 @@ class CleaningView(View):
         return JsonResponse(resp)
 
 
-class StatementSendView(View):
+class ShootSaverView(View):
 
     def post(self, request, *args, **kwargs):
 
         if request.method == 'POST':
 
-            data = json.loads(json.loads(request.body))['cell']
-            shoot_form = StatementForm({
+            data = json.loads(request.body)
+            shoot = data['target'].split(',')
+            prepared_shoot = (int(shoot[0]), int(shoot[1]))
 
-                'shoots': data
+            battlemap = BattleMap.objects.get(
+                game=data['game_id'],
+                user=request.user,
+            )
+            if battlemap.game.turn == request.user:
 
-            })
-            if shoot_form.is_valid():
-
-                print('statement ', request.user, ' is ok')
-
-                ins = shoot_form.cleaned_data['shoots']
-                res = ins[0]+","+ ins[1]
-
-                tmp = BattleMap.objects.filter(user=request.user)
-                tmp.update(shoots=ArrayAppend(BattleMap.shoots.field_name, res))
-
-                print("shoots of", request.user, " Updated!")
-
+                battlemap.shoots.append(prepared_shoot)
+                battlemap.save()
             else:
-                print('statement is invalid: ', shoot_form.errors)
+                return HttpResponse('shoot was rejected')
 
-        return HttpResponse('shoot was stored')
+            return HttpResponse('shoot was stored')
 
 
 class StatementGetView(View):
@@ -73,31 +69,80 @@ class StatementGetView(View):
 
         if request.method == 'POST':
 
-            got_shoot = []
+            game_id = json.loads(request.body)['game_id']
+            identity = json.loads(request.body)['identity']
 
-            try:
+            print("entry:", game_id, identity)
+            game = Game.objects.get(pk=game_id)
+            if identity == 'creator':
+                opponent = game.joiner.pk
+            else:
+                opponent = game.creator.pk
 
-                tmp = BattleMap.objects.get(user=request.user)
-                opponent = tmp.map_of_bf['opponent_username']
-                print(opponent)
-                username_id = User.objects.get(username=opponent).id
-                got_shoot = BattleMap.objects.get(user=username_id).shoots
-                print(got_shoot)
-                resp = {}
-                tmp = {'shooted cells': got_shoot}
-                resp.update(tmp)
+            if game.winner and game.winner != request.user:
+                resp = {'game_result': 'Looser'}
+                return JsonResponse(resp)
+            else:
+                if request.user == game.turn:
+                    battlemap = BattleMap.objects.get(
+                        user=request.user,
+                        game=game_id
+                    )
+                    try:
+                        enemy_fleet = BattleMap.objects.get(
+                            user=opponent,
+                            game=game_id
+                        )
+                    except ObjectDoesNotExist:
+                        return HttpResponse('Enemy has left')
 
-            except:
+                    shoots = battlemap.shoots
+                    if shoots:
+                        last_shoot = shoots[len(shoots)-1]
+                    else:
+                        return HttpResponse('No shoots yet')
+                    for ship in enemy_fleet.fleet:
 
-                if not opponent:
+                        game_result = 'go on'
+                        start_cell = []
 
-                    print("Can't get opponent_username for ", request.user.username)
+                        if last_shoot in ship:
 
-                if not got_shoot:
+                            if set(ship).issubset(set(shoots)):
+                                shoot_result = 'Killed'
+                                start_cell = ship[0]
 
-                    got_shoot = "no shoots yet"
-                    resp = {}
-                    tmp = {'shooted cells': got_shoot}
-                    resp.update(tmp)
+                                if all(set(ship) in set(shoots) for ship in enemy_fleet.fleet):
+                                    game_result = 'Winner'
+                                    game.winner = request.user
+                                    break
+                            else:
+                                shoot_result = 'Hit'
+                            break
+                        else:
+                            shoot_result = 'Miss'
+
+                            if game.turn == game.creator:  # change shooter in db after miss
+                                game.turn = game.joiner
+                            else:
+                                game.turn = game.creator
+                    game.save()
+                    resp = {
+                        'shoot': [last_shoot, shoot_result],
+                        'game_result': game_result,
+                        'start_cell': start_cell,
+                    }
+                else:
+                    if request.user == game.creator:
+                        user = game.joiner
+                    else:
+                        user = game.creator
+                    battlemap = BattleMap.objects.get(
+                        user=user,
+                        game=game_id
+                    )
+                    resp = {'shoots': battlemap.shoots}
 
         return JsonResponse(resp)
+
+

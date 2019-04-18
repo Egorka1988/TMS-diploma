@@ -40,20 +40,10 @@
     var got_statement = "no shoots yet";
     var game_id = {{game_id}};
     var size = {{size}};
-    var data2_for_creator = {};
+    var identity = "{{identity}}";
     var statement = {};
     var form = JSON.parse('{{fleet}}'.replace(/&quot;/g,'"'));
 
-    if ("{{identity}}" == "creator") {
-
-        var data2_for_joiner = {};
-        var opponent = "None";
-
-    } else {
-
-        var data2_for_joiner = JSON.parse("{{fleet}}".replace(/&quot;/g,'"'));
-
-    }
 </script>
 <script type="text/javascript" src="{% static 'sea_battle/script.js' %}"></script>
 </head>

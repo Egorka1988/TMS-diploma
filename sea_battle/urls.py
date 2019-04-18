@@ -3,7 +3,7 @@ from django.urls import path
 from sea_battle.api import \
                             AwaitedFleetView, \
                             CleaningView, \
-                            StatementSendView, \
+                            ShootSaverView, \
                             StatementGetView
 from sea_battle.views import \
                             RegisterFormView, \
@@ -25,6 +25,6 @@ urlpatterns = [
 
     path('awaited_fleet/<int:game_id>', AwaitedFleetView.as_view(), name='awaited_fleet'),
     path('cleaning_db/', CleaningView.as_view(), name='deleting_fleet'),
-    path('statement_exchange/', StatementSendView.as_view(), name='statement_send'),
+    path('shoot/', ShootSaverView.as_view(), name='shoot_saver'),
     path('statement_get/', StatementGetView.as_view(), name='statement_get'),
 ]
