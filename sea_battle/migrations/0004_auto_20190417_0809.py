@@ -3,13 +3,13 @@ import json
 
 from django.db import migrations
 
-def convert_data_to_json(apps, schema_editor):
 
+def convert_data_to_json(apps, schema_editor):
     Battlemap = apps.get_model('sea_battle', 'battlemap')
-    obj = Battlemap.objects.get(pk=1)
-    data = [ship for ship in json.loads(obj.fleet_new)]
-    obj.fleet_new = data
-    obj.save()
+    for obj in Battlemap.objects.all():
+        data = [ship for ship in json.loads(obj.fleet_new)]
+        obj.fleet_new = data
+        obj.save()
 
 
 class Migration(migrations.Migration):

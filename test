@@ -1,0 +1,10 @@
+#!/bin/sh
+
+export DB_NAME=sea_battle_db
+export DB_USER=egor
+export DB_PASSWORD=root
+export DB_HOST=localhost
+
+pytest
+
+//pytest /home/egor/PycharmProjects/TMS-diploma/sea_battle/tests/test_views.py::TestStatementGetView::test_winner -v
