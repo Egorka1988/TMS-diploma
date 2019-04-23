@@ -1,7 +1,10 @@
+from datetime import datetime
+
 from django.db.models import Q
 
 from sea_battle.consts import SHOOT_RESULT_MISS, SHOOT_RESULT_HIT, SHOOT_RESULT_KILL
 from sea_battle.models import BattleMap, Game
+from sea_battle.utils import prepare_to_store
 
 
 def handle_shoot(last_shoot, game, current_user):
@@ -120,5 +123,45 @@ def get_game_battle_maps(game, current_user):
         return None, m
 
     return None, None
+
+
+def set_game_params_to_db_for_creator(size, user, name, fleet):
+
+    """set start params of the game to db by the player, who created game"""
+
+    game = Game.objects.create(
+        size=size,
+        turn=user,
+        creating_date=datetime.now(),
+        creator=user,
+        joiner=None,
+        name=name,
+    )
+
+    battle_map = BattleMap.objects.create(
+        user=user,
+        fleet=prepare_to_store(fleet),
+        shoots=[],
+        game=game,
+    )
+    return game, battle_map
+
+
+def set_game_params_to_db_for_joiner(game_id, user, fleet):
+
+    """set params of the game to db by the player, who joined game"""
+
+    game = Game.objects.get(pk=game_id)
+    game.joiner = user
+    game.save()
+
+    battle_map = BattleMap.objects.create(
+        user=user,
+        fleet=prepare_to_store(fleet),
+        shoots=[],
+        game=game,
+    )
+
+    return game, battle_map
 
 
