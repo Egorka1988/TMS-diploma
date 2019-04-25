@@ -30,7 +30,7 @@ class Game(models.Model):
         null=True,
     )
 
-    date = models.DateField(
+    creating_date = models.DateField(
         verbose_name='Date of game'
     )
 

@@ -1,14 +1,12 @@
 import json
 
-from django.contrib.auth.models import User
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Subquery
-from django.http import JsonResponse, HttpResponse
-from django.urls import resolve
+from django.core.exceptions import PermissionDenied
+
+from django.http import JsonResponse, HttpResponseForbidden
 from django.views import View
 
-
 from sea_battle.models import BattleMap, Game
+from sea_battle.services import get_game, get_enemy_shoots, get_game_state, handle_shoot
 
 
 class AwaitedFleetView(View):
@@ -17,9 +15,9 @@ class AwaitedFleetView(View):
     # an answer to battle.html via ajax
     # class is being used by player, who created game
 
-    def get(self,request, *args, **kwargs):
+    def get(self, request, game_id):
 
-        game_id = resolve(request.path_info).kwargs['game_id']
+        # game_id = resolve(request.path_info).kwargs['game_id']
 
         try:
             joiner = Game.objects.get(pk=game_id).joiner.username
@@ -42,127 +40,35 @@ class CleaningView(View):
 class ShootSaverView(View):
 
     def post(self, request, *args, **kwargs):
+        data = json.loads(request.body)
+        last_shoot = data['target'].split(',')
+        prepared_shoot = [int(last_shoot[0]), int(last_shoot[1])]
 
-        if request.method == 'POST':
+        game = get_game(data['game_id'], request.user)
 
-            data = json.loads(request.body)
-            shoot = data['target'].split(',')
-            prepared_shoot = (int(shoot[0]), int(shoot[1]))
+        if not game.turn == request.user:
+            raise PermissionDenied
 
-            battlemap = BattleMap.objects.get(
-                game=data['game_id'],
-                user=request.user,
-            )
-            if battlemap.game.turn == request.user:
+        shoot_result = handle_shoot(
+            last_shoot=prepared_shoot,
+            game=game,
+            current_user=request.user
+        )
 
-                battlemap.shoots.append(prepared_shoot)
-                battlemap.save()
-            else:
-                return HttpResponse('shoot was rejected')
-
-            return HttpResponse('shoot was stored')
+        return JsonResponse({
+            'state': get_game_state(game, request.user),
+            'shoot_result': shoot_result,
+        })
 
 
 class StatementGetView(View):
+    def get(self, request, game_id):
+        game = get_game(game_id, request.user)
 
-    def post(self, request, *args, **kwargs):
+        if not game:
+            raise HttpResponseForbidden()
 
-        if request.method == 'POST':
-
-            game_id = json.loads(request.body)['game_id']
-            identity = json.loads(request.body)['identity']
-
-            print("entry:", game_id, identity)
-            game = Game.objects.get(pk=game_id)
-            if game.joiner:
-                if identity == 'creator':
-                    opponent = game.joiner.pk
-                else:
-                    opponent = game.creator.pk
-
-                if game.winner and game.winner != request.user:
-                    if request.user == game.creator:
-                        opponent = game.joiner
-                    else:
-                        opponent = game.creator
-                    battlemap = BattleMap.objects.get(
-                        user=opponent,
-                        game=game_id
-                    )
-                    resp = {'game_result': 'Looser',
-                            'shoots': battlemap.shoots}
-                    return JsonResponse(resp)
-                else:
-                    if request.user == game.turn:
-
-                        battlemap = BattleMap.objects.get(
-                            user=request.user,
-                            game=game_id
-                        )
-                        try:
-                            enemy_map = BattleMap.objects.get(
-                                user=opponent,
-                                game=game_id
-                            )
-                        except ObjectDoesNotExist:
-                            return HttpResponse('Enemy has left')
-                        tupled_enemy_fleet = []
-                        for ship in enemy_map.fleet:
-                            tupled_ship = list(tuple(part) for part in ship)
-                            tupled_enemy_fleet.append(tupled_ship)
-
-                        shoots = battlemap.shoots
-                        tupled_shoots = list(tuple(shoot) for shoot in shoots)
-
-                        if shoots:
-                            last_shoot = tuple(shoots[len(shoots)-1])
-                        else:
-                            return HttpResponse('No shoots yet')
-
-                        game_result = 'go on'
-                        start_cell = ()
-                        for ship in tupled_enemy_fleet:
-
-                            if last_shoot in ship:
-
-                                if set(ship).issubset(set(tupled_shoots)):
-                                    shoot_result = 'Killed'
-                                    start_cell = ship[0]
-                                    if all(set(ship).issubset(set(tupled_shoots)) for ship in tupled_enemy_fleet):
-                                        game_result = 'Winner'
-                                        game.winner = request.user
-                                    break
-                                else:
-                                    shoot_result = 'Hit'
-                                break
-                        else:
-                            shoot_result = 'Miss'
-
-                            if game.turn == game.creator:  # change shooter in db after miss
-                                game.turn = game.joiner
-                            else:
-                                game.turn = game.creator
-                        game.save()
-
-                        resp = {
-                            'shoot_result': [last_shoot, shoot_result],
-                            'game_result': game_result,
-                            'start_cell': start_cell,
-                        }
-                    else:
-
-                        if request.user == game.creator:
-                            opponent = game.joiner
-                        else:
-                            opponent = game.creator
-                        battlemap = BattleMap.objects.get(
-                            user=opponent,
-                            game=game_id
-                        )
-                        resp = {'shoots': battlemap.shoots}
-            else:
-                return HttpResponse('Enemy has not come yet')
-
-        return JsonResponse(resp)
-
-
+        return JsonResponse({
+            'state': get_game_state(game, request.user),
+            'shoots': get_enemy_shoots(game_id, request.user),
+        })

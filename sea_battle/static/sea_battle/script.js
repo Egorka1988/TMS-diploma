@@ -29,25 +29,6 @@ function display(){ /* displays ships of player 1 after he has created his map *
         }
     }
 
-function joiner_querying() { /* asks the server if player-joiner created his fleet and returns data if yes */
-
-        console.log("waiting...");
-        document.getElementById("state_msg").innerHTML = "We are\
-            still waiting for enemy's fleet...";
-        var xhr = new XMLHttpRequest();
-        xhr.addEventListener("load", e => {
-
-            joiner = JSON.parse(e.target.responseText);
-            console.log('xhr', joiner);
-
-        });
-        var url = "/awaited_fleet/" + game_id;
-        xhr.open('GET', url, true); /* true => async */
-        xhr.send();
-        console.log(joiner)
-        return joiner;
-    }
-
 function sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
@@ -61,7 +42,8 @@ async function waiting_for_joiner() {
         while (i < 501) {
             i--;
             await sleep(5000);
-            var joiner = joiner_querying()
+            var joiner = receive_game_state()
+            console.log(joiner)
             if (joiner != "Nobody yet") {
 
                 console.log("break. Enemy's fleet has arrived");
@@ -79,16 +61,14 @@ async function waiting_for_joiner() {
               }
 
             if (i == 0) {
-
+            
                 document.getElementById("state_msg").innerHTML = "Your fleet\
                  is so strong ,that nobody has enough bravery fighting with you";
                 return;
-
             }
         }
 
         display_destroy();
-
     }
 
 function joiner_fleet() {
@@ -106,7 +86,7 @@ async function display_destroy(map_keys) {
         var shoot_log = [];
         while (true) {
 
-            var callback = receive_shoot_result();
+            var callback = receive_game_state();
             await sleep(3000);
             console.log(callback)
             shoot_log = callback;
@@ -253,7 +233,7 @@ async function send_shoot(shoot_id) {
         var xhr = new XMLHttpRequest();
         var csrfCookie = document.cookie.substring(10);
 
-        xhr.open('POST', "/shoot/", true); /* true => async */
+        xhr.open('POST', "api/shoot/", true); /* true => async */
 
         if (csrfCookie) {
 
@@ -263,45 +243,36 @@ async function send_shoot(shoot_id) {
         xhr.send(json_result);
     }
 
-function receive_shoot_result() {
+function receive_game_state() {
 
         var xhr = new XMLHttpRequest();
-        var csrfCookie = document.cookie.substring(10);
-        var parcel = {
-                        'game_id':  game_id,
-                        'identity': identity
-                     };
-        var json_result = JSON.stringify(parcel);
-
-        xhr.open('POST', "/statement_get/", true); /* true => async */
-
-        if (csrfCookie) {
-
-            xhr.setRequestHeader("X-CSRFToken", csrfCookie);
-
-        }
-
+        var url = "http://"+ window.location.host + "/api/get_state/" + game_id;
+        console.log(url);
+        xhr.open('GET', url, true); /* true => async */
         xhr.addEventListener("load", e => {
 
         try {
 
-            got_statement = JSON.parse(e.target.responseText);
+            state = JSON.parse(e.target.responseText);
 
         } catch(err) {
 
-                got_statement = "no shoots yet";
+                state = "no shoots yet";
 
         }
         });
-        xhr.send(json_result);
-        console.log(got_statement);
-        return got_statement;
+        xhr.send();
+        console.log(state);
+        return state;
 
     }
 
-if (identity == "creator") {
+if (turn == true) {
 
         document.addEventListener('DOMContentLoaded', waiting_for_joiner);
+
+        document.getElementById("state_msg").innerHTML = "\
+        We are waiting for enemy's fleet...";
 
 } else {
 

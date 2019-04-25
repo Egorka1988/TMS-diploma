@@ -36,7 +36,7 @@ def prepare_to_store(fleet):
     #  converting fleet to suitable format for JSONField
 
     fleet = [tuple(tuple(part) for part in ship) for ship in fleet]
-    print(fleet)
-
     return fleet
+
+
 

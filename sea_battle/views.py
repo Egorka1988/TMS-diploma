@@ -158,11 +158,11 @@ class GamePlayViewForCreator(View):
             request,
             GamePlayViewForCreator.template_name,
             context={
-                'game_id':      game.pk,
-                'fleet':        json.dumps(battlemap.fleet),
-                'sizeiterator': list(range(game.size)),
-                'size':         game.size,
-                'identity':     "creator",
+                'game_id':       game.pk,
+                'fleet':         json.dumps(battlemap.fleet),
+                'sizeiterator':  list(range(game.size)),
+                'size':          game.size,
+                'turn_to_shoot': True,
             }
         )
 
@@ -186,10 +186,10 @@ class GamePlayViewForJoiner(View):
             request,
             GamePlayViewForCreator.template_name,
             context={
-                'game_id':      game.pk,
-                'fleet':        json.dumps(battlemap.fleet),
-                'sizeiterator': list(range(game.size)),
-                'size':         game.size,
-                'identity':     "joiner",
+                'game_id':       game.pk,
+                'fleet':         json.dumps(battlemap.fleet),
+                'sizeiterator':  list(range(game.size)),
+                'size':          game.size,
+                'turn_to_shoot': False,
             }
         )

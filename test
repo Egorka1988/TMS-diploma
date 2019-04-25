@@ -5,6 +5,6 @@ export DB_USER=egor
 export DB_PASSWORD=root
 export DB_HOST=localhost
 
-pytest
 
-//pytest /home/egor/PycharmProjects/TMS-diploma/sea_battle/tests/test_views.py::TestStatementGetView::test_winner -v
+
+pytest /home/egor/PycharmProjects/TMS-diploma/sea_battle/tests/test_services.py::TestShootHandlerServices::test_miss
