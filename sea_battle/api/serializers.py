@@ -32,14 +32,16 @@ class ActiveGamesSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('creator', 'id', 'size', 'name')
 
 
-class StatmentGetSerializer(serializers.Serializer):
+class StatmentGetSerializer(serializers.ModelSerializer):
 
-    qs = {
-    'state': 1,
-    'shoots': 2,
-    }
-
-# qs = {
-# 'state': get_game_state(),
-# 'shoots': get_enemy_shoots(),
-# }
+    class Meta:
+        model = Game
+        fields = [
+            'pk',
+            'creator',
+            'joiner',
+            'creating_date',
+            'turn',
+            'size',
+            'winner'
+            ]

@@ -84,21 +84,19 @@ class StatementGetAPIViewSet(viewsets.GenericViewSet):
     def get_queryset(self):
 
         game_id = self.request.query_params['game_id']
-        print(game_id)
 
         game = Game.objects.filter(pk=game_id)
+        print('aaaaaaaaaaaaaa', game)
 
-        resp = "todo"
-
-        return Response(resp)
+        return game
 
     def list(self, request, *args, **kwargs):
 
         queryset = self.get_queryset()
 
-        serializer = serializers.StatmentGetSerializer(queryset, many=True)
+        serializer_class = serializers.StatmentGetSerializer(queryset, many=True)
 
-        return Response(serializer.data)
+        return Response(serializer_class.data)
 
 
 

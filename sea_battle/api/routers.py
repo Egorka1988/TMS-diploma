@@ -15,4 +15,4 @@ router.register(r'create-game', v.NewGameAPIViewSet, basename='g_create')
 
 # path('cleaning_db/', v.CleaningAPIView.as_view(), name='deleting_fleet'),
 # path('shoot/', v.ShootSaverAPIView.as_view(), name='shoot_handler'),
-router.register(r'get-state/<int:game_id>', v.StatementGetAPIViewSet, basename='state')
+router.register(r'get-state', v.StatementGetAPIViewSet, basename='state')
