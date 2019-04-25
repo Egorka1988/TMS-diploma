@@ -37,8 +37,8 @@
             <form action="/game_create/" method="POST">
                 {% csrf_token %}
                 <p>&nbsp;</p>
-                <h5>Choose size</h5>
-                <h5>of the battlefield (15 max)</h5>
+                <h5>Choose size and name</h5>
+                <h5>for your battlefield (15 max)</h5>
                 <div class="input-group input-group-sm mb-3">
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="inputGroup-sizing-sm">Size:</span>
@@ -54,6 +54,11 @@
                             value="10"
                             name="fld_size"
                             required>
+                    <input
+                            type="text"
+                            name="Name_of_game"
+                            value="Name of your game"
+                            title="specify the name of your game, if you are going to make more than one game">
                 </div>
                 <p>&nbsp;</p>
                 <p><button class="btn btn-primary btn-lg btn-block">Create game</button></p>
@@ -62,12 +67,74 @@
         <td></td>
         <td valign="bottom">
             <form action="/game_join/" method="POST">
-                {% csrf_token %}
-                {% for player in online_users %}
-                <input type="radio" name="opponent_username" value="{{player}}"> <b>{{player}}</b><br>
-                {% endfor %}
-                <p> </p>
-                <p><button class="btn btn-primary btn-lg btn-block">Join game</button></p>
+                <table>
+                    <tr>
+                        <td>
+                            <table id="users">
+                                {% csrf_token %}
+                                <script>
+                                    function makeRadioButton(name, value, text) {
+
+                                        var label = document.createElement("label");
+                                        var radio = document.createElement("input");
+                                        radio.type = "radio";
+                                        radio.name = name;
+                                        console.log(radio.name);
+                                        radio.value = value;
+
+                                        label.appendChild(radio);
+
+                                        label.appendChild(document.createTextNode(text));
+                                        return label;
+                                      }
+
+                                    function playerview(){
+
+                                        var table = document.getElementById("users");
+                                        var incomming_data = "{{online_users}}".replace(/&quot;/g,'"');
+                                        var data = JSON.parse(incomming_data);
+                                        var i = 0;
+                                        var row = table.insertRow(0);
+                                        console.log(data);
+                                        if (data.length) {
+                                            var cell0 = row.insertCell(0);
+                                            var cell1 = row.insertCell(1);
+                                            var cell2 = row.insertCell(2);
+                                            cell0.innerHTML = "Player";
+                                            cell1.innerHTML = "Name of Game";
+                                            cell2.innerHTML = "Size of Game";
+                                        } else {
+                                            var cell0 = row.insertCell(0);
+                                            cell0.innerHTML = "Nobody has come yet. Try to create instead";
+                                        }
+
+                                        while (i < data.length) {
+
+                                            var row = table.insertRow(i+1);
+
+                                            var cell0 = row.insertCell(0);
+                                            var cell1 = row.insertCell(1);
+                                            var cell2 = row.insertCell(2);
+                                            var radio = makeRadioButton("game_id", data[i][1], data[i][0]);
+                                            cell0.appendChild(radio);
+                                            cell1.innerHTML = data[i][3];
+                                            cell2.innerHTML = data[i][2];
+                                            i++;
+                                        }
+                                    }
+
+                                    playerview();
+                                </script>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p> </p>
+                            <p><button class="btn btn-primary btn-lg btn-block">Join game</button></p>
+                        </td>
+                    </tr>
+                </table>
             </form>
         </td>
     </tr>

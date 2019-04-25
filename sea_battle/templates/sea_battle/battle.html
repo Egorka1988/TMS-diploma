@@ -35,38 +35,27 @@
 
 {% block content %}
 {% load static %}
-    <style type="text/css">
+
+<script>
+    var state = "no shoots yet";
+    var game_id = {{game_id}};
+    var size = {{size}};
+    var turn = "{{turn_to_shoot}}";
+    var statement = {};
+    var form = JSON.parse('{{fleet}}'.replace(/&quot;/g,'"'));
+
+</script>
+<script type="text/javascript" src="{% static 'sea_battle/script.js' %}"></script>
+</head>
+<style type="text/css">
        table2 {
         color: black;
         border-collapse: collapse;
         cursor: pointer;
        }
-    </style>
-    <script>
-        var got_statement = "no shoots yet";
-        var size = {{size}};
-        var opponent = '{{opponent}}';
-        var data2_for_creator = {};
-        var statement = {};
-        var form = JSON.parse('{{form}}'.replace(/&quot;/g,'"'));
 
-        if ("{{joined_map}}" == "{}") {
+</style>
 
-            var data2_for_joiner = {};
-
-        } else {
-
-            var data2_for_joiner = JSON.parse("{{joined_map}}".replace(/&quot;/g,'"'));
-
-            console.log("joined map", data2_for_joiner);
-
-        }
-    </script>
-<script type="text/javascript" src="{% static 'sea_battle/script.js' %}"></script>
-    <script>
-
-    </script>
-</head>
 <body>
 It's gonna be gorgeous battle!
 Here are the pages of the annals of sea battles

@@ -15,7 +15,7 @@ ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'django.contrib.postgres',
-    'django_postgres_extensions',
+    # 'django_postgres_extensions',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -65,8 +65,8 @@ WSGI_APPLICATION = 'diploma.wsgi.application'
 
 DATABASES = {
     'default': {
-        # 'ENGINE': 'django.db.backends.postgresql',
-        'ENGINE': 'django_postgres_extensions.backends.postgresql',
+        'ENGINE': 'django.db.backends.postgresql',
+        # 'ENGINE': 'django_postgres_extensions.backends.postgresql',
         'NAME': os.getenv('DB_NAME'),
         'PORT': '5432',
         'USER': os.getenv('DB_USER'),
@@ -90,6 +90,14 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ]
+}
 
 LANGUAGE_CODE = 'en-us'
 

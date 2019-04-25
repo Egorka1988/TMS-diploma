@@ -26,6 +26,7 @@
 {% endblock %}
 
 {% block content %}
+
 <table class="box">
     <tr>
         <td>
@@ -34,7 +35,15 @@
     </tr>
     <tr>
         <td>
-            <form  method="post" id="field" action="/game/">
+            <script>
+
+                if ("{{identity}}" == "creator") {
+                    document.write('<form  method="post" id="field" action="/c_game/">');
+                } else {
+                    document.write('<form  method="post" id="field" action="/j_game/">');
+                }
+
+            </script>
                {% csrf_token %}
                <input type="text" id="json_place" name="json_form" hidden>
                <table id="{{user}}_table">
@@ -57,7 +66,7 @@
 {% block script %}
 
 <script>
-    window
+
     function change(element){
         if (element.style.backgroundColor != "lime") {
             element.style.backgroundColor = "lime";
@@ -67,15 +76,25 @@
     }
     function collecting(){
         var cell_id, color;
+        var cell_id_for_server = [];
+        var game = "{{game_id}}";
         var result ={};
+        if (game.length > 0) {
+            result["game_id"] = Number('{{game_id}}');
+        }
         result["size"] = {{size}};
+        result["game_name"] = "{{game_name}}";
         result["opponent_username"] = "{{opponent}}";
+        result["fleet"] = [];
         for ( var i = 0; i < {{size}}; i++) {
             for (var j = 0; j < {{size}}; j++) {
                 cell_id = i+","+j;
+                cell_id_for_server = [i,j];
                 if (document.getElementById(cell_id) != null){
                     color = document.getElementById(cell_id).getAttribute("style");
-                    result[cell_id] = color;
+                    if (color != null) {
+                        result["fleet"].push(cell_id_for_server);
+                    }
                 }
             }
         }
