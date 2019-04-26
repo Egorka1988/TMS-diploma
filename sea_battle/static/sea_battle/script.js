@@ -246,7 +246,7 @@ async function send_shoot(shoot_id) {
 function receive_game_state() {
 
         var xhr = new XMLHttpRequest();
-        var url = "http://"+ window.location.host + "/api/get_state/?game_id=" + game_id;
+        var url = "http://"+ window.location.host + `/api/games/${game_id}/state/`;
         console.log(url);
         xhr.open('GET', url, true); /* true => async */
         xhr.addEventListener("load", e => {

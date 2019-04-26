@@ -66,7 +66,15 @@
         </td>
         <td></td>
         <td valign="bottom">
-            <form action="/game_join/" method="POST">
+            <script>
+                function get_id_and_submit(){
+                    var data = document.getElementById("join")
+                    var game_id = data.game_id.value;
+                    data.action="http://" + window.location.host + "/api/games/" +game_id+ "/join/"
+                    data.submit()
+                }
+            </script>
+            <form onsubmit=get_id_and_submit()  method="POST" id="join">
                 <table>
                     <tr>
                         <td>
@@ -79,7 +87,6 @@
                                         var radio = document.createElement("input");
                                         radio.type = "radio";
                                         radio.name = name;
-                                        console.log(radio.name);
                                         radio.value = value;
 
                                         label.appendChild(radio);
@@ -95,7 +102,6 @@
                                         var data = JSON.parse(incomming_data);
                                         var i = 0;
                                         var row = table.insertRow(0);
-                                        console.log(data);
                                         if (data.length) {
                                             var cell0 = row.insertCell(0);
                                             var cell1 = row.insertCell(1);

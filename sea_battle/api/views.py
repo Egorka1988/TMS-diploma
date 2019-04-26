@@ -1,13 +1,16 @@
-import json
 from datetime import timedelta
 
 from django.contrib.auth.models import User
 
+from django.db.models import Q
 from django.http import JsonResponse
 from django.utils.timezone import now
 
 from rest_framework import viewsets, generics
+from rest_framework.decorators import action
+from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
 from sea_battle.api import serializers
@@ -79,35 +82,46 @@ class NewGameAPIViewSet(viewsets.GenericViewSet):
 #         })
 #
 #
-class StatementGetAPIViewSet(viewsets.GenericViewSet):
+
+
+class GamesAPIViewSet(viewsets.GenericViewSet):
+
+    serializer_class = serializers.StatmentGetSerializer
+    lookup_url_kwarg = 'game_id'
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
+        current_user = self.request.user
+        return Game.objects.filter(Q(creator=current_user) | Q(joiner=current_user))
 
-        game_id = self.request.query_params['game_id']
+    def create(self, request):
+        # create game
+        pass
 
-        game = Game.objects.filter(pk=game_id)
-        print('aaaaaaaaaaaaaa', game)
+    def update(self):
+        pass
 
-        return game
+    @action(methods=['POST'], detail=True)
+    def join(self, request, **kwargs):
 
-    def list(self, request, *args, **kwargs):
+        game = Game.objects.get(
+            pk=request.data['game_id'],
+        )
+        game.joiner = self.request.user
+        game.save()
 
-        queryset = self.get_queryset()
+        return Response(
+            {
+                'size': game.size,
+                'sizeiterator': list(range(int(game.size))),
+                'opponent': game.creator_id,
+                'game_id': game.pk,
+            }
+        )
 
-        serializer_class = serializers.StatmentGetSerializer(queryset, many=True)
+    @action(methods=['GET'], detail=True)
+    def state(self, request, **kwargs):
+        game = self.get_object()
 
-        return Response(serializer_class.data)
-
-
-
-    # def get(self, request, game_id):
-    #
-    #     game = get_game(game_id, request.user)
-    #
-    #     if not game:
-    #         raise Response("No games're created yet", status=status.HTTP_404_NOT_FOUND)
-    #
-    #     return Response({
-    #         'state': get_game_state(game, request.user),
-    #         'shoots': get_enemy_shoots(game_id, request.user),
-    #     })
+        serializer = self.get_serializer(game)
+        return Response(serializer.data)

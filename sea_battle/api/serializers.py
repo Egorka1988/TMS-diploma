@@ -34,14 +34,29 @@ class ActiveGamesSerializer(serializers.HyperlinkedModelSerializer):
 
 class StatmentGetSerializer(serializers.ModelSerializer):
 
+    state = serializers.SerializerMethodField()
+    enemy_shoots = serializers.SerializerMethodField()
+
+    def get_user(self):
+        return self.context['request'].user
+
     class Meta:
         model = Game
         fields = [
             'pk',
             'creator',
             'joiner',
-            'creating_date',
             'turn',
-            'size',
-            'winner'
+            'winner',
+            'state',
+            'enemy_shoots',
             ]
+
+    def get_state(self, game):
+        user = self.get_user()
+        return get_game_state(game, user)
+
+    def get_enemy_shoots(self, game):
+        if game.joiner:
+            return []
+        return []

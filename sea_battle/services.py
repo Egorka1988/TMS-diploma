@@ -2,7 +2,7 @@ from datetime import datetime
 
 from django.db.models import Q
 
-from sea_battle.consts import SHOOT_RESULT_MISS, SHOOT_RESULT_HIT, SHOOT_RESULT_KILL
+from sea_battle import consts
 from sea_battle.models import BattleMap, Game
 from sea_battle.utils import prepare_to_store
 
@@ -23,15 +23,15 @@ def handle_shoot(last_shoot, game, current_user):
 
     shoots = set(map(tuple, my_map.shoots))
 
-    shoot_result = SHOOT_RESULT_MISS
+    shoot_result = consts.SHOOT_RESULT_MISS
 
     for ship in enemy_map.fleet:
         ship = set(map(tuple, ship))
         if last_shoot in ship:
-            shoot_result = SHOOT_RESULT_HIT
+            shoot_result = consts.SHOOT_RESULT_HIT
 
             if ship.issubset(shoots):
-                shoot_result = SHOOT_RESULT_KILL
+                shoot_result = consts.SHOOT_RESULT_KILL
             break
 
     # update game state if necessary
@@ -45,13 +45,13 @@ def update_game_state(game, shoot_result, current_user, shoots, enemy_map):
     """ changes turn between users if res of shoot is 'miss'
     or sets winner to game, if shooter killed the whole enemy's fleet"""
 
-    if shoot_result == SHOOT_RESULT_MISS:
+    if shoot_result == consts.SHOOT_RESULT_MISS:
         if game.turn_id == game.creator_id:
             game.turn_id = game.joiner_id
         else:
             game.turn_id = game.creator_id
 
-    if shoot_result == SHOOT_RESULT_KILL:
+    if shoot_result == consts.SHOOT_RESULT_KILL:
         if all(set(ship).issubset(shoots) for ship in enemy_map.fleet):
             game.winner_id = current_user.pk
 
@@ -79,15 +79,15 @@ def get_game_state(game, current_user):
     state message for using in response"""
 
     if not game.joiner_id:
-        return 'waiting_for_joiner'
+        return consts.WAITING_FOR_JOINER
 
     if game.winner_id and game.winner_id == current_user.pk:
-        return 'win'
+        return consts.WIN
 
     if game.winner_id:
-        return 'loose'
+        return consts.LOOSE
 
-    return 'active'
+    return consts.ACTIVE
 
 
 def get_enemy_shoots(game_id, current_user):
