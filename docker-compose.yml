@@ -22,3 +22,14 @@ services:
             - "POSTGRES_USER=${DB_USER}" 
             - "POSTGRES_PASSWORD=${DB_PASSWORD}"
             - "POSTGRES_DB=${DB_NAME}"
+
+    frontend:
+        tty: true
+        build:
+            context: ./frontend
+            dockerfile: ./Dockerfile
+        ports:
+          - 8080:8080
+        volumes:
+          - ./frontend:/frontend
+        command: "yarn start"

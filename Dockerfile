@@ -9,6 +9,8 @@ WORKDIR /TMS-diploma
 # Copy the current directory contents into the container at /app
 COPY . /TMS-diploma
 
+RUN apt-get update && apt-get install -y gcc python3-dev
+
 # Install any needed packages specified in requirements.txt
 RUN pip install --trusted-host pypi.python.org -r requirements.txt
 
