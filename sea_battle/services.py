@@ -3,7 +3,6 @@ from datetime import datetime
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
-from rest_framework import exceptions
 
 from sea_battle import constants
 from sea_battle.models import BattleMap, Game
@@ -60,14 +59,6 @@ def update_game_state(game, shoot_result, current_user, shoots, enemy_map):
 
     game.save()
     return
-
-
-def set_joiner(game, user):
-    if game.joiner_id or game.creator_id == user.id:
-        raise ValueError('Improper game for joining')
-
-    game.joiner = user
-    game.save()
 
 
 def get_game(game_id, current_user):
@@ -158,7 +149,7 @@ def create_game(data, user):
             game=game,
             template=False
         )
-        return game, battle_map.fleet
+        return game, battle_map
 
 
 def join_game(game_id, user):
@@ -166,7 +157,7 @@ def join_game(game_id, user):
     """try to join to the particular game"""
 
     with transaction.atomic():
-        game = Game.objects.available_games. \
+        game = Game.objects.available_games(). \
             select_for_update().\
             get(pk=game_id)
         if game.joiner:

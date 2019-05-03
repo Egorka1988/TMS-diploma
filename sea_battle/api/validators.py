@@ -13,12 +13,12 @@ class NewGameValidator(serializers.Serializer):
     def validate_fleet(self, fleet):
         if fleet:
             return extract_ships_from(fleet)
-        raise exceptions.ValidationError("Your fleet is incorrect")
+        raise exceptions.ValidationError(constants.INVALID_FLEET)
 
     def validate_size(self, *args, **kwargs):
         data = self.get_initial()
         if 15 < data['size'] < 10:
-            raise exceptions.ValidationError("Size must be between 10 and 15")
+            raise exceptions.ValidationError(constants.INVALID_SIZE)
         size = data['size']
         return size
 
@@ -30,7 +30,7 @@ class JoinFleetValidator(serializers.Serializer):
     def validate_fleet(self, fleet):
         if fleet:
             return extract_ships_from(fleet)
-        raise exceptions.ValidationError("Your fleet is incorrect")
+        raise exceptions.ValidationError(constants.INVALID_FLEET)
 
 
 class ShootValidator(serializers.Serializer):
@@ -41,8 +41,6 @@ class ShootValidator(serializers.Serializer):
 
         data = self.get_initial()
         if not len(shoot) == 2 or \
-            not all(type(item) is int and item < data['size'] for item in shoot):
-                raise exceptions.ValidationError("Shoot is invalid")
-
-
+                not all(type(item) is int and item < data['size'] for item in shoot):
+            raise exceptions.ValidationError(constants.INVALID_SHOOT)
 

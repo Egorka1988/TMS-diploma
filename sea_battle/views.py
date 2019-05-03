@@ -144,17 +144,16 @@ class GamePlayViewForCreator(View):
 
         data = json.loads(request.POST.get('json_form'))
         fleet = extract_ships_from(data['fleet'])
-
+        data['fleet'] = fleet
+        data['name'] = data['game_name']
         if data['game_name'] != 'Name of your game':
             game_name = data['game_name']
         else:
             game_name = 'No name'
 
-        game, battlemap = set_game_params_to_db_for_creator(
-            data['size'],
-            request.user,
-            game_name,
-            fleet,
+        game, battlemap = create_game(
+            data,
+            request.user
         )
 
         return render(

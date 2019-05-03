@@ -1,10 +1,7 @@
-from datetime import timedelta
 
-from django.contrib.auth.models import User
 from django.db.models import Q
 from django.http import JsonResponse
 from django.utils import timezone
-from django.utils.timezone import now
 
 from rest_framework import viewsets, generics, exceptions
 from rest_framework.decorators import action
@@ -15,7 +12,7 @@ from rest_framework import status
 from sea_battle import constants
 from sea_battle.api import serializers, validators
 from sea_battle.models import BattleMap, Game
-from sea_battle.services import get_game, get_enemy_shoots, get_game_state, handle_shoot, \
+from sea_battle.services import get_game, get_game_state, handle_shoot, \
     create_game, join_game, join_fleet
 
 
@@ -30,38 +27,22 @@ class CleaningAPIView(generics.GenericAPIView):
         return JsonResponse(resp)
 
 
-class ActiveGamesAPIViewSet(viewsets.GenericViewSet):
-
-    def get_queryset(self):
-        starting_time = now() - timedelta(seconds=60)
-
-        online_users = User.objects.filter(
-            onlineuseractivity__last_activity__gte=starting_time
-        )
-
-        games = Game.objects.filter(creator__in=online_users, joiner=None)
-
-        return games
-
-    def list(self, request, *args, **kwargs):
-
-        queryset = self.get_queryset()
-        self.serializer_class = serializers.ActiveGamesSerializer
-        serializer = self.get_serializer(queryset, many=True)
-
-        return Response(serializer.data)
-
-#     def post(self, request, *args, **kwargs):
-#         data = json.loads(request.body)
-#         last_shoot = data['target'].split(',')
-#         prepared_shoot = [int(last_shoot[0]), int(last_shoot[1])]
-
-
 class GamesAPIViewSet(viewsets.GenericViewSet):
 
     serializer_class = serializers.NewGameSerializer
     lookup_url_kwarg = 'game_id'
     permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        current_user = self.request.user
+        return Game.objects.filter(Q(creator=current_user) | Q(joiner=current_user))
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        self.serializer_class = serializers.ActiveAndAvailableGamesSerializer
+        serializer = self.get_serializer(queryset, many=False)
+
+        return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
         # Validation
@@ -69,16 +50,12 @@ class GamesAPIViewSet(viewsets.GenericViewSet):
         validator.is_valid(raise_exception=True)
 
         # Pass validated data to business logic (service)
-        game, fleet = create_game(validator.validated_data, request.user)
+        game, battlemap = create_game(validator.validated_data, request.user)
 
         # Serialization
         data = serializers.NewGameSerializer(game).data
-        data['fleet'] = fleet
+        data['fleet'] = battlemap.fleet
         return Response(data, status=status.HTTP_201_CREATED)
-
-    def get_queryset(self):
-        current_user = self.request.user
-        return Game.objects.filter(Q(creator=current_user) | Q(joiner=current_user))
 
     @action(methods=['PATCH'], detail=True)
     def shoot(self, request, game_id, **kwargs):

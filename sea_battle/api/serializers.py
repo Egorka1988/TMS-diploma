@@ -1,18 +1,55 @@
-from django.contrib.auth.models import User
-from django.utils.datastructures import MultiValueDictKeyError
-from rest_framework import serializers, exceptions
 
-from sea_battle.models import Game, BattleMap
+from rest_framework import serializers
+
+from sea_battle.models import Game
 
 # Serializers define the API representation.
-from sea_battle.services import get_game_state, get_enemy_shoots, set_joiner
+from sea_battle.services import get_game_state, get_enemy_shoots
 
 
+class ActiveGameSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    size = serializers.IntegerField()
+    creator_id = serializers.IntegerField()
+    joiner_id = serializers.IntegerField()
 
-class ActiveGamesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Game
-        fields = ('id', 'name', 'creator', 'size')
+
+class ActiveAndAvailableGamesSerializer(serializers.Serializer):
+
+    active_games = serializers.SerializerMethodField()
+    available_games = serializers.SerializerMethodField()
+
+    def get_active_games(self, *args, **kwargs):
+        user = self.context['request'].user
+        games = Game.objects.active_games().exclude(creator=user)
+        active_games = []
+        for game in games:
+            item = {
+                'game.id': game.pk,
+                'name': game.name,
+                'size': game.size,
+                'creator_id': game.creator_id,
+                'joiner_id':game.joiner_id
+            }
+            active_games.append(item)
+        return active_games
+
+    def get_available_games(self, *args, **kwargs):
+
+        user = self.context['request'].user
+        games = Game.objects.available_games().exclude(creator=user)
+        available_games = []
+        for game in games:
+            item = {
+                'game.id': game.pk,
+                'name': game.name,
+                'size': game.size,
+                'creator_id': game.creator_id
+            }
+            available_games.append(item)
+        return available_games
+
 
 
 class ShootResultSerializer(serializers.Serializer):
