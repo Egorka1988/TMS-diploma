@@ -1,6 +1,35 @@
+# from concurrency.api import apply_concurrency_check
+# from concurrency.fields import AutoIncVersionField
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import ArrayField, JSONField
 from django.db import models
+from datetime import timedelta
+
+from django.utils import timezone
+
+
+# apply_concurrency_check(User, 'version', AutoIncVersionField)
+
+
+class GamesManager(models.Manager):
+
+    def clean_expired_games(self):
+        pass
+
+
+class GamesQuerySet(models.QuerySet):
+
+    def active_games(self):
+        return self.filter(
+            last_activity__gt=(timezone.now() - timedelta(seconds=60)),
+            joiner__ne=None,
+        )
+
+    def available_games(self):
+        return self.filter(
+            last_activity__gt=(timezone.now() - timedelta(seconds=60)),
+            joiner=None,
+        )
 
 
 class Game(models.Model):
@@ -49,6 +78,15 @@ class Game(models.Model):
         null=True,
         related_name='game_joiner',
     )
+
+    last_activity = models.DateTimeField(
+        null=True
+    )
+
+    objects = GamesManager.from_queryset(GamesQuerySet)()
+
+
+# apply_concurrency_check(Game, 'version', AutoIncVersionField)
 
 
 class BattleMap(models.Model):

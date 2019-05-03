@@ -1,21 +1,22 @@
 from datetime import timedelta
 
 from django.contrib.auth.models import User
-
 from django.db.models import Q
 from django.http import JsonResponse
+from django.utils import timezone
 from django.utils.timezone import now
 
-from rest_framework import viewsets, generics
+from rest_framework import viewsets, generics, exceptions
 from rest_framework.decorators import action
-from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
-from sea_battle.api import serializers
+from sea_battle import constants
+from sea_battle.api import serializers, validators
 from sea_battle.models import BattleMap, Game
-from sea_battle.services import get_game, get_enemy_shoots, get_game_state, handle_shoot
+from sea_battle.services import get_game, get_enemy_shoots, get_game_state, handle_shoot, \
+    create_game, join_game, join_fleet
 
 
 class CleaningAPIView(generics.GenericAPIView):
@@ -45,83 +46,99 @@ class ActiveGamesAPIViewSet(viewsets.GenericViewSet):
     def list(self, request, *args, **kwargs):
 
         queryset = self.get_queryset()
-
-        serializer = serializers.ActiveGamesSerializer(queryset, many=True)
+        self.serializer_class = serializers.ActiveGamesSerializer
+        serializer = self.get_serializer(queryset, many=True)
 
         return Response(serializer.data)
 
-
-class NewGameAPIViewSet(viewsets.GenericViewSet):
-    pass
-
-
-# class JoinGameAPIView(generics.GenericAPIView):
-#     pass
-
-# class ShootHandlerAPIView(generics.GenericAPIView):
-#
 #     def post(self, request, *args, **kwargs):
 #         data = json.loads(request.body)
 #         last_shoot = data['target'].split(',')
 #         prepared_shoot = [int(last_shoot[0]), int(last_shoot[1])]
-#
-#         game = get_game(data['game_id'], request.user)
-#
-#         if not game.turn == request.user:
-#             raise PermissionDenied
-#
-#         shoot_result = handle_shoot(
-#             last_shoot=prepared_shoot,
-#             game=game,
-#             current_user=request.user
-#         )
-#
-#         return JsonResponse({
-#             'state': get_game_state(game, request.user),
-#             'shoot_result': shoot_result,
-#         })
-#
-#
 
 
 class GamesAPIViewSet(viewsets.GenericViewSet):
 
-    serializer_class = serializers.StatmentGetSerializer
+    serializer_class = serializers.NewGameSerializer
     lookup_url_kwarg = 'game_id'
     permission_classes = (IsAuthenticated,)
+
+    def create(self, request, *args, **kwargs):
+        # Validation
+        validator = validators.NewGameValidator(data=request.data)
+        validator.is_valid(raise_exception=True)
+
+        # Pass validated data to business logic (service)
+        game, fleet = create_game(validator.validated_data, request.user)
+
+        # Serialization
+        data = serializers.NewGameSerializer(game).data
+        data['fleet'] = fleet
+        return Response(data, status=status.HTTP_201_CREATED)
 
     def get_queryset(self):
         current_user = self.request.user
         return Game.objects.filter(Q(creator=current_user) | Q(joiner=current_user))
 
-    def create(self, request):
-        # create game
-        pass
+    @action(methods=['PATCH'], detail=True)
+    def shoot(self, request, game_id, **kwargs):
 
-    def update(self):
-        pass
+        game = get_game(game_id, request.user)
+        if game.turn == request.user:
+
+            request.data['size'] = game.size
+            validator = validators.ShootValidator(data=request.data)
+            validator.is_valid(raise_exception=True)
+            shoot = validator.validated_data['shoot']
+
+            shoot_result = handle_shoot(shoot, game, request.user)
+            state = get_game_state(game, request.user)
+            data = {'shoot': shoot_result, 'state': state}
+
+        else:
+            raise exceptions.NotAcceptable(constants.NOT_YOUR_TURN)
+
+        resp = serializers.JoinFleetSerializer(data).data
+
+        return Response(resp, status=status.HTTP_200_OK)
 
     @action(methods=['POST'], detail=True)
-    def join(self, request, **kwargs):
+    def join(self, request, game_id):
 
-        game = Game.objects.get(
-            pk=request.data['game_id'],
-        )
-        game.joiner = self.request.user
-        game.save()
+        """Handles if it is possible to join to the current game"""
 
-        return Response(
-            {
-                'size': game.size,
-                'sizeiterator': list(range(int(game.size))),
-                'opponent': game.creator_id,
-                'game_id': game.pk,
-            }
-        )
+        game = join_game(game_id, request.user)
+
+        if game == constants.FAIL_TO_JOIN:
+            raise exceptions.NotAcceptable(constants.FAIL_TO_JOIN)
+
+        return Response(status=status.HTTP_202_ACCEPTED)
+
+    @action(methods=['POST'], detail=True)
+    def join_fleet(self, request, game_id):
+
+        """After joining was accepted player sets his fleet"""
+
+        # providing validation of joiner's fleet
+        validator = validators.JoinFleetValidator(data=request.data)
+        validator.is_valid(raise_exception=True)
+        fleet = validator.validated_data['fleet']
+
+        # create fleet for joiner
+        fleet = join_fleet(game_id, request.user, fleet)
+
+        # serialize data for using at frontend
+        data = serializers.JoinFleetSerializer(fleet).data
+
+        return Response(data, status=status.HTTP_201_CREATED)
 
     @action(methods=['GET'], detail=True)
-    def state(self, request, **kwargs):
-        game = self.get_object()
+    def state(self, *args, **kwargs):
 
+        game = self.get_object()
+        game.last_activity = timezone.now()
+        game.save()
+
+        self.serializer_class = serializers.StatmentGetSerializer
         serializer = self.get_serializer(game)
         return Response(serializer.data)

@@ -7,3 +7,6 @@ WAITING_FOR_JOINER = 'waiting_for_joiner'
 WIN = 'win'
 LOOSE = 'loose'
 ACTIVE = 'active'
+
+FAIL_TO_JOIN = "Oop's... Somebody has already joined. Try another game"
+NOT_YOUR_TURN = "Don't cheat! Now it's not your turn to shoot"

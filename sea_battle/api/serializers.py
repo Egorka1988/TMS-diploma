@@ -1,62 +1,52 @@
 from django.contrib.auth.models import User
-from rest_framework import serializers
+from django.utils.datastructures import MultiValueDictKeyError
+from rest_framework import serializers, exceptions
 
 from sea_battle.models import Game, BattleMap
 
-
 # Serializers define the API representation.
-from sea_battle.services import get_game_state, get_enemy_shoots
+from sea_battle.services import get_game_state, get_enemy_shoots, set_joiner
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = User
-        fields = ('url', 'username', 'email', 'is_staff')
 
-
-class GameSerializer(serializers.HyperlinkedModelSerializer):
+class ActiveGamesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Game
-        fields = ('pk', 'name', 'size', 'turn', 'creator', 'joiner', 'winner', 'creating_date')
+        fields = ('id', 'name', 'creator', 'size')
 
 
-class BattleMapSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = BattleMap
-        fields = ('pk', 'game', 'user', 'fleet', 'shoots', 'rating', 'template')
+class ShootResultSerializer(serializers.Serializer):
+
+    state = serializers.CharField()
+    shoot_result = serializers.CharField()
 
 
-class ActiveGamesSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Game
-        fields = ('creator', 'id', 'size', 'name')
-
-
-class StatmentGetSerializer(serializers.ModelSerializer):
+class StatmentGetSerializer(serializers.Serializer):
 
     state = serializers.SerializerMethodField()
-    enemy_shoots = serializers.SerializerMethodField()
+    shoots_of_enemy = serializers.SerializerMethodField()
 
     def get_user(self):
         return self.context['request'].user
-
-    class Meta:
-        model = Game
-        fields = [
-            'pk',
-            'creator',
-            'joiner',
-            'turn',
-            'winner',
-            'state',
-            'enemy_shoots',
-            ]
 
     def get_state(self, game):
         user = self.get_user()
         return get_game_state(game, user)
 
-    def get_enemy_shoots(self, game):
+    def get_shoots_of_enemy(self, game):
         if game.joiner:
-            return []
+            current_user = self.get_user()
+            return get_enemy_shoots(game.pk, current_user)
         return []
+
+
+class NewGameSerializer(serializers.Serializer):
+
+    id = serializers.IntegerField()
+    size = serializers.IntegerField()
+    turn = serializers.IntegerField(source='turn_id')
+
+
+class JoinFleetSerializer(serializers.Serializer):
+
+    fleet = serializers.ListField()

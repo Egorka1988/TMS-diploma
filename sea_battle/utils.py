@@ -1,6 +1,7 @@
 
 def extract_ships_from(ship_indexes):
-    # function for sorting ships by their coords
+
+    """ Function for making ships from their coords """
 
     ship_indexes = [tuple(idx) for idx in ship_indexes]
 
@@ -33,7 +34,8 @@ def extract_ships_from(ship_indexes):
 
 
 def prepare_to_store(fleet):
-    #  converting fleet to suitable format for JSONField
+
+    """ Converting fleet to suitable format for JSONField """
 
     fleet = [tuple(tuple(part) for part in ship) for ship in fleet]
     return fleet

@@ -13,7 +13,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic import View
 from datetime import timedelta
 from sea_battle.models import Game
-from sea_battle.services import set_game_params_to_db_for_creator, set_game_params_to_db_for_joiner
+from sea_battle.services import create_game, join_game
 
 from sea_battle.utils import extract_ships_from
 
@@ -66,8 +66,11 @@ class SeeUsersView(View):
             onlineuseractivity__last_activity__gte=starting_time
         )
 
-        games = Game.objects.filter(creator__in=online_users, joiner=None)\
-            .exclude(creator=request.user)
+        # games = Game.available_games.filter(creator__in=online_users)\
+        #     .exclude(creator=request.user)
+        games = Game.objects.available_games()
+
+        print(repr(games))
 
         cleared_users = games.values_list('creator__username', 'id', 'size', 'name')
 
@@ -177,7 +180,7 @@ class GamePlayViewForJoiner(View):
         data = json.loads(request.POST.get('json_form'))
         fleet = extract_ships_from(data['fleet'])
 
-        game, battlemap = set_game_params_to_db_for_joiner(
+        game, battlemap = join_game(
             data['game_id'],
             request.user,
             fleet

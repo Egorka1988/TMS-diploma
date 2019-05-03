@@ -1,8 +1,11 @@
 from datetime import datetime
 
+from django.db import transaction
 from django.db.models import Q
+from django.utils import timezone
+from rest_framework import exceptions
 
-from sea_battle import consts
+from sea_battle import constants
 from sea_battle.models import BattleMap, Game
 from sea_battle.utils import prepare_to_store
 
@@ -23,15 +26,15 @@ def handle_shoot(last_shoot, game, current_user):
 
     shoots = set(map(tuple, my_map.shoots))
 
-    shoot_result = consts.SHOOT_RESULT_MISS
+    shoot_result = constants.SHOOT_RESULT_MISS
 
     for ship in enemy_map.fleet:
         ship = set(map(tuple, ship))
         if last_shoot in ship:
-            shoot_result = consts.SHOOT_RESULT_HIT
+            shoot_result = constants.SHOOT_RESULT_HIT
 
             if ship.issubset(shoots):
-                shoot_result = consts.SHOOT_RESULT_KILL
+                shoot_result = constants.SHOOT_RESULT_KILL
             break
 
     # update game state if necessary
@@ -45,18 +48,26 @@ def update_game_state(game, shoot_result, current_user, shoots, enemy_map):
     """ changes turn between users if res of shoot is 'miss'
     or sets winner to game, if shooter killed the whole enemy's fleet"""
 
-    if shoot_result == consts.SHOOT_RESULT_MISS:
+    if shoot_result == constants.SHOOT_RESULT_MISS:
         if game.turn_id == game.creator_id:
             game.turn_id = game.joiner_id
         else:
             game.turn_id = game.creator_id
 
-    if shoot_result == consts.SHOOT_RESULT_KILL:
+    if shoot_result == constants.SHOOT_RESULT_KILL:
         if all(set(ship).issubset(shoots) for ship in enemy_map.fleet):
             game.winner_id = current_user.pk
 
     game.save()
     return
+
+
+def set_joiner(game, user):
+    if game.joiner_id or game.creator_id == user.id:
+        raise ValueError('Improper game for joining')
+
+    game.joiner = user
+    game.save()
 
 
 def get_game(game_id, current_user):
@@ -79,15 +90,15 @@ def get_game_state(game, current_user):
     state message for using in response"""
 
     if not game.joiner_id:
-        return consts.WAITING_FOR_JOINER
+        return constants.WAITING_FOR_JOINER
 
     if game.winner_id and game.winner_id == current_user.pk:
-        return consts.WIN
+        return constants.WIN
 
     if game.winner_id:
-        return consts.LOOSE
+        return constants.LOOSE
 
-    return consts.ACTIVE
+    return constants.ACTIVE
 
 
 def get_enemy_shoots(game_id, current_user):
@@ -125,43 +136,55 @@ def get_game_battle_maps(game, current_user):
     return None, None
 
 
-def set_game_params_to_db_for_creator(size, user, name, fleet):
+def create_game(data, user):
 
-    """set start params of the game to db by the player, who created game"""
+    """set start params of the game to db by the player, who creates the game"""
 
-    game = Game.objects.create(
-        size=size,
-        turn=user,
-        creating_date=datetime.now(),
-        creator=user,
-        joiner=None,
-        name=name,
-    )
+    with transaction.atomic():
+        game = Game.objects.create(
+            size=data['size'],
+            turn=user,
+            creating_date=datetime.now(),
+            creator=user,
+            joiner=None,
+            name=data['name'],
+            last_activity=timezone.now()
+        )
 
-    battle_map = BattleMap.objects.create(
-        user=user,
-        fleet=prepare_to_store(fleet),
-        shoots=[],
-        game=game,
-    )
-    return game, battle_map
-
-
-def set_game_params_to_db_for_joiner(game_id, user, fleet):
-
-    """set params of the game to db by the player, who joined game"""
-
-    game = Game.objects.get(pk=game_id)
-    game.joiner = user
-    game.save()
-
-    battle_map = BattleMap.objects.create(
-        user=user,
-        fleet=prepare_to_store(fleet),
-        shoots=[],
-        game=game,
-    )
-
-    return game, battle_map
+        battle_map = BattleMap.objects.create(
+            user=user,
+            fleet=prepare_to_store(data['fleet']),
+            shoots=[],
+            game=game,
+            template=False
+        )
+        return game, battle_map.fleet
 
 
+def join_game(game_id, user):
+
+    """try to join to the particular game"""
+
+    with transaction.atomic():
+        game = Game.objects.available_games. \
+            select_for_update().\
+            get(pk=game_id)
+        if game.joiner:
+            return constants.FAIL_TO_JOIN
+
+        game.joiner = user
+        game.save()
+    return game
+
+
+def join_fleet(game_id, user, fleet):
+
+    with transaction.atomic():
+        battle_map = BattleMap.objects.create(
+            user=user,
+            fleet=prepare_to_store(fleet),
+            shoots=[],
+            game_id=game_id,
+        )
+
+    return battle_map.fleet
