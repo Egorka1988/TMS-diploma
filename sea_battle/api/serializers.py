@@ -7,7 +7,8 @@ from sea_battle.models import Game
 from sea_battle.services import get_game_state, get_enemy_shoots
 
 
-class ActiveGameSerializer(serializers.Serializer):
+class ActiveGamesSerializer(serializers.Serializer):
+
     id = serializers.IntegerField()
     name = serializers.CharField()
     size = serializers.IntegerField()
@@ -15,47 +16,18 @@ class ActiveGameSerializer(serializers.Serializer):
     joiner_id = serializers.IntegerField()
 
 
-class ActiveAndAvailableGamesSerializer(serializers.Serializer):
+class AvailableGamesSerializer(serializers.Serializer):
 
-    active_games = serializers.SerializerMethodField()
-    available_games = serializers.SerializerMethodField()
-
-    def get_active_games(self, *args, **kwargs):
-        user = self.context['request'].user
-        games = Game.objects.active_games().exclude(creator=user)
-        active_games = []
-        for game in games:
-            item = {
-                'game.id': game.pk,
-                'name': game.name,
-                'size': game.size,
-                'creator_id': game.creator_id,
-                'joiner_id':game.joiner_id
-            }
-            active_games.append(item)
-        return active_games
-
-    def get_available_games(self, *args, **kwargs):
-
-        user = self.context['request'].user
-        games = Game.objects.available_games().exclude(creator=user)
-        available_games = []
-        for game in games:
-            item = {
-                'game.id': game.pk,
-                'name': game.name,
-                'size': game.size,
-                'creator_id': game.creator_id
-            }
-            available_games.append(item)
-        return available_games
-
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    size = serializers.IntegerField()
+    creator_id = serializers.IntegerField()
 
 
 class ShootResultSerializer(serializers.Serializer):
 
     state = serializers.CharField()
-    shoot_result = serializers.CharField()
+    shoot = serializers.CharField()
 
 
 class StatmentGetSerializer(serializers.Serializer):

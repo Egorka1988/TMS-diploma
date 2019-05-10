@@ -1,6 +1,3 @@
-from random import random
-
-from mixer.backend.django import mixer
 
 from sea_battle.utils import extract_ships_from
 import pytest

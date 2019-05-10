@@ -6,3 +6,5 @@ router = routers.DefaultRouter()
 
 # path('cleaning_db/', v.CleaningAPIView.as_view(), name='deleting_fleet'),
 router.register(r'games', v.GamesAPIViewSet, basename='games')
+router.register(r'games-for-watching', v.WatchGamesAPIViewSet, basename='w_games')
+

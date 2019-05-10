@@ -36,11 +36,12 @@ class JoinFleetValidator(serializers.Serializer):
 class ShootValidator(serializers.Serializer):
 
     shoot = serializers.ListField()
+    size = serializers.IntegerField()
 
-    def validate_shoot(self, shoot):
+    def validate_shoot(self, shoot, *args, **kwargs):
 
         data = self.get_initial()
         if not len(shoot) == 2 or \
                 not all(type(item) is int and item < data['size'] for item in shoot):
             raise exceptions.ValidationError(constants.INVALID_SHOOT)
-
+        return shoot

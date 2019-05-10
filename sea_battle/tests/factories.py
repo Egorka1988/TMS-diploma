@@ -3,6 +3,7 @@ from datetime import datetime
 import factory
 
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 from sea_battle.models import BattleMap, Game
 
@@ -21,7 +22,8 @@ class GameFactory(factory.django.DjangoModelFactory):
 
     creator = factory.SubFactory(UserFactory)
     turn = factory.SelfAttribute('creator')
-    date = datetime.now()
+    creating_date = datetime.now()
+    last_activity = timezone.now()
 
     @factory.post_generation
     def creator_battle_map(obj, create, extracted, **kwargs):
@@ -31,11 +33,13 @@ class GameFactory(factory.django.DjangoModelFactory):
 
 class ActiveGameFactory(GameFactory):
     joiner = factory.SubFactory(UserFactory)
+    last_activity = timezone.now()
 
     @factory.post_generation
     def joiner_battle_map(obj, create, extracted, **kwargs):
         if create and not extracted:
             BattleMapFactory(game=obj, user=obj.joiner, **kwargs)
+
 
 class BattleMapFactory(factory.django.DjangoModelFactory):
 

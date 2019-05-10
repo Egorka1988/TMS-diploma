@@ -27,6 +27,24 @@ class CleaningAPIView(generics.GenericAPIView):
         return JsonResponse(resp)
 
 
+class WatchGamesAPIViewSet(viewsets.GenericViewSet):
+
+    serializer_class = serializers.ActiveGamesSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        current_user = self.request.user
+        games = Game.objects.active_games().exclude(Q(creator=current_user) | Q(joiner=current_user))
+        print("games", games)
+        return games
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+
+        return Response(serializer.data)
+
+
 class GamesAPIViewSet(viewsets.GenericViewSet):
 
     serializer_class = serializers.NewGameSerializer
@@ -38,9 +56,10 @@ class GamesAPIViewSet(viewsets.GenericViewSet):
         return Game.objects.filter(Q(creator=current_user) | Q(joiner=current_user))
 
     def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        self.serializer_class = serializers.ActiveAndAvailableGamesSerializer
-        serializer = self.get_serializer(queryset, many=False)
+
+        games = Game.objects.available_games().exclude(creator=request.user)
+        self.serializer_class = serializers.AvailableGamesSerializer
+        serializer = self.get_serializer(games, many=True)
 
         return Response(serializer.data)
 
@@ -58,7 +77,7 @@ class GamesAPIViewSet(viewsets.GenericViewSet):
         return Response(data, status=status.HTTP_201_CREATED)
 
     @action(methods=['PATCH'], detail=True)
-    def shoot(self, request, game_id, **kwargs):
+    def shoot(self, request, game_id, **kwargs, ):
 
         game = get_game(game_id, request.user)
         if game.turn == request.user:
@@ -75,7 +94,7 @@ class GamesAPIViewSet(viewsets.GenericViewSet):
         else:
             raise exceptions.NotAcceptable(constants.NOT_YOUR_TURN)
 
-        resp = serializers.JoinFleetSerializer(data).data
+        resp = serializers.ShootResultSerializer(data).data
 
         return Response(resp, status=status.HTTP_200_OK)
 
@@ -86,7 +105,8 @@ class GamesAPIViewSet(viewsets.GenericViewSet):
 
         game = join_game(game_id, request.user)
 
-        if game == constants.FAIL_TO_JOIN:
+        if game == constants.FAIL_TO_JOIN or \
+                game == constants.GAME_NOT_FOUND:
             raise exceptions.NotAcceptable(constants.FAIL_TO_JOIN)
 
         return Response(status=status.HTTP_202_ACCEPTED)
@@ -102,10 +122,10 @@ class GamesAPIViewSet(viewsets.GenericViewSet):
         fleet = validator.validated_data['fleet']
 
         # create fleet for joiner
-        fleet = join_fleet(game_id, request.user, fleet)
+        data = {'fleet': join_fleet(game_id, request.user, fleet)}
 
         # serialize data for using at frontend
-        data = serializers.JoinFleetSerializer(fleet).data
+        data = serializers.JoinFleetSerializer(data).data
 
         return Response(data, status=status.HTTP_201_CREATED)
 

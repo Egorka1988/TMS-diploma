@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.core import exceptions
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
@@ -157,9 +158,13 @@ def join_game(game_id, user):
     """try to join to the particular game"""
 
     with transaction.atomic():
-        game = Game.objects.available_games(). \
-            select_for_update().\
-            get(pk=game_id)
+        try:
+            game = Game.objects.available_games(). \
+                select_for_update().\
+                get(pk=game_id)
+        except exceptions.ObjectDoesNotExist:
+            return constants.GAME_NOT_FOUND
+
         if game.joiner:
             return constants.FAIL_TO_JOIN
 
