@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 
 from rest_framework import viewsets, generics, exceptions
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -31,6 +32,7 @@ class WatchGamesAPIViewSet(viewsets.GenericViewSet):
 
     serializer_class = serializers.ActiveGamesSerializer
     permission_classes = (IsAuthenticated,)
+    authentication_classes = (SessionAuthentication,)
 
     def get_queryset(self):
         current_user = self.request.user
@@ -49,6 +51,7 @@ class GamesAPIViewSet(viewsets.GenericViewSet):
 
     serializer_class = serializers.NewGameSerializer
     lookup_url_kwarg = 'game_id'
+    authentication_classes = (SessionAuthentication,)
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
