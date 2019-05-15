@@ -6,3 +6,4 @@ diploma/diploma/__pycache__
 tricks
 .yarn_cache/*
 !.yarn_cache/.gitkeep
+node_modules

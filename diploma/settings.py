@@ -15,7 +15,7 @@ ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'django.contrib.postgres',
-    # 'django_postgres_extensions',
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -31,6 +31,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -39,6 +41,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'online_users.middleware.OnlineNowMiddleware',
+
 ]
 
 ROOT_URLCONF = 'diploma.urls'
@@ -105,11 +108,11 @@ REST_FRAMEWORK = {
     ]
 }
 
-SIMPLE_JWT = {
-
-    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',)
-
-}
+# SIMPLE_JWT = {
+#
+#     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',)
+#
+# }
 
 LANGUAGE_CODE = 'en-us'
 
@@ -134,3 +137,8 @@ if HTMLVALIDATOR_ENABLED:
     MIDDLEWARE += ["htmlvalidator.middleware.HTMLValidator", ]
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+CORS_ORIGIN_WHITELIST = [
+    "http://localhost:8080",
+    "http://127.0.0.1:8080"
+]

@@ -23,7 +23,7 @@ services:
             - "POSTGRES_PASSWORD=${DB_PASSWORD}"
             - "POSTGRES_DB=${DB_NAME}"
 
-    frontend:
+    frontend_django:
         tty: true
         build:
             context: ./frontend
