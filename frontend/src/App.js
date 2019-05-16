@@ -7,7 +7,7 @@ class App extends Component {
         return (
             <BrowserRouter>
                 <div className="App">
-                        <Route path='/' component={SignIn} />
+                        <Route path='/login' component={SignIn} />
                 </div>
             </BrowserRouter>
         );
