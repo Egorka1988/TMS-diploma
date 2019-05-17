@@ -1,12 +1,24 @@
 import React, {Component} from 'react'
 import { signIn } from '../../store/actions/authActions'
 import { connect } from 'react-redux'
+import store from '../../index.js'
+import authReducer from '../../store/reducers/authReducer';
+import {
+    Redirect,
+  } from "react-router-dom";
 
+  
 class SignIn extends Component {
 
     state = {
         username: '',
-        password: ''
+        password: '',
+        isLoading: false,
+    }
+
+    handleLogin = (authData) => {
+        authData.token ? 
+        localStorage.setItem('authToken', authData.token): null
     }
 
     handleChange = (e) => {
@@ -15,15 +27,21 @@ class SignIn extends Component {
         })
     }
     handleSubmit = (e) => {
-        e.preventDefault();
-        console.log('props', this.props)
-        console.log('state', this.state)
-        this.props.signIn(this.state)        
-        
-        console.log('submit')
-    
+        e.preventDefault();        
+        this.setState({isLoading: true})
+        this.props.signIn(this.state)
+            .then(authData => this.handleLogin(authData))
+            .finally(() => this.setState({isLoading: false}));
     }
+
     render() {
+        if (this.state.isLoading) {
+            return <div>Singing in...</div>
+        }
+        if (this.props.authToken) {
+            return <Redirect to="/"/>;
+        }
+        const { authError }  = this.props
         return (
             <div className="container">
                 <form onSubmit={this.handleSubmit} onChange={this.handleChange} className="white">
@@ -39,11 +57,19 @@ class SignIn extends Component {
                     <div className="input-field">
                         <button className="btn pink lighten-1 z-depth-0">Login</button>
                         <div className="red-text center">
+                            { authError ? <p>{ authError }</p> : null }
                         </div>
                     </div>
                 </form>
             </div>
         )
+    }
+}
+
+const mapStateToProps = (state) => {
+    return {
+        authToken: state.authToken,
+        authError: state.authError
     }
 }
 
@@ -53,7 +79,4 @@ const mapDispatchToProps = (dispatch) => {
     }
 }
 
-export default connect(
-    null,
-    mapDispatchToProps
-)(SignIn)
+export default connect(mapStateToProps, mapDispatchToProps)(SignIn)

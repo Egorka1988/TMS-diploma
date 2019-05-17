@@ -1,3 +1,6 @@
+import store from '../../index.js'
+
+
 const initState = {
     authError: null
 }
@@ -9,18 +12,18 @@ const authReducer = (state = initState, action) => {
             return {
                 ...state,
                 authError: 'Login failed',
-                token: action.token
+                authToken: null,
             }
         case 'LOGIN_SUCCESS':
-            console.log('login success', action.token);
+            console.log('login success');
             return {
                 ...state,
                 authError: null,
-                token: action.token
+                authToken: action.token
             }
         default:
             return state;
     }
 }
-
-export default authReducer
+ 
+export default authReducer;
