@@ -1,13 +1,16 @@
+import json
 
+from django.contrib.auth.models import User
 from django.db.models import Q
 from django.http import JsonResponse
 from django.utils import timezone
 
 from rest_framework import viewsets, generics, exceptions
-from rest_framework.authentication import SessionAuthentication
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from rest_framework import status
 
@@ -15,7 +18,7 @@ from sea_battle import constants
 from sea_battle.api import serializers, validators
 from sea_battle.models import BattleMap, Game
 from sea_battle.services import get_game, get_game_state, handle_shoot, \
-    create_game, join_game, join_fleet
+    create_game, join_game, join_fleet, create_user
 
 
 class CleaningAPIView(generics.GenericAPIView):
@@ -29,11 +32,32 @@ class CleaningAPIView(generics.GenericAPIView):
         return JsonResponse(resp)
 
 
+class RegisterFormAPIViewSet(viewsets.GenericViewSet):
+
+    permission_classes = (AllowAny,)
+
+    def get_queryset(self):
+
+        return self.request.data
+
+    def create(self, request, *args, **kwargs):
+        # Validation
+
+        validator = validators.SignUpValidator(data=request.data)
+        validator.is_valid(raise_exception=True)
+
+        user = create_user(validator.validated_data)
+
+        token, created = Token.objects.get_or_create(user=user)
+        resp = {'token': token.key, 'username': user.username}
+        return Response(resp, status=status.HTTP_201_CREATED)
+
+
 class WatchGamesAPIViewSet(viewsets.GenericViewSet):
 
     serializer_class = serializers.ActiveGamesSerializer
     permission_classes = (IsAuthenticated,)
-    authentication_classes = (SessionAuthentication,)
+    authentication_classes = (TokenAuthentication,)
 
     def get_queryset(self):
         current_user = self.request.user
@@ -52,7 +76,7 @@ class GamesAPIViewSet(viewsets.GenericViewSet):
 
     serializer_class = serializers.NewGameSerializer
     lookup_url_kwarg = 'game_id'
-    authentication_classes = (SessionAuthentication,)
+    authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
@@ -143,3 +167,4 @@ class GamesAPIViewSet(viewsets.GenericViewSet):
         self.serializer_class = serializers.StatmentGetSerializer
         serializer = self.get_serializer(game)
         return Response(serializer.data)
+

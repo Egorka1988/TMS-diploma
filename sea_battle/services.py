@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.contrib.auth.models import User
 from django.core import exceptions
 from django.db import transaction
 from django.db.models import Q
@@ -126,6 +127,15 @@ def get_game_battle_maps(game, current_user):
         return None, m
 
     return None, None
+
+
+def create_user(data):
+
+    user = User.objects.create_user(
+        username=data['username'],
+        password=data['password']
+    )
+    return user
 
 
 def create_game(data, user):

@@ -21,7 +21,7 @@ class AvailableGamesSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
     size = serializers.IntegerField()
-    creator_id = serializers.IntegerField()
+    creator = serializers.CharField()
 
 
 class ShootResultSerializer(serializers.Serializer):

@@ -8,18 +8,23 @@ import App from './App.js'
 import { Provider } from 'react-redux'
 import { createStore, applyMiddleware } from 'redux'
 import thunk from 'redux-thunk';
-import authReducer from './store/reducers/authReducer'
+import rootReducer from './store/reducers/rootReducer'
+import { initialLoad } from './store/actions/authActions';
+import { localStoreTokenManager } from './utils';
+
 
 const initialState = {
-    authToken: localStorage.getItem('authToken') || null
-}
+    auth: {'authToken':null}
+};
 
 const store = createStore(
-    authReducer,
+    rootReducer,
     initialState,
     applyMiddleware(thunk)
 );
 
-ReactDOM.render(<Provider store={store} ><App /></Provider>, document.getElementById("root"));
+store.subscribe(localStoreTokenManager(store));
+// store.dispatch(initialLoad());
 
-export default store;
+
+ReactDOM.render(<Provider store={store} ><App /></Provider>, document.getElementById("root"));

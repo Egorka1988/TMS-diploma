@@ -26,11 +26,11 @@ class TestWatchGamesAPIViewSet(APITestCase):
 
         GameFactory()
 
-        response = client.get('/api/games-for-watching/')
+        response = client.get('/rest/games-for-watching/')
         assert response.status_code == 403
 
         client.force_authenticate(user=test_user)
-        response = client.get('/api/games-for-watching/')
+        response = client.get('/rest/games-for-watching/')
 
         self.assertEqual(len(response.data), 3)
         assert response.status_code == 200
@@ -52,11 +52,11 @@ class TestGamesAPIViewSet(APITestCase):
 
         GameFactory()
 
-        response = client.get('/api/games/')
+        response = client.get('/rest/games/')
         assert response.status_code == 403
 
         client.force_authenticate(user=test_user)
-        response = client.get('/api/games/')
+        response = client.get('/rest/games/')
         print(response.data)
 
         self.assertEqual(len(response.data), 1)
@@ -77,11 +77,11 @@ class TestGamesAPIViewSet(APITestCase):
             'user_id': test_user.id
         }
 
-        response = client.post('/api/games/', data, format='json')
+        response = client.post('/rest/games/', data, format='json')
         assert response.status_code == 403
 
         client.force_authenticate(user=test_user)
-        response = client.post('/api/games/', data, format='json')
+        response = client.post('/rest/games/', data, format='json')
         self.assertEqual(2, len(BattleMap.objects.get(user=test_user).fleet))
         assert response.status_code == 201
 
@@ -109,7 +109,7 @@ class TestGamesAPIViewSet(APITestCase):
             'user_id': test_user.id
         }
 
-        url = '/api/games/' + str(game.pk) + '/shoot/'
+        url = '/rest/games/' + str(game.pk) + '/shoot/'
 
         response = client.patch(url, data, format='json')
         assert response.status_code == 403
@@ -131,7 +131,7 @@ class TestGamesAPIViewSet(APITestCase):
 
         game = GameFactory()
 
-        url = '/api/games/' + str(game.pk) + '/join/'
+        url = '/rest/games/' + str(game.pk) + '/join/'
 
         data = {
             'game_id': game.pk,
@@ -147,7 +147,7 @@ class TestGamesAPIViewSet(APITestCase):
         self.assertEqual(test_user, Game.objects.get(pk=game.pk).joiner)
         assert response.status_code == 202
 
-        url = '/api/games/' + str(game.pk*2) + '/join/'
+        url = '/rest/games/' + str(game.pk*2) + '/join/'
         response = client.post(url, data, format='json')
 
         assert response.status_code == 406
@@ -165,7 +165,7 @@ class TestGamesAPIViewSet(APITestCase):
         battlemap.fleet = [[[0, 0], [1, 0]], [[9, 9]]]
         battlemap.save()
 
-        url = '/api/games/' + str(game.pk) + '/join_fleet/'
+        url = '/rest/games/' + str(game.pk) + '/join_fleet/'
 
         data = {
             'game_id': game.pk,
@@ -197,7 +197,7 @@ class TestGamesAPIViewSet(APITestCase):
         c_battlemap.save()
         j_battlemap.save()
 
-        url = '/api/games/' + str(game.pk) + '/state/'
+        url = '/rest/games/' + str(game.pk) + '/state/'
 
         response = client.get(url)
         assert response.status_code == 403
@@ -208,3 +208,22 @@ class TestGamesAPIViewSet(APITestCase):
         resp_assert = {'state': constants.ACTIVE, 'shoots_of_enemy': [[0, 0], [1, 1]]}
         self.assertEqual(resp_assert, json.loads(response.content))
         assert response.status_code == 200
+
+
+@pytest.mark.django_db
+class TestRegisterFormAPIViewSet(APITestCase):
+
+    """check, if list of active games is provided
+    for authenticated users and forbidden for anonymous"""
+
+    def test_create(self):
+
+        client = APIClient()
+
+        data = json.dumps({"username": "test", "password": "test123"})
+
+
+        response = client.post('/rest/signup/', data=data, content_type='application/json')
+
+
+        assert response.status_code == 201
