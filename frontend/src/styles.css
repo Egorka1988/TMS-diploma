@@ -6,13 +6,75 @@
   }
 
 .battlemap {
+    padding: 0px;
+
     border: 1px solid black;
     cursor: pointer;
     height: 25px;
     width: 25px;
-    background: null;
+    align-content: center
     }
 .tableMap {
   width: 300px;
   
+}
+.legend {
+  border: 1px solid black;
+  border-top: none;
+  border-radius: 5px;
+  height: 25px;
+  width: 25px;
+  background: lime;
+  align-content: center
+  }
+
+.ship:first-child {
+  border-top: 1px solid black;
+  border-radius: 5px;
+  width: 25px;
+  align-content: center
+}
+.aircraftbody {
+  position: relative;
+  clear: both;
+  border: 1px solid black;
+  border-top: none;
+  border-radius: 5px;
+  height: 25px;
+  width: 25px;
+  background: lime;
+  align-content: center
+}
+.aircraftbody:first-child {
+  border-top: 1px solid black;
+  border-radius: 5px;
+  width: 25px;
+  align-content: center
+}
+.aircraftrefit {
+  position: relative;
+  top: -50px;
+  border: 1px solid black;
+  border-collapse: collapse;
+  border-right: none;
+  border-top: none;
+  border-radius: 5px;
+  height: 25px;
+  width: 25px;
+  background: lime;
+  align-content: center
+}
+.aircraftrefit:first-child {
+  border-top: 1px solid black;
+  border-radius: 5px;
+  width: 25px;
+  align-content: center
+} 
+.aircraftCarrier {
+  align-self: auto;
+  
+}
+.aircraftCarrier> div{
+  float:right;
+  align-items: left;
 }

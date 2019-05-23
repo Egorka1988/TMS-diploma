@@ -30,18 +30,19 @@ export const getGames = () => {
     }
 }
 
-export const createGame = (data) => {
+export const createGame = (stateData, fleet) => {
     return async (dispatch, getState) => {
         const myHeaders = new Headers();
-        console.log(data)
         myHeaders.append("content-type", "application/json")
         myHeaders.append("authorization", `Token ${getState().auth.authToken}`)
+        stateData.fleet = fleet
+        console.log('hhhhh', stateData)
         const myInit = { 
                 method: 'POST',
                 mode: 'cors',
                 headers: myHeaders,
                 cache: 'default',
-                body: JSON.stringify(data)
+                body: JSON.stringify(stateData)
                 };
 
         const myRequest = new Request('http://127.0.0.1:8000/rest/games/', myInit);
@@ -51,13 +52,17 @@ export const createGame = (data) => {
         if (response.ok) {
             dispatch({
                 type: 'GAME_CREATE_SUCCESS',
-                fleet: respdata,
+                fleet: respdata.fleet,
+                turn: respdata.turn,
+                size: respdata.size,
+                gameId: respdata.id
             })
         } else {
             dispatch({
                 type: 'GAME_CREATE_ERROR',
-                err: respdata.detail
+                err: respdata.fleet || respdata.size || respdata.name
             })
         }
     }
 }
+

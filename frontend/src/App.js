@@ -6,6 +6,7 @@ import Navbar from './components/layout/Navbar'
 import Profile from './components/auth/Profile'
 import SignUp from './components/auth/SignUp'
 import NewGame from './components/games/NewGame'
+import ActiveGame from './components/games/ActiveGame'
 
 class App extends Component {
 
@@ -20,6 +21,7 @@ class App extends Component {
                         <Route path='/signup' component={SignUp} />
                         <Route path='/profile' component={Profile} />
                         <Route path='/create' component={NewGame} />
+                        <Route path='/active-game' component={ActiveGame} />
                 </div>
             </BrowserRouter>
         );

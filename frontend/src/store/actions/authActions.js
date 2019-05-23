@@ -42,7 +42,6 @@ export const initialLoad = () => async (dispatch, getState) => {
 
     const currentUser = data.currentUser;
     if (data.isAuthenticated) {
-        dispatch({'type': 'SET_CURRENT_USER', currentUser})
     } else {
         dispatch({'type': 'UNSET_CURRENT_USER'})
     }

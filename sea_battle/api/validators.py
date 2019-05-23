@@ -19,7 +19,7 @@ class NewGameValidator(serializers.Serializer):
 
     def validate_size(self, *args, **kwargs):
         data = self.get_initial()
-        if 15 < data['size'] < 10:
+        if 15 < int(data['size']) < 10:
             raise exceptions.ValidationError(constants.INVALID_SIZE)
         size = data['size']
         return size

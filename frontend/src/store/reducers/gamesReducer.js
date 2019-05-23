@@ -16,6 +16,22 @@ const gamesReducer = (state = initState, action) => {
                 ...state,
                 err: action.err,
             }
+        case 'GAME_CREATE_SUCCESS':
+                console.log('Game created')
+            return {
+                ...state,
+                fleet: action.fleet,
+                turn: action.turn,
+                size: action.size,
+                gameId: action.gameId,
+                err: null
+            }
+        case 'GAME_CREATE_ERROR':
+                console.log('Create game failed')
+            return {
+                ...state,
+                err: action.err,
+            }
         default:
             return state;
     }
