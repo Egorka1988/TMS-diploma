@@ -30,19 +30,31 @@ export const getGames = () => {
     }
 }
 
-export const createGame = (stateData, fleet) => {
+export const createGame = (stateData) => {
     return async (dispatch, getState) => {
         const myHeaders = new Headers();
         myHeaders.append("content-type", "application/json")
         myHeaders.append("authorization", `Token ${getState().auth.authToken}`)
-        stateData.fleet = fleet
         console.log('hhhhh', stateData)
+        let fleet = []
+        const size = Object.keys(stateData.battleMap).length
+        for (let i=0; i<size; i++){
+            for (let j=0; j<size; j++){
+                stateData.battleMap[i+1][j+1].isSelected ? fleet.push([i+1,j+1]) : null
+            }
+        }
+        console.log(fleet)
+
         const myInit = { 
                 method: 'POST',
                 mode: 'cors',
                 headers: myHeaders,
                 cache: 'default',
-                body: JSON.stringify(stateData)
+                body: JSON.stringify({
+                    fleet, 
+                    size: stateData.size, 
+                    name: stateData.name
+                    })
                 };
 
         const myRequest = new Request('http://127.0.0.1:8000/rest/games/', myInit);

@@ -6,7 +6,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import App from './App.js'
 import { Provider } from 'react-redux'
-import { createStore, applyMiddleware } from 'redux'
+import { createStore, applyMiddleware, } from 'redux'
 import thunk from 'redux-thunk';
 import rootReducer from './store/reducers/rootReducer'
 import { initialLoad } from './store/actions/authActions';
