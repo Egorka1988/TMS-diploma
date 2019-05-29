@@ -26,7 +26,6 @@ class NewGame extends Component {
         name: '',
         size: 10,
         isLoading: false,
-        fleet: [],
         battleMap: genBattleMapState(),
         errHandleCompleted: false
     }
@@ -52,7 +51,6 @@ class NewGame extends Component {
         
         let oldCell = battleMap[x][y]
         let newCell = {...oldCell, isSelected: !oldCell.isSelected}
-        
         
         this.setState({battleMap: {
             ...battleMap,
@@ -85,62 +83,67 @@ class NewGame extends Component {
         const invalidShipComposition = this.props.invalidShipComposition
         const forbiddenCells = this.props.forbiddenCells
         let msg = []
+        let battleMap = this.state.battleMap
+        
         if (emptyFleet) {
-            return (<div>{emptyFleet}</div>)
+            msg.push(<div key='emptyFleet'>{emptyFleet}</div>)
         } 
-        if (invalidShipType) {
-            let battleMap = this.state.battleMap
-            for (const ship of invalidShipType) {
-                msg.push(<div>The ship on <font size="+1">{ship[0][0]}{(ship[0][1] + 9).toString(36)}</font> is too big</div>)
-                for (const cell of ship) {
-                const [x, y] = cell;
-                battleMap[x][y] = {...battleMap[x][y], isError: true}
-                }
-            } 
-            this.setState({
-                errHandleCompleted: true,
-                battleMap: battleMap,
-                errMsg: msg
-            })
-        }
         if (invalidCount) {
-            msg.push(<div>The ships' count is not correct. See the schema. </div>)
-            this.setState({
-                errMsg: msg,
-                errHandleCompleted: true,
-            })
+            msg.push(<div>The ships' count is not correct. Check the schema. </div>)
         }
-        if (invalidShipComposition) {
-            let battleMap = this.state.battleMap
-            for (const ship of invalidShipComposition) {
-                msg.push(<div>The ship on <font size="+1">{ship[0][0]}{(ship[0][1] + 9).toString(36)}</font> is not properly built. Check the schema</div>)
+        if (invalidShipType) {
+            for (const ship of invalidShipType) {
+                msg.push(
+                    <div key={'invalidShipType'+ship}>
+                        The ship on 
+                        <font size="+1">
+                            {ship[0][0]}{(ship[0][1] + 9).toString(36)}
+                        </font>
+                         is too big
+                    </div>)
                 for (const cell of ship) {
-                const [x, y] = cell;
-                battleMap[x][y] = {...battleMap[x][y], isError: true}
+                    const [x, y] = cell;
+                    battleMap[x][y] = {...battleMap[x][y], isError: true}
                 }
             } 
-            this.setState({
-                errHandleCompleted: true,
-                battleMap: battleMap,
-                errMsg: msg
-            })
+        }
+        
+        if (invalidShipComposition) {
+            for (const ship of invalidShipComposition) {
+                msg.push(
+                    <div key={'invalidShipComposition'+ship}>
+                        The ship on 
+                        <font size="+1">
+                            {ship[0][0]}{(ship[0][1] + 9).toString(36)}
+                        </font>
+                             is not properly built. Check the schema
+                    </div>)
+                for (const cell of ship) {
+                    const [x, y] = cell;
+                    battleMap[x][y] = {...battleMap[x][y], isError: true}
+                }
+            } 
         }
         if (forbiddenCells) {
-            let battleMap = this.state.battleMap
+            
             for (const cell of forbiddenCells) {
                 const [x, y] = cell;
                 battleMap[x][y] = {...battleMap[x][y], isError: true}
-                msg.push(<div>The ship on <font size="+1">{x}{(y + 9).toString(36)}</font> is too close to other ship</div>)
+                msg.push(
+                    <div key={'forbiddenCells' + cell}>
+                        The ship on 
+                        <font size="+1">
+                            {x}{(y + 9).toString(36)}
+                        </font>
+                         is too close to other ship
+                    </div>)
             } 
-            this.setState({
-                errHandleCompleted: true,
-                battleMap: battleMap,
-                errMsg: msg
-            })
         }
-
-
-        
+        this.setState({
+            errHandleCompleted: true,
+            battleMap: battleMap,
+            errMsg: msg
+        })
     }
 
     render() {
@@ -205,10 +208,6 @@ const mapStateToProps = (state) => {
     return {
         fleetComposition: state.auth.fleetComposition,
         auth: state.auth,
-        fleet: state.games.fleet,
-        turn: state.games.turn,
-        size: state.games.size,
-        gameId: state.games.gameId,
         err: state.games.err,
         emptyFleet: state.games.emptyFleet,
         invalidShipType: state.games.invalidShipType,
