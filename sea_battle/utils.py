@@ -173,9 +173,7 @@ def check_dead_zone(fleet):
     for ship in fleet:
         dead_zone[frozenset(ship)] = ship_dead_zone_handler(ship)
 
-    print(fleet)
     flat_fleet = [cell for ship in fleet for cell in ship]
-    print(flat_fleet)
 
     for zone in dead_zone.copy().values():
         for cell in zone:

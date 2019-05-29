@@ -145,10 +145,8 @@ def create_game(data, user):
 
     with transaction.atomic():
 
-        fleet_composition = FLEET_COMPOSITION[data['size']]
-
         game = Game.objects.create(
-            fleet_composition,
+
             size=data['size'],
             turn=user,
             creating_date=datetime.now(),

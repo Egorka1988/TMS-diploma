@@ -117,6 +117,7 @@ class GamesAPIViewSet(viewsets.GenericViewSet):
             return Response(fleet_composition_errors, status=status.HTTP_400_BAD_REQUEST)
 
         # Pass validated data to business logic (service)
+        print('aaaaaaaaaaaaaaaa', validator.validated_data)
         game, battlemap = create_game(validator.validated_data, request.user)
 
         # Serialization

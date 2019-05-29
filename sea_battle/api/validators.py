@@ -32,6 +32,7 @@ class NewGameValidator(serializers.Serializer):
         return check_fleet_composition(fleet, size)
 
 
+
 class JoinFleetValidator(serializers.Serializer):
 
     fleet = serializers.ListField()
