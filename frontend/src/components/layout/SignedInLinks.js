@@ -6,12 +6,29 @@ import { signOut } from '../../store/actions/authActions'
 const SignedInLinks = (props) => {
     return (
         <ul className="right">
-            <li><a onClick={props.signOut}>Log Out</a></li>
-            <li><NavLink to='/profile' className='btn btn-floating pink lighten-1'>
-                {props.username}  
-            </NavLink></li>
+            <li>
+                <NavLink to='login' onClick={props.signOut}>
+                    Log Out
+                </NavLink>
+            </li>
+            <li>
+                <NavLink to='/profile' className='btn btn-floating btn-large pink lighten-1'>
+                    Edit
+                </NavLink>
+            </li>
+            <li>
+                <NavLink to='/profile'>
+                    {props.username} 
+                </NavLink>
+            </li>
         </ul>
     )
+}
+
+const mapStateToProps = (state) => {
+    return {
+        username: state.auth.currentUser
+    }
 }
 
 const mapDispatchToProps = (dispatch) => {
@@ -19,4 +36,4 @@ const mapDispatchToProps = (dispatch) => {
         signOut: () => dispatch(signOut())
     }
 }
-export default connect(null, mapDispatchToProps)(SignedInLinks)
+export default connect(mapStateToProps, mapDispatchToProps)(SignedInLinks)

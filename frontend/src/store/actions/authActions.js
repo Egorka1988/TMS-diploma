@@ -36,14 +36,27 @@ export const signOut = () => ({'type': 'LOG_OUT_SUCCESS'});
 
 export const initialLoad = () => async (dispatch, getState) => {
     if (!getState().auth.authToken) return;
+    const myHeaders = new Headers();
+    myHeaders.append("authorization", `Token ${getState().auth.authToken}`)
+        const myInit = { 
+                method: 'GET',
+                mode: 'cors',
+                headers: myHeaders,
+                cache: 'default',
+                };
 
-    const resp = await fetch('http://127.0.0.1:8000/rest/initial-data');
+    const resp = await fetch('http://127.0.0.1:8000/rest/initial-data/', myInit);
     const data = await resp.json();
 
-    const currentUser = data.currentUser;
+    const currentUser = data.username;
     if (data.isAuthenticated) {
+        dispatch({
+            'type': 'INITIAL_DATA', 
+            currentUser: data.username,
+            fleetComposition: data.fleet_composition    
+        })
     } else {
-        dispatch({'type': 'UNSET_CURRENT_USER'})
+        dispatch({'type': 'UNSET_CURRENT_USER', currentUser})
     }
 }
 

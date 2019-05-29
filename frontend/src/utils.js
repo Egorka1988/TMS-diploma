@@ -1,7 +1,5 @@
 import React from 'react'
 import style from './styles.css'
-// import { dispatch } from 'react-redux'
-let x;
 
 export const localStoreTokenManager = store => {
     let currentToken = localStorage.getItem('authToken') || null;
@@ -21,18 +19,6 @@ export const localStoreTokenManager = store => {
         currentToken = newToken;
     }
 }
-
-
-
-// closure example
-// const iterator = n => {
-//     let i = -1;
-//     return () => {
-//         i += 1;
-//         if (i > n) throw Error('end');
-//         return i;
-//     };
-// }
 
 export const spinner = () => {
         return (

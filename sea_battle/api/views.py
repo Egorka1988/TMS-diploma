@@ -72,6 +72,22 @@ class WatchGamesAPIViewSet(viewsets.GenericViewSet):
         return Response(serializer.data)
 
 
+class InitialDataAPIViewSet(viewsets.GenericViewSet):
+
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def list(self, request, **kwargs):
+
+        initial_data = {
+            'fleet_composition': constants.FLEET_COMPOSITION,
+            'username': request.user.username,
+            'isAuthenticated': request.user.is_authenticated
+        }
+
+        return Response(initial_data)
+
+
 class GamesAPIViewSet(viewsets.GenericViewSet):
 
     serializer_class = serializers.NewGameSerializer
@@ -96,12 +112,17 @@ class GamesAPIViewSet(viewsets.GenericViewSet):
         validator = validators.NewGameValidator(data=request.data)
         validator.is_valid(raise_exception=True)
 
+        fleet_composition_errors = validator.check_fleet_composition()
+        if fleet_composition_errors:
+            return Response(fleet_composition_errors, status=status.HTTP_400_BAD_REQUEST)
+
         # Pass validated data to business logic (service)
         game, battlemap = create_game(validator.validated_data, request.user)
 
         # Serialization
         data = serializers.NewGameSerializer(game).data
         data['fleet'] = battlemap.fleet
+        data['dead_zone'] = []
         return Response(data, status=status.HTTP_201_CREATED)
 
     @action(methods=['PATCH'], detail=True)

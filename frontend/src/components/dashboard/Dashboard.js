@@ -3,20 +3,20 @@ import { connect } from 'react-redux'
 import { Redirect } from 'react-router-dom'
 import { getGames } from '../../store/actions/gamesActions'
 import AvailableGames from '../games/AvailableGamesList'
-import { Link, renderas } from 'react-router-dom'
+import { Link } from 'react-router-dom'
+
 
 class Dashboard extends Component {
     componentDidMount () {
         this.props.getGames()
     }
     
-    
     render() {
-        
-        console.log('dash props', this.props)
+
         const { authToken, availableGames, err } = this.props; 
         if (!authToken)return <Redirect to='/login' />
         return(
+            
             <div className="dashboard container">
                 <div className="row">
                     <div className="col s12 m6">
@@ -39,7 +39,6 @@ class Dashboard extends Component {
 
 
 const mapStateToProps = (state) => {
-    console.log('dash state', state)
     return {
         authToken: state.auth.authToken,
         availableGames: state.games.availableGames,

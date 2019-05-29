@@ -7,6 +7,7 @@ from django.db.models import Q
 from django.utils import timezone
 
 from sea_battle import constants
+from sea_battle.constants import FLEET_COMPOSITION
 from sea_battle.models import BattleMap, Game
 from sea_battle.utils import prepare_to_store
 
@@ -143,14 +144,18 @@ def create_game(data, user):
     """set start params of the game to db by the player, who creates the game"""
 
     with transaction.atomic():
+
+        fleet_composition = FLEET_COMPOSITION[data['size']]
+
         game = Game.objects.create(
+            fleet_composition,
             size=data['size'],
             turn=user,
             creating_date=datetime.now(),
             creator=user,
             joiner=None,
             name=data['name'],
-            last_activity=timezone.now()
+            last_activity=timezone.now(),
         )
 
         battle_map = BattleMap.objects.create(

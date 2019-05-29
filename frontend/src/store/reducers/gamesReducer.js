@@ -4,6 +4,18 @@ const initState = {
 
 const gamesReducer = (state = initState, action) => {
     switch(action.type){
+        case 'FLEET_COMPOSITION':
+                console.log(action.fleetComposition)
+            return {
+                ...state, 
+                fleetComposition: action.fleetComposition
+            }
+        case 'FLEET_COMPOSITION_ERROR':
+                console.log(action.err)
+            return {
+                ...state,
+                err: action.err,
+            }
         case 'AVAILABLE_GAMES_LIST':
                 console.log('Load games completed')
             return {
@@ -28,9 +40,15 @@ const gamesReducer = (state = initState, action) => {
             }
         case 'GAME_CREATE_ERROR':
                 console.log('Create game failed')
+
             return {
                 ...state,
-                err: action.err,
+                err: 'error',
+                emptyFleet: action.emptyFleet,
+                invalidShipType: action.invalidShipType,
+                invalidCount: action.invalidCount,
+                invalidShipComposition: action.invalidShipComposition,
+                forbiddenCells: action.forbiddenCells,
             }
         default:
             return state;

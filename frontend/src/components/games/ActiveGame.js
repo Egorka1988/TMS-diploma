@@ -2,7 +2,7 @@ import React, {Component} from 'react'
 import { createGame } from '../../store/actions/gamesActions'
 import { connect } from 'react-redux'
 import { Redirect } from "react-router-dom";
-import { spinner, table, changeColor, collectFleet } from '../../utils';
+import { spinner, changeColor, collectFleet } from '../../utils';
 
 
 class ActiveGame extends Component {
@@ -43,7 +43,7 @@ class ActiveGame extends Component {
                     <div>
                         <table id='battlemap' onClick={this.handleColor} className='tableMap'>
                             <tbody>
-                                {table(this.state.size)}
+                                {/* {table(this.state.size)} */}
                             </tbody>
                         </table>
                     </div>

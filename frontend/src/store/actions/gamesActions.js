@@ -10,7 +10,7 @@ export const getGames = () => {
                 mode: 'cors',
                 headers: myHeaders,
                 cache: 'default'
-                };
+            };
 
         const myRequest = new Request('http://127.0.0.1:8000/rest/games/', myInit);
         const response = await fetch(myRequest);
@@ -35,7 +35,6 @@ export const createGame = (stateData) => {
         const myHeaders = new Headers();
         myHeaders.append("content-type", "application/json")
         myHeaders.append("authorization", `Token ${getState().auth.authToken}`)
-        console.log('hhhhh', stateData)
         let fleet = []
         const size = Object.keys(stateData.battleMap).length
         for (let i=0; i<size; i++){
@@ -43,7 +42,6 @@ export const createGame = (stateData) => {
                 stateData.battleMap[i+1][j+1].isSelected ? fleet.push([i+1,j+1]) : null
             }
         }
-        console.log(fleet)
 
         const myInit = { 
                 method: 'POST',
@@ -70,9 +68,15 @@ export const createGame = (stateData) => {
                 gameId: respdata.id
             })
         } else {
+            const data = respdata
             dispatch({
                 type: 'GAME_CREATE_ERROR',
-                err: respdata.fleet || respdata.size || respdata.name
+                err: 'error',
+                emptyFleet: data['fleet'],
+                invalidShipType: data['not_allowed_ships'],
+                invalidCount: data['not_allowed_ship_count'],
+                invalidShipComposition: data['invalid_ship_composition'],
+                forbiddenCells: data['forbidden_cells'],
             })
         }
     }

@@ -11,17 +11,18 @@ import ActiveGame from './components/games/ActiveGame'
 class App extends Component {
 
     render() {
-        console.log('app props', this.props)
+        
         return (
             <BrowserRouter>
-            <Navbar />
+            
                 <div className="App">
-                        <Route exact path='/' component={Dashboard} />
-                        <Route path='/login' component={SignIn} />
-                        <Route path='/signup' component={SignUp} />
-                        <Route path='/profile' component={Profile} />
-                        <Route path='/create' component={NewGame} />
-                        <Route path='/active-game' component={ActiveGame} />
+                    <Navbar />
+                    <Route exact path='/' component={Dashboard} />
+                    <Route path='/login' component={SignIn} />
+                    <Route path='/signup' component={SignUp} />
+                    <Route path='/profile' component={Profile} />
+                    <Route path='/create' component={NewGame} />
+                    <Route path='/active-game' component={ActiveGame} />
                 </div>
             </BrowserRouter>
         );

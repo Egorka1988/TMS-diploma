@@ -5,14 +5,14 @@ import SignedOutLinks from './SignedOutLinks'
 import { connect } from 'react-redux'
 
 const Navbar = (props) => {
-    console.log('navbar', props)
     const { authToken } = props;
-    const links = authToken ? <SignedInLinks /> : <SignedOutLinks />;
+
     return (
         <nav className="nav-wrapper grey darken-3">
             <div className="container">
                 <Link to='/' className="brand-logo">Sea Battle</Link>
-                { links }
+                { authToken  && props.currentUser &&<SignedInLinks /> }
+                { !authToken  && <SignedOutLinks /> }
             </div>
         </nav>
     )
@@ -20,8 +20,8 @@ const Navbar = (props) => {
 
 const mapStateToProps = (state) => {
     return {
+        currentUser: state.auth.currentUser,
         authToken: state.auth.authToken,
-        username: state.username
     }
 }
 export default connect(

@@ -32,10 +32,11 @@ const authReducer = (state = initState, action) => {
                 currentUser: null,
             }
 
-        case 'SET_CURRENT_USER': 
+        case 'INITIAL_DATA': 
             return {
                 ...state,
-                currentUser: action.currentUser
+                currentUser: action.currentUser,
+                fleetComposition: action.fleetComposition
             }
         case 'SIGN_UP_SUCCESS':
             console.log('sign up success');

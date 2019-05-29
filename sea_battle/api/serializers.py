@@ -59,3 +59,5 @@ class NewGameSerializer(serializers.Serializer):
 class JoinFleetSerializer(serializers.Serializer):
 
     fleet = serializers.ListField()
+
+

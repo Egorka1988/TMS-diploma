@@ -3,48 +3,29 @@ import { connect } from 'react-redux'
 import { spinner} from '../../utils';
 import { Cell } from './BattleMap'
 
-const ship = (size) => {
-    let children = []
-    let table = []
-    for (let i=0; i<size; i++) {
-        children.push(<div className='legend'></div>)
-    }
-    table.push(<div className="ship">{children}</div>)
-    return table
-}
 
+class Legend extends Component {
 
-export class Legend extends Component {
-
-    state= {
-        fleetComposition: {
-            10: {'4': 1, '3': 2, '2': 3, '1': 4},
-            11: {'4': 2, '3': 3, '2': 4, '1': 5},
-            12: {'4': 2, '3': 4, '2': 5, '1': 6},
-            13: {'4': 2, '3': 4, '2': 5, '1': 7, 'air': 1},
-            14: {'4': 2, '3': 4, '2': 5, '1': 8, 'air': 2},
-            15: {'4': 3, '3': 4, '2': 5, '1': 10, 'air': 3}
-    }
-
-    }
-    
     getShipCount = (shipType) => {
-        const shipCount = this.state
+        const shipCount = this.props
             .fleetComposition[this.props.size][shipType]
         return <div>{shipCount}</div>
     }
+    
     renderAircraftCarrier = () => {
         let body = []
         for (let i=0; i<6; i++) {
-            body.push(<div className='aircraftbody'></div>)
+            body.push(<div key={'body'+i} className='aircraftbody'></div>)
         }
         const refit = [
-            <div>
+            <div key='refit'>
                 <div className='aircraftrefit'></div>
                 <div className='aircraftrefit'></div>
             </div>
         ]
-        return <div className='aircraftCarrier'>{body}{refit}</div>
+        return  <div key='aircraftCarrier' className='aircraftCarrier'>
+                    {body}{refit}
+                </div>
 }
     
     renderShip = (deckCount) =>{
@@ -52,31 +33,41 @@ export class Legend extends Component {
         deckCount === 'air' ? ship.push(this.renderAircraftCarrier()) : null
         for (let i=0; i<deckCount; i++) {
             ship.push(
-            <div  >
+            <div key={'legendCell'+i+deckCount}>
                 <Cell 
-                size={this.props.size} 
-                cursor=''
-                color='lime'
-                style={{border:'1px solid black', borderRadius: '5px', borderTop: 'none', height: 25, width: 25, backgroundColor: 'lime'}}
+                    size={this.props.size} 
+                    cursor=''
+                    color='lime'
+                    style={{border:'1px solid black', borderRadius: '2px', borderTop: 'none', height: 25, width: 25, backgroundColor: 'lime', borderTop: i === 0 ? '1px solid black': null}}
                 />
             </div>)
         }
         return <div>{ship}</div>
     }
+    
     renderLegend = () => {
-        
+
+        const fleetComposition = this.props.fleetComposition[this.props.size]
         const rows = [
-                <div>Ship</div>, 
-                <div>X</div>, 
-                <div>Count</div> 
+                <div key='shipType'>Ship type</div>, 
+                <div key='x'>X</div>, 
+                <div key='count' >Count</div> 
         ]
-        const ShipTypes = Object.keys(this.state
-            .fleetComposition[this.props.size])
+        const ShipTypes = Object.keys(fleetComposition)
 
         for (let i = 0; i < ShipTypes.length; i++) {
-            rows.push(<div>{this.renderShip(ShipTypes[i])}</div>)
-            rows.push(<div>X</div>)
-            rows.push(<div>{this.getShipCount(ShipTypes[i])}</div>)
+            rows.push(
+                <div key={'renderShip'+i}>
+                    {this.renderShip(ShipTypes[i])}
+                </div>)
+            rows.push(
+                <div key={'x'+i}>
+                    X
+                </div>)
+            rows.push(
+                <div key={'getShipCount'+i}>
+                    {this.getShipCount(ShipTypes[i])}
+                </div>)
         }
         return rows
     }
@@ -88,8 +79,16 @@ export class Legend extends Component {
                 <div style={{gridArea: 'header1'}}>
                     <h6  className="grey-text text-darken-3">Your available ships for this field-size:</h6>
                 </div>
-                    {this.renderLegend()}
+                    {this.props.fleetComposition && this.renderLegend()}
             </div>
         )
     }
 }
+const mapStateToProps = (state) => {
+    return {
+        fleetComposition: state.auth.fleetComposition
+
+    }
+}
+
+export default connect(mapStateToProps)(Legend)

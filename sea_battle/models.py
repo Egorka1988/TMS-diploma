@@ -78,6 +78,11 @@ class Game(models.Model):
         null=True
     )
 
+    fleet_composition = JSONField(
+        verbose_name='Fleet composition up to size',
+        default=list
+    )
+
     objects = GamesManager.from_queryset(GamesQuerySet)()
 
 

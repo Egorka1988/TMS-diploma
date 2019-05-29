@@ -6,4 +6,4 @@ export DB_PASSWORD=root
 export DB_HOST=localhost
 
 
-pytest /home/egor/PycharmProjects/TMS-diploma/sea_battle/api/tests/test_api_views.py::TestRegisterFormAPIViewSet
+ytest /home/egor/PycharmProjects/TMS-diploma/sea_battle/api/tests/test_api_views.py::TestRegisterFormAPIViewSet

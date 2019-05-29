@@ -12,9 +12,21 @@ ACTIVE = 'active'
 FAIL_TO_JOIN = "Oop's... Somebody has already joined. Try another game"
 NOT_YOUR_TURN = "Don't cheat! Now it's not your turn to shoot"
 INVALID_SHOOT = "Shoot is invalid"
-INVALID_FLEET = "Your fleet is incorrect"
+EMPTY_FLEET = "Your empty fleet won't scare anyone. Please, set your fleet according to the schema"
 INVALID_SIZE = "Size must be between 10 and 15"
 GAME_NOT_FOUND = "Game with current id not found"
 
 USER_ALREADY_EXISTS = "User with that username already exists. Please, try another"
 SHORT_PASSWORD = "This password is too short. It should contain at least 6 symbols"
+
+FLEET_COMPOSITION = {
+    10: {'4': 1, '3': 2, '2': 3, '1': 4},
+    11: {'4': 2, '3': 3, '2': 4, '1': 5},
+    12: {'4': 2, '3': 4, '2': 5, '1': 6},
+    13: {'4': 2, '3': 4, '2': 5, '1': 7, 'air': 1},
+    14: {'4': 2, '3': 4, '2': 5, '1': 8, 'air': 2},
+    15: {'4': 3, '3': 4, '2': 5, '1': 10, 'air': 3},
+}
+
+AIRCRAFT_CARRIER_BUILT_NOT_PROPER = 'Aircraft carrier has been set not proper. Check the schema'
+LINEAR_SHIP_BUILT_NOT_PROPER = 'Linear ship has been set not proper. Check the schema'

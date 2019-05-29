@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from rest_framework import serializers, exceptions
 
 from sea_battle import constants
-from sea_battle.utils import extract_ships_from
+from sea_battle.utils import extract_ships_from, check_fleet_composition, ship_dead_zone_handler
 
 
 class NewGameValidator(serializers.Serializer):
@@ -12,10 +12,10 @@ class NewGameValidator(serializers.Serializer):
     size = serializers.IntegerField()
     fleet = serializers.ListField()
 
-    def validate_fleet(self, fleet):
+    def validate_fleet(self, fleet, *args, **kwargs):
         if fleet:
             return extract_ships_from(fleet)
-        raise exceptions.ValidationError(constants.INVALID_FLEET)
+        raise exceptions.ValidationError(constants.EMPTY_FLEET)
 
     def validate_size(self, *args, **kwargs):
         data = self.get_initial()
@@ -23,6 +23,13 @@ class NewGameValidator(serializers.Serializer):
             raise exceptions.ValidationError(constants.INVALID_SIZE)
         size = data['size']
         return size
+
+    def check_fleet_composition(self):
+        data = self.validated_data
+        fleet = data['fleet']
+        size = data['size']
+
+        return check_fleet_composition(fleet, size)
 
 
 class JoinFleetValidator(serializers.Serializer):
