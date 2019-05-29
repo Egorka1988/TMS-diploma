@@ -209,7 +209,7 @@ def ship_dead_zone_handler(ship):
         if not x or not y:
             dead_zone.discard(item)
 
-    return dead_zone
+    return list(dead_zone)
 
 def prepare_to_store(fleet):
 

@@ -19,6 +19,7 @@ from sea_battle.api import serializers, validators
 from sea_battle.models import BattleMap, Game
 from sea_battle.services import get_game, get_game_state, handle_shoot, \
     create_game, join_game, join_fleet, create_user
+from sea_battle.utils import check_dead_zone, ship_dead_zone_handler
 
 
 class CleaningAPIView(generics.GenericAPIView):
@@ -117,13 +118,17 @@ class GamesAPIViewSet(viewsets.GenericViewSet):
             return Response(fleet_composition_errors, status=status.HTTP_400_BAD_REQUEST)
 
         # Pass validated data to business logic (service)
-        print('aaaaaaaaaaaaaaaa', validator.validated_data)
         game, battlemap = create_game(validator.validated_data, request.user)
 
         # Serialization
         data = serializers.NewGameSerializer(game).data
         data['fleet'] = battlemap.fleet
         data['dead_zone'] = []
+        for ship in battlemap.fleet:
+            data['dead_zone'].append({
+               json.dumps(ship): ship_dead_zone_handler(ship)
+            })
+        # data['dead_zone'] = json.dumps(check_dead_zone(battlemap.fleet))
         return Response(data, status=status.HTTP_201_CREATED)
 
     @action(methods=['PATCH'], detail=True)
