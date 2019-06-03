@@ -1,39 +1,21 @@
 import React, {Component} from 'react'
-import { createGame } from '../../store/actions/gamesActions'
+import { joinFleet } from '../../store/actions/gamesActions'
 import { connect } from 'react-redux'
 import { Redirect } from "react-router-dom";
 import { spinner} from '../../utils';
 import { Map } from './BattleMap'
 import Legend from './Legend'
+import { genBattleMapState } from './NewGame'
 
 
-export const genBattleMapState = (size=10) => {
-   
-    let battleMap = {}
-    for (let i=1; i<size+1; i++) {
-        battleMap[i] = {}
-        for (let j=1; j<size+1; j++) {
-            battleMap[i][j] = {isSelected: false}
-        }
-    }
-    return battleMap
-}
-
-
-class NewGame extends Component {
+class JoinGame extends Component {
 
     state = {
-        name: '',
-        size: 10,
+        name: this.props.name,
+        size: this.props.size,
         isLoading: false,
-        battleMap: genBattleMapState(),
+        battleMap: genBattleMapState(this.props.size),
         errHandleCompleted: false
-    }
-
-    
-    handleSizeChange = (e) => {
-        const size = parseInt(e.target.value);
-        this.setState({size, battleMap : genBattleMapState(size), errMsg: null})
     }
 
     onClick = (cell) => { 
@@ -61,8 +43,8 @@ class NewGame extends Component {
         e.preventDefault();        
         this.setState({ 
             isLoading: true, 
-            size: 10,
-            battleMap: genBattleMapState(), 
+            size: this.props.size,
+            battleMap: genBattleMapState(this.props.size), 
             errMsg: null
         }, 
         () => {this.setState({isLoading: false})
@@ -71,7 +53,7 @@ class NewGame extends Component {
     handleSubmit = (e) => {
         e.preventDefault();       
         this.setState({ isLoading: true });
-        this.props.createGame(this.state)
+        this.props.joinFleet(this.state, this.props.gameId)
             .finally(() => this.setState({isLoading: false, errHandleCompleted : false})); 
     }
 
@@ -85,15 +67,15 @@ class NewGame extends Component {
         let battleMap = this.state.battleMap
         
         if (emptyFleet) {
-            msg.push(<div key='emptyFleet'>{emptyFleet}</div>)
+            msg.push(<div key='joinEmptyFleet'>{emptyFleet}</div>)
         } 
         if (invalidCount) {
-            msg.push(<div>The ships' count is not correct. Check the schema. </div>)
+            msg.push(<div key='invalidJoinCount'>The ships' count is not correct. Check the schema. </div>)
         }
         if (invalidShipType) {
             for (const ship of invalidShipType) {
                 msg.push(
-                    <div key={'invalidShipType'+ship}>
+                    <div key={'joinInvalidShipType'+ship}>
                         The ship on 
                         <font size="+1">
                             {ship[0][0]}{(ship[0][1] + 9).toString(36)}
@@ -110,7 +92,7 @@ class NewGame extends Component {
         if (invalidShipComposition) {
             for (const ship of invalidShipComposition) {
                 msg.push(
-                    <div key={'invalidShipComposition'+ship}>
+                    <div key={'joinInvalidShipComposition'+ship}>
                         The ship on 
                         <font size="+1">
                             &nbsp; {ship[0][0]}{(ship[0][1] + 9).toString(36)} &nbsp;
@@ -129,7 +111,7 @@ class NewGame extends Component {
                 const [x, y] = cell;
                 battleMap[x][y] = {...battleMap[x][y], isError: true}
                 msg.push(
-                    <div key={'forbiddenCells' + cell}>
+                    <div key={'joinForbiddenCells' + cell}>
                         The ship on 
                         <font size="+1">
                             &nbsp; {x}{(y + 9).toString(36)} &nbsp;
@@ -152,34 +134,30 @@ class NewGame extends Component {
         if (!this.props.auth.authToken) { 
             return <Redirect to="/login"/>;
         }
-        if (this.props.gameId) {
+        if (this.props.deadZone) {
 
-            return <Redirect to={'/'+ this.props.gameId + "/active-game"} />;
+            return <Redirect to={'/'+ this.props.gameId +'/active-game'} />;
         }
         return (
             <div className="container">
+                <div>
+                    <h5 className="grey-text text-darken-3">Name of the game: {this.props.name}</h5>
+                </div>
+                <div className="input-field">
+                    <h5 className="grey-text text-darken-3">Your opponent's name is {this.props.creator}</h5>
+                </div>
                 <form onSubmit={this.handleSubmit} onChange={this.handleChange} className="white">
-                    <h5 className="grey-text text-darken-3">New Game</h5>
-                    <div className="range-field">
-                        <span>
-                            <h6 className="grey-text text-darken-3">Size</h6>
-                        </span>
-                        <input type="range" id="size" max="15" min="10" value={this.state.size} onChange={this.handleSizeChange}/>
-                    </div>
                     
-                    <div className="input-field">
-                        <input type="text" id="name" defaultValue="Name of the game"  />
-                    </div>
                     <div className="row">
                         <div className="col s8 ">
                              <Map 
                                 onClick={this.onClick}
-                                size={this.state.size} 
+                                size={this.props.size} 
                                 battleMap={this.state.battleMap}
                             />
                             
                             <div className="input-field">
-                                <button className="btn pink lighten-1 z-depth-20">Create</button>
+                                <button className="btn pink lighten-1 z-depth-20">Join</button>
                               
                                 {this.props.err ? this.state.errHandleCompleted ? null : this.errorHandler() : null}
                                 {this.state.errMsg}
@@ -192,9 +170,9 @@ class NewGame extends Component {
                         
                         <div className="col s4 ">
                                <Legend 
-                                    size={this.state.size}
-                                    battleMap={this.state.battleMap} 
-                                    disabled={true} 
+                                    size={this.props.size}
+                                    battleMap={this.state.battleMap}  
+                                    disabled={true}  
                                 />
                         </div>
                     </div>
@@ -207,9 +185,13 @@ class NewGame extends Component {
 const mapStateToProps = (state) => {
    
     return {
+        size: state.games.size,
+        name: state.games.name,
+        creator: state.games.creator,
         fleetComposition: state.auth.fleetComposition,
         auth: state.auth,
         err: state.games.err,
+        deadZone: state.games.deadZone,
         gameId: state.games.gameId,
         emptyFleet: state.games.emptyFleet,
         invalidShipType: state.games.invalidShipType,
@@ -221,8 +203,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        createGame: (data) => dispatch(createGame(data))
+        joinFleet: (data, gameId) => dispatch(joinFleet(data, gameId))
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(NewGame)
+export default connect(mapStateToProps, mapDispatchToProps)(JoinGame)

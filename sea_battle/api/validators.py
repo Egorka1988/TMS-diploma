@@ -1,9 +1,9 @@
-from django.contrib.auth.forms import UserCreationForm
+
 from django.contrib.auth.models import User
 from rest_framework import serializers, exceptions
 
 from sea_battle import constants
-from sea_battle.utils import extract_ships_from, check_fleet_composition, ship_dead_zone_handler
+from sea_battle.utils import extract_ships_from, check_fleet_composition
 
 
 class NewGameValidator(serializers.Serializer):
@@ -36,24 +36,34 @@ class NewGameValidator(serializers.Serializer):
 class JoinFleetValidator(serializers.Serializer):
 
     fleet = serializers.ListField()
+    size = serializers.IntegerField()
 
     def validate_fleet(self, fleet):
         if fleet:
             return extract_ships_from(fleet)
         raise exceptions.ValidationError(constants.INVALID_FLEET)
 
+    def validate_size(self, size):
+        if 15 < int(size) < 10:
+            raise exceptions.ValidationError(constants.INVALID_SIZE)
+        return size
+
+    def check_fleet_composition(self):
+        data = self.validated_data
+        fleet = data['fleet']
+        size = data['size']
+
+        return check_fleet_composition(fleet, size)
+
 
 class ShootValidator(serializers.Serializer):
 
     shoot = serializers.ListField()
-    size = serializers.IntegerField()
-
 
     def validate_shoot(self, shoot, *args, **kwargs):
 
-        data = self.get_initial()
         if not len(shoot) == 2 or \
-                not all(type(item) is int and item < data['size'] for item in shoot):
+                not all(type(item) is int for item in shoot):
             raise exceptions.ValidationError(constants.INVALID_SHOOT)
         return shoot
 

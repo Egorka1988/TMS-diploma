@@ -27,7 +27,7 @@ class TestWatchGamesAPIViewSet(APITestCase):
         GameFactory()
 
         response = client.get('/rest/games-for-watching/')
-        assert response.status_code == 403
+        assert response.status_code == 401
 
         client.force_authenticate(user=test_user)
         response = client.get('/rest/games-for-watching/')
@@ -53,7 +53,7 @@ class TestGamesAPIViewSet(APITestCase):
         GameFactory()
 
         response = client.get('/rest/games/')
-        assert response.status_code == 403
+        assert response.status_code == 401
 
         client.force_authenticate(user=test_user)
         response = client.get('/rest/games/')
@@ -78,7 +78,7 @@ class TestGamesAPIViewSet(APITestCase):
         }
 
         response = client.post('/rest/games/', data, format='json')
-        assert response.status_code == 403
+        assert response.status_code == 401
 
         client.force_authenticate(user=test_user)
         response = client.post('/rest/games/', data, format='json')
@@ -99,20 +99,17 @@ class TestGamesAPIViewSet(APITestCase):
             size=10
         )
         enemy_map = BattleMap.objects.get(user=game.joiner, game=game)
-        enemy_map.fleet = [[[0, 0], [0, 1]]]
+        enemy_map.fleet = [[[0, 1], [0, 2]]]
         enemy_map.save()
 
         data = {
-            'shoot': [0, 0],
-            'game_id': game.pk,
-            'size': 10,
-            'user_id': test_user.id
+            'shoot': [0, 2],
         }
 
         url = '/rest/games/' + str(game.pk) + '/shoot/'
 
         response = client.patch(url, data, format='json')
-        assert response.status_code == 403
+        assert response.status_code == 401
 
         client.force_authenticate(user=test_user)
 
@@ -139,7 +136,7 @@ class TestGamesAPIViewSet(APITestCase):
         }
 
         response = client.post(url, data, format='json')
-        assert response.status_code == 403
+        assert response.status_code == 401
 
         client.force_authenticate(user=test_user)
 
@@ -174,7 +171,7 @@ class TestGamesAPIViewSet(APITestCase):
         }
 
         response = client.post(url, data, format='json')
-        assert response.status_code == 403
+        assert response.status_code == 401
 
         client.force_authenticate(user=test_user)
 
@@ -200,7 +197,7 @@ class TestGamesAPIViewSet(APITestCase):
         url = '/rest/games/' + str(game.pk) + '/state/'
 
         response = client.get(url)
-        assert response.status_code == 403
+        assert response.status_code == 401
 
         client.force_authenticate(user=game.creator)
 
@@ -222,8 +219,6 @@ class TestRegisterFormAPIViewSet(APITestCase):
 
         data = json.dumps({"username": "test", "password": "test123"})
 
-
         response = client.post('/rest/signup/', data=data, content_type='application/json')
-
 
         assert response.status_code == 201

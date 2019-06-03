@@ -11,7 +11,7 @@ const Navbar = (props) => {
         <nav className="nav-wrapper grey darken-3">
             <div className="container">
                 <Link to='/' className="brand-logo">Sea Battle</Link>
-                { authToken  && props.currentUser &&<SignedInLinks /> }
+                { authToken  && props.currentUser && <SignedInLinks /> }
                 { !authToken  && <SignedOutLinks /> }
             </div>
         </nav>

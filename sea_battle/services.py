@@ -7,9 +7,8 @@ from django.db.models import Q
 from django.utils import timezone
 
 from sea_battle import constants
-from sea_battle.constants import FLEET_COMPOSITION
 from sea_battle.models import BattleMap, Game
-from sea_battle.utils import prepare_to_store
+from sea_battle.utils import prepare_to_store, ship_dead_zone_handler
 
 
 def handle_shoot(last_shoot, game, current_user):
@@ -19,6 +18,7 @@ def handle_shoot(last_shoot, game, current_user):
 
     last_shoot = tuple(last_shoot)
     my_map, enemy_map = get_game_battle_maps(game, current_user)
+    dead_zone = []
 
     if not my_map or not enemy_map:
         raise ValueError('Invalid game')
@@ -37,12 +37,14 @@ def handle_shoot(last_shoot, game, current_user):
 
             if ship.issubset(shoots):
                 shoot_result = constants.SHOOT_RESULT_KILL
+                dead_zone = ship_dead_zone_handler(ship)
+
             break
 
     # update game state if necessary
     update_game_state(game, shoot_result, current_user, shoots, enemy_map)
 
-    return shoot_result
+    return shoot_result, dead_zone
 
 
 def update_game_state(game, shoot_result, current_user, shoots, enemy_map):
@@ -57,7 +59,11 @@ def update_game_state(game, shoot_result, current_user, shoots, enemy_map):
             game.turn_id = game.creator_id
 
     if shoot_result == constants.SHOOT_RESULT_KILL:
-        if all(set(ship).issubset(shoots) for ship in enemy_map.fleet):
+        # import pdb; pdb.set_trace()
+        # for ship in enemy_map.fleet:
+        #     for item in ship:
+        tupled_fleet = [tuple(item) for ship in enemy_map.fleet for item in ship]
+        if all(set(ship).issubset(shoots) for ship in tupled_fleet):
             game.winner_id = current_user.pk
 
     game.save()

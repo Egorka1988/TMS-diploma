@@ -188,9 +188,9 @@ class TestShipDeadZoneHandler:
     ship = {
         (3, 1), (4, 1), (5, 1), (6, 1), (7, 1), (8, 1), (4, 2), (5, 2)
     }
-    assert ship_dead_zone_handler(ship) == {
+    assert ship_dead_zone_handler(ship) == [
         (3, 2), (9, 1), (3, 3), (8, 2), (9, 2), (2, 1), (6, 3), (6, 2), (2, 2), (5, 3), (4, 3), (7, 2)
-    }
+    ]
 
 
 class TestCheckDeadZone:
@@ -210,16 +210,16 @@ class TestCheckDeadZone:
         ]
         assert check_dead_zone(fleet) == {
             frozenset({(8, 1), (9, 1)}):
-                {
+                [
                     (7, 1),
                     (7, 2),
                     (8, 2),
                     (9, 2),
                     (10, 1),
                     (10, 2)
-                },
+                ],
             frozenset({(7, 4), (8, 4)}):
-                {
+                [
                     (6, 3),
                     (6, 4),
                     (6, 5),
@@ -230,5 +230,5 @@ class TestCheckDeadZone:
                     (9, 3),
                     (9, 4),
                     (9, 5)
-                },
+                ],
             }

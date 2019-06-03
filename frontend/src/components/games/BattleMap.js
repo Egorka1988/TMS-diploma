@@ -1,6 +1,6 @@
 import React from 'react'
 
-export const Cell = ({ index, isSelected, onClick, disabled, style, isError }) => {
+export const Cell = ({ index, isSelected, onClick, disabled, style, isError, isHit, content}) => {
     
     return (
         <div 
@@ -8,11 +8,12 @@ export const Cell = ({ index, isSelected, onClick, disabled, style, isError }) =
             style={{ 
                 width: '25px',
                 height: '25px',
-                cursor: disabled ? 'inherit' : 'pointer',
-                backgroundColor: isError? 'red' : isSelected ? 'lime' : 'white',
+                cursor: disabled ? 'default' : 'pointer',
+                textAlign: 'center',
+                backgroundColor: isError? 'red' : isHit ? '#9e9d24' : isSelected ? 'lime' : 'white', 
                 ...style
             }} 
-        />
+        >{content}</div>
     );
 }
 
@@ -33,7 +34,7 @@ const LegendCell = ({ children }) => {
 }
 
 
-export const Map = ({ size, battleMap, onClick, isError }) => {
+export const Map = ({ size, battleMap, onClick, disabled }) => {
     let bulk = []
     for (let i=0; i<size+1; i++) {
         for (let j=0; j<size+1; j++) {
@@ -51,6 +52,9 @@ export const Map = ({ size, battleMap, onClick, isError }) => {
                     onClick={onClick}
                     isSelected={cellData.isSelected}
                     isError={cellData.isError}
+                    disabled={cellData.isHit? true : cellData.content? true : cellData.disabled}
+                    isHit={cellData.isHit}
+                    content={cellData.content}
                 />)
             }
         }

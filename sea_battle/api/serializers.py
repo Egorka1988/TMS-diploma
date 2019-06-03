@@ -28,6 +28,7 @@ class ShootResultSerializer(serializers.Serializer):
 
     state = serializers.CharField()
     shoot = serializers.CharField()
+    dead_zone = serializers.ListField()
 
 
 class StatmentGetSerializer(serializers.Serializer):
@@ -53,11 +54,28 @@ class NewGameSerializer(serializers.Serializer):
 
     id = serializers.IntegerField()
     size = serializers.IntegerField()
-    turn = serializers.IntegerField(source='turn_id')
+    turn = serializers.CharField()
 
 
 class JoinFleetSerializer(serializers.Serializer):
 
     fleet = serializers.ListField()
+    dead_zone = serializers.JSONField()
 
+
+class InitialStateSerializer(serializers.Serializer):
+
+    creator = serializers.CharField()
+    id = serializers.IntegerField()
+    size = serializers.IntegerField()
+    name = serializers.CharField(default='')
+    joiner = serializers.CharField()
+    turn = serializers.CharField()
+    winner = serializers.CharField(default='')
+    # game_state = serializers.CharField()
+    # fleet = serializers.ListField()
+    # my_dead_zone = serializers.JSONField()
+    # enemy_dead_zone = serializers.JSONField()
+    # my_shoots = serializers.JSONField(default={'my_shoots': []})
+    # enemy_shoots = serializers.JSONField(default={'enemy_shoots': []})
 

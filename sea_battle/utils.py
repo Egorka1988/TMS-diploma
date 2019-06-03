@@ -1,3 +1,5 @@
+import json
+
 from sea_battle import constants
 
 
@@ -185,12 +187,12 @@ def check_dead_zone(fleet):
 
 def ship_dead_zone_handler(ship):
 
-    ship_surr = []
+    ship = [tuple(cell) for cell in ship]
 
-    for cell in ship:
+    ship_surr = set()
 
-        x, y = cell
-        surround = [
+    for x, y in ship:
+        ship_surr.update([
             (x - 1, y - 1),
             (x - 1, y + 1),
             (x - 1, y),
@@ -199,17 +201,11 @@ def ship_dead_zone_handler(ship):
             (x, y + 1),
             (x + 1, y + 1),
             (x + 1, y - 1),
-        ]
+        ])
 
-        [ship_surr.append(item) for item in surround]
+    dead_zone = ship_surr.difference(set(ship))
 
-    dead_zone = set(ship_surr).difference(set(ship))
-    for item in dead_zone.copy():
-        x, y = item
-        if not x or not y:
-            dead_zone.discard(item)
-
-    return list(dead_zone)
+    return [(x, y) for x, y in dead_zone if x and y]
 
 def prepare_to_store(fleet):
 
@@ -219,4 +215,26 @@ def prepare_to_store(fleet):
     return fleet
 
 
+def mapped_shoots(shoots, fleet):
+    _flat_fleet = []
+    enemy_shoots = []
+    for ship in fleet:
+        _flat_fleet.extend(ship)
+    for shoot in shoots:
 
+        if shoot in _flat_fleet:
+            enemy_shoots.append([*shoot, 'hit'])
+        else:
+            enemy_shoots.append([*shoot, 'miss'])
+    return enemy_shoots
+
+
+def get_enemy_dead_zone(shoots, fleet):
+    enemy_dead_zone = {}
+
+    for ship in fleet:
+        tupled_ship = [tuple(item) for item in ship]
+        tupled_shoots = [tuple(item) for item in shoots]
+        if all(set(t_ship).issubset(set(tupled_shoots)) for t_ship in tupled_ship):
+            enemy_dead_zone[json.dumps(ship)] = ship_dead_zone_handler(ship)
+    return enemy_dead_zone

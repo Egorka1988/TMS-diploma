@@ -2,7 +2,9 @@ import React from 'react'
 import { Link, renderas } from 'react-router-dom'
 
 
-const AvailableGames = ({availableGames}) => {
+
+const AvailableGames = ({availableGames, joinHandler, joinErr}) => {
+    
     return (
         <div className="highlight">
             <table>
@@ -16,24 +18,26 @@ const AvailableGames = ({availableGames}) => {
                 </thead>
                 <tbody>
                     { availableGames && availableGames.map(game => {
-                        return( <tr key={game.id}>
+                        return( 
+                            <tr key={game.id}>
                                     <td>{game.id}</td>                                 
                                     <td>{game.name}</td>
                                     <td>{game.size}</td>
                                     <td>{game.creator}</td>
                                     <td>
-                                        <Link to={ game.id + '/join/' }>
-                                            <button renderas="button" className="btn pink lighten-1 z-depth-0">
-                                                <span>Join</span>
-                                            </button>
-                                        </Link>
+                                        <button 
+                                            renderas="button" 
+                                            className="btn pink lighten-1 z-depth-0"
+                                            onClick={() => joinHandler(game)} >
+                                            <span>Join</span>
+                                        </button>
                                     </td>
+                                    <td>{joinErr}</td>
                             </tr>
                         )
                     })}
                 </tbody>
-            </table>
-            
+            </table>   
         </div>
     )
 }

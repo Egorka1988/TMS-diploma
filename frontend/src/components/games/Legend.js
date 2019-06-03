@@ -38,6 +38,7 @@ class Legend extends Component {
                     size={this.props.size} 
                     cursor=''
                     color='lime'
+                    disabled={this.props.disabled}
                     style={{border:'1px solid black', borderRadius: '2px', borderTop: 'none', height: 25, width: 25, backgroundColor: 'lime', borderTop: i === 0 ? '1px solid black': null}}
                 />
             </div>)

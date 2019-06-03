@@ -22,7 +22,7 @@ class GamesQuerySet(models.QuerySet):
 
     def available_games(self):
         return self.filter(
-            # last_activity__gt=(timezone.now() - timedelta(seconds=60)),
+            last_activity__gt=(timezone.now() - timedelta(seconds=200)),
             joiner=None,
         )
 

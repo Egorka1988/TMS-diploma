@@ -4,6 +4,7 @@ const initState = {
 
 const gamesReducer = (state = initState, action) => {
     switch(action.type){
+
         case 'FLEET_COMPOSITION':
                 console.log(action.fleetComposition)
             return {
@@ -36,6 +37,10 @@ const gamesReducer = (state = initState, action) => {
                 turn: action.turn,
                 size: action.size,
                 gameId: action.gameId,
+                deadZone: action.deadZone,
+                name: action.name,
+                battleMap: action.battleMap,
+                gameState: action.gameState,
                 err: null
             }
         case 'GAME_CREATE_ERROR':
@@ -50,8 +55,43 @@ const gamesReducer = (state = initState, action) => {
                 invalidShipComposition: action.invalidShipComposition,
                 forbiddenCells: action.forbiddenCells,
             }
+        case 'JOIN_SUCCESS':
+                console.log('Join success')
+            return {  
+                ...state,      
+                size: action.size,
+                name: action.name,
+                creator: action.creator,
+                gameId: action.gameId,
+            }
+        case 'JOIN_ERROR':
+                console.log('Join failed')
+            return {
+                ...state,
+                joinErr: respdata.values(),
+            }
+        case 'GAME_JOIN_FLEET_SUCCESS':
+            console.log('Join fleet success')
+        return {  
+            ...state,      
+            battleMap: action.battleMap,
+            fleet: action.fleet,
+            deadZone: action.deadZone
+        }
+        case 'GAME_JOIN_FLEET_ERROR':
+                console.log('Join fleet failed')
+            return {
+                ...state,
+                err: 'error',
+                emptyFleet: action.emptyFleet,
+                invalidShipType: action.invalidShipType,
+                invalidCount: action.invalidCount,
+                invalidShipComposition: action.invalidShipComposition,
+                forbiddenCells: action.forbiddenCells,}
+
         default:
             return state;
+
     }
 }
  

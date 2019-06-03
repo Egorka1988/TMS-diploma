@@ -21,6 +21,7 @@ export const signIn = (credentials) => {
                 type: 'LOGIN_SUCCESS',
                 token: data.token,
             })
+            dispatch(initialLoad())
         } else {
             dispatch({
                 type: 'LOGIN_ERROR',
@@ -34,9 +35,19 @@ export const signIn = (credentials) => {
 
 export const signOut = () => ({'type': 'LOG_OUT_SUCCESS'});
 
-export const initialLoad = () => async (dispatch, getState) => {
+export const initialLoad = (currentUrl) => async (dispatch, getState) => {
     if (!getState().auth.authToken) return;
     const myHeaders = new Headers();
+    let gameId = null
+    let url = currentUrl.split('/');
+    
+        for (let i = 0; i< url.length; i++) {
+            if (Number.isInteger(+url[i]) && (url[i+1] === 'join' || url[i+1] === 'active-game')) {
+                gameId = url[i] 
+                break
+            }
+        }
+
     myHeaders.append("authorization", `Token ${getState().auth.authToken}`)
         const myInit = { 
                 method: 'GET',
@@ -44,8 +55,9 @@ export const initialLoad = () => async (dispatch, getState) => {
                 headers: myHeaders,
                 cache: 'default',
                 };
-
-    const resp = await fetch('http://127.0.0.1:8000/rest/initial-data/', myInit);
+    const noGameUrl = 'http://127.0.0.1:8000/rest/initial-data/'
+    const gameUrl = gameId ? noGameUrl+'?gameId='+ gameId : null
+    const resp = await fetch(gameUrl ? gameUrl : noGameUrl, myInit);
     const data = await resp.json();
 
     const currentUser = data.username;
@@ -105,6 +117,7 @@ export const signUp = (credentials) => {
                 token: data.token,
                 username: data.username
             })
+            dispatch(initialLoad())
         } else {
             dispatch({
                 type: 'SIGN_UP_ERROR',
