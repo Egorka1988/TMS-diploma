@@ -88,6 +88,7 @@ const gamesReducer = (state = initState, action) => {
                 invalidCount: action.invalidCount,
                 invalidShipComposition: action.invalidShipComposition,
                 forbiddenCells: action.forbiddenCells,}
+        
 
         default:
             return state;

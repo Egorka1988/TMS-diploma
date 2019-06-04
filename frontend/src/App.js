@@ -24,7 +24,7 @@ class App extends Component {
                     <Route path='/profile' component={Profile} />
                     <Route path='/create' component={NewGame} />
                     <Route path={'/join/:gameId'} component={JoinGame} />
-                    <Route path='/active-games/:gameId' component={ActiveGame} />
+                    <Route path={'/active-games/:gameId'} component={ActiveGame} />
                 </div>
             </BrowserRouter>
         );

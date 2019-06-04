@@ -29,12 +29,13 @@ class ShootResultSerializer(serializers.Serializer):
     state = serializers.CharField()
     shoot = serializers.CharField()
     dead_zone = serializers.ListField()
+    dead_ship = serializers.ListField()
 
 
 class StatmentGetSerializer(serializers.Serializer):
 
     state = serializers.SerializerMethodField()
-    shoots_of_enemy = serializers.SerializerMethodField()
+    turn = serializers.CharField()
 
     def get_user(self):
         return self.context['request'].user
@@ -43,11 +44,16 @@ class StatmentGetSerializer(serializers.Serializer):
         user = self.get_user()
         return get_game_state(game, user)
 
-    def get_shoots_of_enemy(self, game):
+    def to_representation(self, game):
+        data = super().to_representation(game)
+
         if game.joiner:
             current_user = self.get_user()
-            return get_enemy_shoots(game.pk, current_user)
-        return []
+            shoots, dead_zone = get_enemy_shoots(game.pk, current_user)
+            data['shoots_of_enemy'] = shoots
+            data['my_dead_zone'] = dead_zone
+
+        return data
 
 
 class NewGameSerializer(serializers.Serializer):
@@ -72,10 +78,5 @@ class InitialStateSerializer(serializers.Serializer):
     joiner = serializers.CharField()
     turn = serializers.CharField()
     winner = serializers.CharField(default='')
-    # game_state = serializers.CharField()
-    # fleet = serializers.ListField()
-    # my_dead_zone = serializers.JSONField()
-    # enemy_dead_zone = serializers.JSONField()
-    # my_shoots = serializers.JSONField(default={'my_shoots': []})
-    # enemy_shoots = serializers.JSONField(default={'enemy_shoots': []})
+
 

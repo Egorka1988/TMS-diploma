@@ -21,11 +21,11 @@ SHORT_PASSWORD = "This password is too short. It should contain at least 6 symbo
 
 FLEET_COMPOSITION = {
     10: {'4': 1, '3': 2, '2': 3, '1': 4},
-    11: {'4': 2, '3': 3, '2': 4, '1': 5},
-    12: {'4': 2, '3': 4, '2': 5, '1': 6},
-    13: {'4': 2, '3': 4, '2': 5, '1': 7, 'air': 1},
-    14: {'4': 2, '3': 4, '2': 5, '1': 8, 'air': 2},
-    15: {'4': 3, '3': 4, '2': 5, '1': 10, 'air': 3},
+    11: {'4': 1, '3': 3, '2': 4, '1': 5},
+    12: {'4': 1, '3': 4, '2': 4, '1': 6},
+    13: {'4': 1, '3': 2, '2': 3, '1': 5, 'air': 1},
+    14: {'4': 2, '3': 2, '2': 3, '1': 8, 'air': 1},
+    15: {'4': 2, '3': 3, '2': 3, '1': 8, 'air': 2},
 }
 
 AIRCRAFT_CARRIER_BUILT_NOT_PROPER = 'Aircraft carrier has been set not proper. Check the schema'

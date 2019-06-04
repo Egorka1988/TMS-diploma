@@ -12,12 +12,10 @@ const SignedInLinks = (props) => {
                 </NavLink>
             </li>
             <li>
-                <NavLink to='/profile' className='btn btn-floating btn-large pink lighten-1'>
-                    Edit
-                </NavLink>
+                <NavLink to='/' className='btn btn-floating btn-large pink lighten-1' />
             </li>
             <li>
-                <NavLink to='/profile'>
+                <NavLink to='/'>
                     {props.username} 
                 </NavLink>
             </li>

@@ -1,6 +1,5 @@
 import React, {Component} from 'react'
 import { connect } from 'react-redux'
-import { spinner} from '../../utils';
 import { Cell } from './BattleMap'
 
 
@@ -34,8 +33,7 @@ class Legend extends Component {
         for (let i=0; i<deckCount; i++) {
             ship.push(
             <div key={'legendCell'+i+deckCount}>
-                <Cell 
-                    size={this.props.size} 
+                <Cell
                     cursor=''
                     color='lime'
                     disabled={this.props.disabled}
@@ -74,7 +72,7 @@ class Legend extends Component {
     }
 
     render() {
-
+        console.log('ddddd',this.props)
         return (
             <div className="legendContainer">
                 <div style={{gridArea: 'header1'}}>
@@ -87,8 +85,7 @@ class Legend extends Component {
 }
 const mapStateToProps = (state) => {
     return {
-        fleetComposition: state.auth.fleetComposition
-
+        fleetComposition: state.auth.fleetComposition,
     }
 }
 

@@ -14,9 +14,6 @@ class Dashboard extends Component {
 
     joinHandler = (game) => {
         this.props.joinGame(game)
-        .then((gameId) => {
-        })
-        
     }
     
     render() {
@@ -25,7 +22,7 @@ class Dashboard extends Component {
             return <Redirect to='/login' />
         }
         if (gameId) {
-            return <Redirect to={'/' + gameId + '/join'}/>
+            return <Redirect to={'/join/'+gameId}/>
         } 
         
         return(

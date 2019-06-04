@@ -18,8 +18,7 @@ from sea_battle.api import serializers, validators
 from sea_battle.models import BattleMap, Game
 from sea_battle.services import get_game, get_game_state, handle_shoot, \
     create_game, join_game, join_fleet, create_user, get_game_battle_maps
-from sea_battle.utils import ship_dead_zone_handler, mapped_shoots, get_enemy_dead_zone
-
+from sea_battle.utils import ship_dead_zone_handler, mapped_shoots
 
 class CleaningAPIView(generics.GenericAPIView):
 
@@ -161,10 +160,11 @@ class GamesAPIViewSet(viewsets.GenericViewSet):
             validator.is_valid(raise_exception=True)
             shoot = validator.validated_data['shoot']
 
-            shoot_result, dead_zone = handle_shoot(shoot, game, request.user)
+            shoot_result, dead_zone, dead_ship = handle_shoot(shoot, game, request.user)
             state = get_game_state(game, request.user)
             data = {'shoot': shoot_result, 'state': state}
             data['dead_zone'] = dead_zone
+            data['dead_ship'] = dead_ship
         else:
             raise exceptions.NotAcceptable(constants.NOT_YOUR_TURN)
 
@@ -222,6 +222,7 @@ class GamesAPIViewSet(viewsets.GenericViewSet):
 
         self.serializer_class = serializers.StatmentGetSerializer
         serializer = self.get_serializer(game)
+
         return Response(serializer.data)
 
     @action(methods=['GET'], detail=True, url_path='initial-state')
@@ -230,23 +231,28 @@ class GamesAPIViewSet(viewsets.GenericViewSet):
         game = self.get_object()
 
         my_bm, enemy_bm = get_game_battle_maps(game, request.user)
-        my_shoots = mapped_shoots(my_bm.shoots, enemy_bm.fleet)
-        dead_zone = {}
-        enemy_dead_zone = get_enemy_dead_zone(my_shoots, enemy_bm.fleet)
 
+        my_shoots, enemy_dead_zone = [[], []]
+        enemy_shoots, my_dead_zone = [[], []]
+        fleet = []
 
-        for ship in my_bm.fleet:
-            dead_zone[json.dumps(ship)] = ship_dead_zone_handler(ship)
-
+        if enemy_bm and my_bm:
+            if enemy_bm.shoots:
+                enemy_shoots, my_dead_zone = mapped_shoots(enemy_bm.shoots, my_bm.fleet)
+            if my_bm.shoots:
+                my_shoots, enemy_dead_zone = mapped_shoots(my_bm.shoots, enemy_bm.fleet)
+            fleet = my_bm.fleet
         self.serializer_class = serializers.InitialStateSerializer
         serializer = self.get_serializer(game)
+
         data = serializer.data
-        data['my_dead_zone'] = dead_zone
+        data['my_dead_zone'] = my_dead_zone
         data['enemy_dead_zone'] = enemy_dead_zone
-        data['fleet'] = my_bm.fleet
-        data['enemy_shoots'] = mapped_shoots(enemy_bm.shoots, my_bm.fleet)
+        data['fleet'] = fleet
+        data['enemy_shoots'] = enemy_shoots
         data['game_state'] = get_game_state(game, request.user)
         data['my_shoots'] = my_shoots
+        data['current_user'] = request.user.username
 
         return Response(data)
 

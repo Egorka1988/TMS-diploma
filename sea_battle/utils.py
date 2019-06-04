@@ -207,6 +207,7 @@ def ship_dead_zone_handler(ship):
 
     return [(x, y) for x, y in dead_zone if x and y]
 
+
 def prepare_to_store(fleet):
 
     """ Converting fleet to suitable format for JSONField """
@@ -216,25 +217,27 @@ def prepare_to_store(fleet):
 
 
 def mapped_shoots(shoots, fleet):
+    tupled_fleet = []
+    for ship in fleet:
+        tupled_fleet.append(set([tuple(cell) for cell in ship]))
+
+    tupled_shoots = set([tuple(shoot) for shoot in shoots])
     _flat_fleet = []
-    enemy_shoots = []
-    for ship in fleet:
-        _flat_fleet.extend(ship)
-    for shoot in shoots:
+    shoots = []
+    dead_zone = []
+    for ship in tupled_fleet:
+        _flat_fleet.extend(set(ship))
 
-        if shoot in _flat_fleet:
-            enemy_shoots.append([*shoot, 'hit'])
-        else:
-            enemy_shoots.append([*shoot, 'miss'])
-    return enemy_shoots
+    for ship in tupled_fleet:
+        intersect = ship & tupled_shoots
+        if intersect == ship:
+            dead_zone.extend(ship_dead_zone_handler(ship))
+            for cell in ship:
+                shoots.append([*cell, 'kill'])
+        if 0 < len(intersect) < len(ship):
+            for cell in intersect:
+                shoots.append([*cell, 'hit'])
 
-
-def get_enemy_dead_zone(shoots, fleet):
-    enemy_dead_zone = {}
-
-    for ship in fleet:
-        tupled_ship = [tuple(item) for item in ship]
-        tupled_shoots = [tuple(item) for item in shoots]
-        if all(set(t_ship).issubset(set(tupled_shoots)) for t_ship in tupled_ship):
-            enemy_dead_zone[json.dumps(ship)] = ship_dead_zone_handler(ship)
-    return enemy_dead_zone
+    for shoot in (tupled_shoots-set(_flat_fleet)):
+        shoots.append([*shoot, 'miss'])
+    return shoots, set(dead_zone)

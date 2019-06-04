@@ -52,7 +52,7 @@ export const Map = ({ size, battleMap, onClick, disabled }) => {
                     onClick={onClick}
                     isSelected={cellData.isSelected}
                     isError={cellData.isError}
-                    disabled={cellData.isHit? true : cellData.content? true : cellData.disabled}
+                    disabled={disabled}
                     isHit={cellData.isHit}
                     content={cellData.content}
                 />)

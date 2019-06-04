@@ -2,9 +2,8 @@ import React, {Component} from 'react'
 import { shoot, getGameState, loadActiveGame } from '../../store/actions/gamesActions'
 import { connect } from 'react-redux'
 import { Redirect } from "react-router-dom";
-import { spinner, changeColor, collectFleet } from '../../utils';
+import { spinner } from '../../utils';
 import { Map } from './BattleMap'
-import { genBattleMapState } from './NewGame'
 
 
 class ActiveGame extends Component {
@@ -23,41 +22,45 @@ class ActiveGame extends Component {
     onClickSelf = () => {}
     
     onClick = (cell) => { 
-        this.props.shoot(cell, this.props.gameId)
+        if (this.props.canShoot) {
+            this.props.shoot(cell, this.props.gameId);
+        }        
     }
  
     render() {
-        console.log('state', this.state)
-        console.log('props',this.props)
+     
         if (this.props.isLoading) {
             return spinner()
         }
         let msg = '';
         if (this.props.gameState === 'win') {
-            msg = <div>You win! <p>Congratulations!</p></div> 
+            clearInterval(this.timer);
+            msg = <div ><div>You win!</div><div>Congratulations!</div></div>
         }
         if (this.props.gameState === 'loose') {
-            msg = <div>You loose, bro. <p>Maybe next time you will be more lucky</p></div>
+            clearInterval(this.timer);
+            msg =<div><div>You loose, bro.</div><div className='stateDescr'>Maybe next time you will be more lucky</div></div>
         }
         if (this.props.gameState === 'waiting_for_joiner') {
-            msg = "Waiting for your opponent..."
+
+            msg = <div >Waiting for your opponent...</div>
         }
         if (this.props.gameState === 'active') {
-            msg = "Let's go! Now shoots " + this.props.turn
+            msg = this.props.turn === this.props.auth.currentUser ? 
+            <div>Ok, bro, shoot!</div> :
+            <div>Wait for your enemy's shoot...</div>
         }
         if (!this.props.auth.authToken) { 
             return <Redirect to="/login"/>;
         }
+
         
         return (
             <div className="activeGameContainer">
                 <div className="header">{this.props.name}</div>
-                <div className="userInfoContainer">
-                    <div>{this.props.auth.currentUser}</div>
-                    <div>{this.props.creator == this.props.auth.currentUser ? this.props.joiner ?  this.props.joiner : <span>Nobody yet...</span> : this.props.creator}</div>
-                </div>
                 <div className="userMapsContainer">
-                    <div>
+                    <div className="mapContainer">
+                        <div className="userInfoContainer">{this.props.auth.currentUser}</div>
                         <Map 
                             onClick={this.onClickSelf}
                             size={this.props.size}
@@ -66,17 +69,20 @@ class ActiveGame extends Component {
                         />
                     </div>
                     <div>
-                        <div>{msg}</div> 
-                        <div>{this.props.shootMsg}</div>
-                        <div>{this.props.err}</div>
+                        <div className="stateMsg">{msg}</div> 
+                        <div></div>
+                        <div className="mapContainer">{this.props.shootMsg}</div>
+                        <div></div>
+                        <div className="errContainer">{this.props.err}</div>
                     </div>
                     
-                    <div>
+                    <div className="mapContainer">
+                        <div className="userInfoContainer">{this.props.creator == this.props.auth.currentUser ? this.props.joiner ?  this.props.joiner : <span>Nobody yet...</span> : this.props.creator}</div>
                         <Map 
                             onClick={this.onClick}
                             size={this.props.size}
                             battleMap={this.props.enemyBattleMap} 
-                            disabled={this.props.isDisabled}
+                            disabled={!this.props.canShoot}
                         /> 
                     </div>
                 </div>
@@ -100,14 +106,16 @@ class ActiveGame extends Component {
 
             auth: state.auth,
             err: state.activeGame.err,
-            shootMsg: state.shootMsg,
+            shootMsg: state.activeGame.shootMsg,
 
-            isDisabled: state.activeGame.turn == state.auth.currentUser,
+            isDisabled: state.activeGame.isDisabled,
 
             battleMap: state.activeGame.battleMap,
             enemyBattleMap: state.activeGame.enemyBattleMap,
             
             winner: state.activeGame.winner,
+
+            canShoot: state.gameState === "active" ? state.auth.currentUser === state.activeGame.turn : false,
         }
     }
     
@@ -116,7 +124,6 @@ class ActiveGame extends Component {
             loadActiveGame: (gameId) => dispatch(loadActiveGame(gameId)),
             getGameState: (gameId, gameState) => dispatch(getGameState(gameId, gameState)),
             shoot: (targetCell, gameId) => dispatch(shoot(targetCell, gameId)),
-            
         }
     }
     

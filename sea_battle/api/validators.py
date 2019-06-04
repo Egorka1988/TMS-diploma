@@ -41,7 +41,7 @@ class JoinFleetValidator(serializers.Serializer):
     def validate_fleet(self, fleet):
         if fleet:
             return extract_ships_from(fleet)
-        raise exceptions.ValidationError(constants.INVALID_FLEET)
+        raise exceptions.ValidationError(constants.EMPTY_FLEET)
 
     def validate_size(self, size):
         if 15 < int(size) < 10:

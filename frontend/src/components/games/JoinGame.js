@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import { joinFleet } from '../../store/actions/gamesActions'
+import { joinFleet, loadActiveGame, clickHandle } from '../../store/actions/gamesActions'
 import { connect } from 'react-redux'
 import { Redirect } from "react-router-dom";
 import { spinner} from '../../utils';
@@ -9,12 +9,13 @@ import { genBattleMapState } from './NewGame'
 
 
 class JoinGame extends Component {
+    componentWillMount(){
+        this.props.loadActiveGame(this.props.match.params.gameId, true)
+    }
 
     state = {
-        name: this.props.name,
-        size: this.props.size,
         isLoading: false,
-        battleMap: genBattleMapState(this.props.size),
+        // battleMap: genBattleMapState(this.props.size),
         errHandleCompleted: false
     }
 
@@ -28,16 +29,7 @@ class JoinGame extends Component {
             }
             this.setState({battleMap: resetBattleMap})            
         }
-        const [x, y] = cell;
-        let battleMap = this.state.battleMap
-        
-        let oldCell = battleMap[x][y]
-        let newCell = {...oldCell, isSelected: !oldCell.isSelected}
-        
-        this.setState({battleMap: {
-            ...battleMap,
-            [x]: {...battleMap[x], [y]: newCell}
-        }})
+        this.props.clickHandle(cell, this.props.battleMap)
     }
     handleReset = (e) => {
         e.preventDefault();        
@@ -52,9 +44,12 @@ class JoinGame extends Component {
     }
     handleSubmit = (e) => {
         e.preventDefault();       
-        this.setState({ isLoading: true });
-        this.props.joinFleet(this.state, this.props.gameId)
-            .finally(() => this.setState({isLoading: false, errHandleCompleted : false})); 
+        this.setState({ isLoading: true, size: this.props.size}, 
+            () =>{
+                this.props.joinFleet(this.props, this.props.gameId)
+                .finally(() => this.setState({isLoading: false, errHandleCompleted : false})); 
+        });
+        
     }
 
     errorHandler = () => {
@@ -128,6 +123,7 @@ class JoinGame extends Component {
     }
 
     render() {
+        console.log('aaa',this.props)
         if (this.state.isLoading) {
             return spinner()
         }
@@ -136,7 +132,7 @@ class JoinGame extends Component {
         }
         if (this.props.deadZone) {
 
-            return <Redirect to={'/'+ this.props.gameId +'/active-game'} />;
+            return <Redirect to={'/active-games/'+ this.props.gameId} />;
         }
         return (
             <div className="container">
@@ -153,7 +149,7 @@ class JoinGame extends Component {
                              <Map 
                                 onClick={this.onClick}
                                 size={this.props.size} 
-                                battleMap={this.state.battleMap}
+                                battleMap={this.props.battleMap}
                             />
                             
                             <div className="input-field">
@@ -169,11 +165,12 @@ class JoinGame extends Component {
                         </div>
                         
                         <div className="col s4 ">
-                               <Legend 
-                                    size={this.props.size}
-                                    battleMap={this.state.battleMap}  
-                                    disabled={true}  
-                                />
+                        {this.props.size ? <Legend 
+                            size={this.props.size}
+                            battleMap={this.state.battleMap}  
+                            disabled={true} 
+                        /> : null
+                        }
                         </div>
                     </div>
                 </form> 
@@ -185,14 +182,15 @@ class JoinGame extends Component {
 const mapStateToProps = (state) => {
    
     return {
-        size: state.games.size,
-        name: state.games.name,
-        creator: state.games.creator,
+        size: state.activeGame.size,
+        name: state.activeGame.name,
+        creator: state.activeGame.creator,
         fleetComposition: state.auth.fleetComposition,
         auth: state.auth,
         err: state.games.err,
+        battleMap: state.activeGame.battleMap,
         deadZone: state.games.deadZone,
-        gameId: state.games.gameId,
+        gameId: state.activeGame.gameId,
         emptyFleet: state.games.emptyFleet,
         invalidShipType: state.games.invalidShipType,
         invalidCount: state.games.invalidCount,
@@ -203,6 +201,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
+        clickHandle: (cell, bm) => dispatch(clickHandle(cell, bm)),
+        loadActiveGame: (gameId, settingFleetMode) => dispatch(loadActiveGame(gameId, settingFleetMode)),
         joinFleet: (data, gameId) => dispatch(joinFleet(data, gameId))
     }
 }

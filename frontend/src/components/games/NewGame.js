@@ -154,7 +154,7 @@ class NewGame extends Component {
         }
         if (this.props.gameId) {
 
-            return <Redirect to={'/'+ this.props.gameId + "/active-game"} />;
+            return <Redirect to={"/active-games/" + this.props.gameId} />;
         }
         return (
             <div className="container">

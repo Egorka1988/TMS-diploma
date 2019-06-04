@@ -110,6 +110,7 @@ export const shoot = (cell, gameId) => {
                 shootResult: respdata.shoot,
                 lastShoot: cell,
                 enemyDeadZone: respdata.dead_zone,
+                deadShip: respdata.dead_ship,
             })
         } else {
             dispatch({
@@ -121,7 +122,7 @@ export const shoot = (cell, gameId) => {
 }
 
 
-export const loadActiveGame = (gameId) => {
+export const loadActiveGame = (gameId, settingFleetMode) => {
     return async (dispatch, getState) => {
         const myHeaders = new Headers();
         myHeaders.append("content-type", "application/json")
@@ -137,11 +138,11 @@ export const loadActiveGame = (gameId) => {
         const myRequest = new Request(url, myInit);
         const response = await fetch(myRequest);
         const data = await response.json();
-        
         if (response.ok) {
             dispatch({
                 type: 'LOAD_ACTIVE_GAME',
-                ...data
+                ...data,
+                settingFleetMode: settingFleetMode
             })
         }
     }
@@ -235,7 +236,7 @@ export const joinFleet = (stateData, gameId) => {
     }
 }
 
-export const getGameState = (gameId, gameState) => {
+export const getGameState = (gameId) => {
     return async (dispatch, getState) => {
         const myHeaders = new Headers();
         myHeaders.append("content-type", "application/json")
@@ -253,25 +254,24 @@ export const getGameState = (gameId, gameState) => {
         const respdata = await response.json();
         
         if (response.ok) {
-            const stateEnemyShoots = getState().games.enemyShoots
-            if (stateEnemyShoots) {
-                stateEnemyShoots.sort()
-                if (JSON.stringify(getState().games.gameState) !== JSON.stringify(respdata.state) || 
-                    JSON.stringify(respdata.shoots_of_enemy.sort()) !== JSON.stringify(stateEnemyShoots)){
-                    dispatch({
-                        type: 'GAME_STATE',
-                        gameState: respdata.state,
-                        enemyShoots: respdata.shoots_of_enemy,
-                    })
-                }
-            }else{
-                dispatch({
-                    type: 'GAME_STATE',
-                    gameState: respdata.state,
-                    enemyShoots: respdata.shoots_of_enemy,
+            dispatch({
+                type: 'GAME_STATE',
+                turn: respdata.turn,
+                gameState: respdata.state,
+                enemyShoots: respdata.shoots_of_enemy,
+                myDeadZone: respdata.my_dead_zone,
             })
-            }
-        }
-            
+        }     
     }
 } 
+
+export const clickHandle = (cell, battleMap) => {
+    return async (dispatch, getState) => {
+        
+        dispatch({
+            type: 'FLEET_SET',
+            cell: cell,
+            battleMap: battleMap,
+        })
+    }
+}

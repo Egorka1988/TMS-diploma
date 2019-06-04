@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from sea_battle import constants
 from sea_battle.models import BattleMap, Game
-from sea_battle.utils import prepare_to_store, ship_dead_zone_handler
+from sea_battle.utils import prepare_to_store, ship_dead_zone_handler, mapped_shoots
 
 
 def handle_shoot(last_shoot, game, current_user):
@@ -19,6 +19,7 @@ def handle_shoot(last_shoot, game, current_user):
     last_shoot = tuple(last_shoot)
     my_map, enemy_map = get_game_battle_maps(game, current_user)
     dead_zone = []
+    dead_ship = []
 
     if not my_map or not enemy_map:
         raise ValueError('Invalid game')
@@ -38,13 +39,14 @@ def handle_shoot(last_shoot, game, current_user):
             if ship.issubset(shoots):
                 shoot_result = constants.SHOOT_RESULT_KILL
                 dead_zone = ship_dead_zone_handler(ship)
+                dead_ship = ship
 
             break
 
     # update game state if necessary
     update_game_state(game, shoot_result, current_user, shoots, enemy_map)
 
-    return shoot_result, dead_zone
+    return shoot_result, dead_zone, dead_ship
 
 
 def update_game_state(game, shoot_result, current_user, shoots, enemy_map):
@@ -59,11 +61,9 @@ def update_game_state(game, shoot_result, current_user, shoots, enemy_map):
             game.turn_id = game.creator_id
 
     if shoot_result == constants.SHOOT_RESULT_KILL:
-        # import pdb; pdb.set_trace()
-        # for ship in enemy_map.fleet:
-        #     for item in ship:
+
         tupled_fleet = [tuple(item) for ship in enemy_map.fleet for item in ship]
-        if all(set(ship).issubset(shoots) for ship in tupled_fleet):
+        if set(tupled_fleet).issubset(shoots) :
             game.winner_id = current_user.pk
 
     game.save()
@@ -108,9 +108,11 @@ def get_enemy_shoots(game_id, current_user):
     Using that info player paints his own map,
     according to current state """
 
-    battle_map = BattleMap.objects.filter(~Q(user=current_user), game_id=game_id).first()
-    if battle_map:
-        return battle_map.shoots
+    bm1, bm2 = BattleMap.objects.filter(game_id=game_id)
+    if bm1.user == current_user:
+        return mapped_shoots(bm2.shoots, bm1.fleet)
+    if bm2.user == current_user:
+        return mapped_shoots(bm1.shoots, bm2.fleet)
     return []
 
 

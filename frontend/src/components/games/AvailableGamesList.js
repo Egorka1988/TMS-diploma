@@ -1,6 +1,4 @@
 import React from 'react'
-import { Link, renderas } from 'react-router-dom'
-
 
 
 const AvailableGames = ({availableGames, joinHandler, joinErr}) => {
