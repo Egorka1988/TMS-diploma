@@ -31,7 +31,7 @@ django-postgres-extensions==0.9.3
 django-registration==3.0
 django-rest-knox==4.0.1
 django-silk==3.0.1
-djangorestframework==3.9.0
+djangorestframework==3.9.1
 djangorestframework-simplejwt==4.3.0
 docker==3.7.2
 docker-compose==1.24.0
@@ -74,7 +74,7 @@ pytest-django==3.4.8
 pytest-docker-compose==1.0.1
 python-dateutil==2.8.0
 pytz==2018.7
-PyYAML==3.13
+PyYAML==4.2b1
 requests==2.20.1
 setproctitle==1.1.10
 six==1.12.0
@@ -84,7 +84,7 @@ terminaltables==3.1.0
 text-unidecode==1.2
 texttable==0.9.1
 uritemplate==3.0.0
-urllib3==1.24.1
+urllib3==1.24.2
 vine==1.1.4
 wcwidth==0.1.7
 websocket-client==0.56.0
