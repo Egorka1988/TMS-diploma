@@ -32,7 +32,11 @@ Linux system is recommended.I use 16.04 version
     $ python manage.py runserver
     </code></pre>
 13. If everything is well, you will recieve a link http://127.0.0.1:8000/ and your backend is run now.
-14. Frontend is written with React+Redux as SPA. 
+14. Front-end is written with React+Redux as SPA. It's separate application, working on port 8080.
+15. First, install yarn https://yarnpkg.com/ru/docs/install#debian-stable 
+16. Then your current directory to /frontend . Then write follow: <pre><code>yarn install --check-files </code></pre>
+17. Then <pre><code>yarn start </code></pre>
+18. Application is avalable on URL http://127.0.0.1:8080/
 
 
 
