@@ -21,7 +21,6 @@ class SignUp extends Component {
     handleSubmit = (e) => {
         e.preventDefault();        
         this.setState({isLoading: true})
-        console.log('signup state', this.state)
         this.props.signUp(this.state)
             .finally(() => this.setState({isLoading: false}));
     }
@@ -61,10 +60,9 @@ class SignUp extends Component {
 }
 
 const mapStateToProps = (state) => {
-    console.log('signup state', state)
     return {
-        authToken: state.authToken,
-        authError: state.authError,
+        authToken: state.auth.authToken,
+        authError: state.auth.authError,
         username: state.username
     }
 }

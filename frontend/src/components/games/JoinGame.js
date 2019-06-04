@@ -21,10 +21,10 @@ class JoinGame extends Component {
 
     onClick = (cell) => { 
         if (this.state.errHandleCompleted) {
-            let resetBattleMap = this.state.battleMap
-            for (let i = 1; i<this.state.size+1; i++) {
-                for (let j = 1; j<this.state.size+1;j++) {
-                    resetBattleMap[i][j].isError = false
+            let resetBattleMap = {...this.props.battleMap}
+            for (let i = 1; i<this.props.size+1; i++) {
+                for (let j = 1; j<this.props.size+1;j++) {
+                    resetBattleMap[i][j] = {...resetBattleMap[i][j], isError = false}
                 }
             }
             this.setState({battleMap: resetBattleMap})            

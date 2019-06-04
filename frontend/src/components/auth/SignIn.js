@@ -29,11 +29,11 @@ class SignIn extends Component {
         if (this.state.isLoading) {
             return spinner()
         }
-        if (this.props.auth.authToken) {
-
+        const { authError, authToken }  = this.props
+        
+        if (authToken) {
             return <Redirect to="/"/>;
         }
-        const { authError }  = this.props
          
         return (
             <div className="container">
@@ -47,12 +47,6 @@ class SignIn extends Component {
                     <div className="input-field">
                         <label htmlFor="password">Password</label>
                         <input type="password" id="password"  />
-                    </div>
-                    <div>
-                        <label pointerEvents="auto">
-                            <input type="checkbox" id='remember_user' />
-                            <span>Remember me (unsafe)</span>
-                        </label>
                     </div>
                     <div className="input-field">
                         <button className="btn pink lighten-1 z-depth-0">Login</button>
@@ -68,8 +62,8 @@ class SignIn extends Component {
 
 const mapStateToProps = (state) => {
     return {
-        auth: state.auth,
-        authError: state.authError,
+        authToken: state.auth.authToken,
+        authError: state.auth.authError,
         username: state.username
     }
 }

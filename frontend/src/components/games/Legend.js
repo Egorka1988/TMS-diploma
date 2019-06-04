@@ -72,7 +72,6 @@ class Legend extends Component {
     }
 
     render() {
-        console.log('ddddd',this.props)
         return (
             <div className="legendContainer">
                 <div style={{gridArea: 'header1'}}>
