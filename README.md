@@ -1,13 +1,12 @@
 # TMS-diploma
 It's a project of famous game- SeaBattle.<br>
-First, visitor has to signup, then he comes to the login page. <br>
-Then he sees other players, who is currently online. <br>
-Authentificated user chooses an opponent and size of game-field. When pressing submit-button, user create the game. <br>
-Then he should set up his ships by clicking on the cells of game-field.<br>
-Finally, the authentificated opponent should choose the first user from playerlist and also create the game. Then he sets his ships up and the battle begins. 
+First, visitor has to signup <br>
+Then he sees available for  join games. User can choose existing or create his own game<br>
+Then he should choose size, name of the game (if that is new game) and set up his ships by clicking on the cells of game-field.<br>
+Finally, user-creator gets to active-game page, where he wait for somebody join his game. When it happened, the state message will say when it's time to shoot.  
 # List ToDo for trying at localhost:
 
-Linux system is recommended.
+Linux system is recommended.I use 16.04 version
 
 1. Download python https://www.python.org/downloads/. This project is started using Python 3.6
 2. Setup pip. https://pip.pypa.io/en/stable/installing/
@@ -17,7 +16,7 @@ Linux system is recommended.
 6. Download the project: https://github.com/Egorka1988/TMS-diploma.git
 7. Change your directory to dir, where <code>requirements.txt</code> is located. 
 8. Run:  <code>pip install -r requirements.txt</code> to install all packages you need for proper start the project.
-9. In project is used PostgreSQL v.9.5.14 database. Let's install it:
+9. In project is used PostgreSQL v.10.8 database. Let's install it:
     <pre><code>$ sudo apt-get update
     $ sudo apt-get install postgresql postgresql-contrib</code></pre>
     Additional information you can find here: https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-16-04 <br>
@@ -32,7 +31,8 @@ Linux system is recommended.
     $ python manage.py migrate
     $ python manage.py runserver
     </code></pre>
-13. If everything is well, you will recieve a link http://127.0.0.1:8000/ and I hope, it works. Enjoy!
+13. If everything is well, you will recieve a link http://127.0.0.1:8000/ and your backend is run now.
+14. Frontend is written with React+Redux as SPA. 
 
 
 
