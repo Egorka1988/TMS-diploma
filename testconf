@@ -1,9 +1,0 @@
-#!/bin/sh
-
-export DB_NAME=sea_battle_db
-export DB_USER=egor
-export DB_PASSWORD=root
-export DB_HOST=localhost
-
-
-ytest /home/egor/PycharmProjects/TMS-diploma/sea_battle/api/tests/test_api_views.py::TestRegisterFormAPIViewSet

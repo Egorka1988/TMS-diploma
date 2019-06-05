@@ -100,7 +100,7 @@ class NewGame extends Component {
                     <div key={'invalidShipType'+ship}>
                         The ship on 
                         <font size="+1">
-                            {ship[0][0]}{(ship[0][1] + 9).toString(36)}
+                            &nbsp; {ship[0][0]}{(ship[0][1] + 9).toString(36)} &nbsp;
                         </font>
                          is too big
                     </div>)

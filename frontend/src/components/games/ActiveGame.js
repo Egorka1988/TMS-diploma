@@ -4,7 +4,7 @@ import { connect } from 'react-redux'
 import { Redirect } from "react-router-dom";
 import { spinner } from '../../utils';
 import { Map } from './BattleMap'
-import { WAIT_FOR_ENEMY_SHOOT, WAIT_FOR_YOUR_SHOOT, WIN, LOOSE, LOOSE_DESCR, NOBODY } from '../../constants'
+import { WAIT_FOR_ENEMY_SHOOT, WAIT_FOR_YOUR_SHOOT, WIN, LOOSE, LOOSE_DESCR, NOBODY, WAITING_FOR_ENEMY } from '../../constants'
 
 
 class ActiveGame extends Component {

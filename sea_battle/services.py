@@ -94,10 +94,19 @@ def get_game_state(game, current_user):
     """ apart func for generating current game
     state message for using in response"""
 
-    if not game.joiner_id and not game.battle_maps.filter(
-            user_id=game.joiner_id
-    ):
+    if not game.joiner_id:
         return constants.WAITING_FOR_JOINER
+    else:
+        fleet = []
+        try:
+            fleet = game.battle_maps\
+                .filter(user_id=game.joiner_id)\
+                .first().fleet
+        except:
+            return constants.WAITING_FOR_JOINER
+
+        if not fleet:
+            return constants.WAITING_FOR_JOINER
 
     if game.winner_id and game.winner_id == current_user.pk:
         return constants.WIN

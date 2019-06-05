@@ -124,6 +124,7 @@ class JoinGame extends Component {
     }
 
     render() {
+        debugger;
         if (this.state.isLoading) {
             return spinner()
         }
