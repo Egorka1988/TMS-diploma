@@ -62,8 +62,6 @@ export const Map = ({ size, battleMap, onClick, disabled }) => {
     
     return <div style={{display: 'inline-block'}}>
                 <div
-                    // className = 'battleGrid' 
-                    // style={setProperty('--size', {{size}+1})}
                     style={{
                         display: 'grid',
                         gridTemplate:
