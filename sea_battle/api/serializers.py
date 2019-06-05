@@ -36,6 +36,7 @@ class StatmentGetSerializer(serializers.Serializer):
 
     state = serializers.SerializerMethodField()
     turn = serializers.CharField()
+    joiner = serializers.CharField()
 
     def get_user(self):
         return self.context['request'].user

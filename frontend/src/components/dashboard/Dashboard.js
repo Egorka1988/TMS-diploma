@@ -24,17 +24,17 @@ class Dashboard extends Component {
         if (gameId) {
             return <Redirect to={'/join/'+gameId}/>
         } 
-        
+        console.log(availableGames)
         return(
             <div className="dashboard container">
                 <div className="row">
                     <div className="col s12 m6">
+                    {availableGames &&
                         <AvailableGames 
-                            availableGames={availableGames} 
+                            availableGames={availableGames.length ? availableGames : null} 
                             joinHandler={this.joinHandler}
                             joinErr={joinErr}
-                            />
-                        {err}
+                            />}
                     </div>
                     <div className="col s12 m5 offset-m1">
                         <Link to='/create/'>
@@ -55,7 +55,6 @@ const mapStateToProps = (state) => {
     return {
         authToken: state.auth.authToken,
         availableGames: state.games.availableGames,
-        err: state.games.err,
         joinErr: state.games.err,
         gameId: state.games.gameId,
     }

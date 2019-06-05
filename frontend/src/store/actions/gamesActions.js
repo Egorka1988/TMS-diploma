@@ -62,13 +62,7 @@ export const createGame = (stateData) => {
         if (response.ok) {
             dispatch({
                 type: 'GAME_CREATE_SUCCESS',
-                battleMap: stateData.battleMap,
-                fleet: respdata.fleet,
-                turn: respdata.turn,
-                size: respdata.size,
                 gameId: respdata.id,
-                deadZone: respdata.dead_zone,
-                gameState: respdata.state,
             })
         } else {
             dispatch({
@@ -122,7 +116,7 @@ export const shoot = (cell, gameId) => {
 }
 
 
-export const loadActiveGame = (gameId, settingFleetMode) => {
+export const loadActiveGame = (gameId, settingFleetMode=false) => {
     return async (dispatch, getState) => {
         const myHeaders = new Headers();
         myHeaders.append("content-type", "application/json")
@@ -257,6 +251,7 @@ export const getGameState = (gameId) => {
             dispatch({
                 type: 'GAME_STATE',
                 turn: respdata.turn,
+                joiner: respdata.joiner,
                 gameState: respdata.state,
                 enemyShoots: respdata.shoots_of_enemy,
                 myDeadZone: respdata.my_dead_zone,

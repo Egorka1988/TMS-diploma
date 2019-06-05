@@ -36,6 +36,10 @@ class NewGame extends Component {
         this.setState({size, battleMap : genBattleMapState(size), errMsg: null})
     }
 
+    handleNameChange = (e) => {
+        this.setState({name: e.target.value})
+    }
+
     onClick = (cell) => { 
         if (this.state.errHandleCompleted) {
             let resetBattleMap = this.state.battleMap
@@ -164,11 +168,24 @@ class NewGame extends Component {
                         <span>
                             <h6 className="grey-text text-darken-3">Size</h6>
                         </span>
-                        <input type="range" id="size" max="15" min="10" value={this.state.size} onChange={this.handleSizeChange}/>
+                        <input 
+                            type="range" 
+                            id="size" 
+                            max="15" 
+                            min="10" 
+                            value={this.state.size} 
+                            onChange={this.handleSizeChange}
+                        />
                     </div>
                     
                     <div className="input-field">
-                        <input type="text" id="name" defaultValue="Name of the game"  />
+                        <input 
+                            type="text" 
+                            id="name" 
+                            placeholder="Name of the game" 
+                            value={this.state.name} 
+                            onChange={this.handleNameChange} 
+                        />
                     </div>
                     <div className="row">
                         <div className="col s8 ">

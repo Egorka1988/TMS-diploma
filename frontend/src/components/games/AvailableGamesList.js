@@ -2,7 +2,7 @@ import React from 'react'
 
 
 const AvailableGames = ({availableGames, joinHandler, joinErr}) => {
-    
+
     return (
         <div className="highlight">
             <table>
@@ -15,8 +15,11 @@ const AvailableGames = ({availableGames, joinHandler, joinErr}) => {
                 </tr>
                 </thead>
                 <tbody>
+                    <tr>
+                        { !availableGames ? <td>No available games yet. Try to create your own</td> : null }
+                    </tr>
                     { availableGames && availableGames.map(game => {
-                        return( 
+                        return(
                             <tr key={game.id}>
                                     <td>{game.id}</td>                                 
                                     <td>{game.name}</td>
@@ -31,7 +34,7 @@ const AvailableGames = ({availableGames, joinHandler, joinErr}) => {
                                         </button>
                                     </td>
                                     <td>{joinErr}</td>
-                            </tr>
+                            </tr> 
                         )
                     })}
                 </tbody>

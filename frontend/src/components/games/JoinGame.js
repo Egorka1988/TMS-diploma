@@ -24,7 +24,8 @@ class JoinGame extends Component {
             let resetBattleMap = {...this.props.battleMap}
             for (let i = 1; i<this.props.size+1; i++) {
                 for (let j = 1; j<this.props.size+1;j++) {
-                    resetBattleMap[i][j] = {...resetBattleMap[i][j], isError = false}
+                    
+                    resetBattleMap[i][j] = {...resetBattleMap[i][j], isError: false}
                 }
             }
             this.setState({battleMap: resetBattleMap})            

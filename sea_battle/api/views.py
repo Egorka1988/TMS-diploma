@@ -241,6 +241,7 @@ class GamesAPIViewSet(viewsets.GenericViewSet):
                 enemy_shoots, my_dead_zone = mapped_shoots(enemy_bm.shoots, my_bm.fleet)
             if my_bm.shoots:
                 my_shoots, enemy_dead_zone = mapped_shoots(my_bm.shoots, enemy_bm.fleet)
+        if my_bm:
             fleet = my_bm.fleet
         self.serializer_class = serializers.InitialStateSerializer
         serializer = self.get_serializer(game)

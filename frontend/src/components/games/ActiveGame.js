@@ -28,7 +28,7 @@ class ActiveGame extends Component {
     }
  
     render() {
-     
+        console.log('props',this.props)
         if (this.props.isLoading) {
             return spinner()
         }
@@ -54,7 +54,6 @@ class ActiveGame extends Component {
             return <Redirect to="/login"/>;
         }
 
-        
         return (
             <div className="activeGameContainer">
                 <div className="header">{this.props.name}</div>
@@ -115,7 +114,7 @@ class ActiveGame extends Component {
             
             winner: state.activeGame.winner,
 
-            canShoot: state.gameState === "active" ? state.auth.currentUser === state.activeGame.turn : false,
+            canShoot: state.activeGame.gameState === "active" ? state.auth.currentUser === state.activeGame.turn : false,
         }
     }
     
