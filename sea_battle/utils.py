@@ -1,4 +1,3 @@
-import json
 
 from sea_battle import constants
 
@@ -46,29 +45,28 @@ def check_fleet_composition(fleet, size):
     fc = constants.FLEET_COMPOSITION[size]
 
     if 'air' in fc:
-        current_fleet = dict.fromkeys(['1', '2', '3', '4', 'air'], 0)
+        curr_fleet = dict.fromkeys(['1', '2', '3', '4', 'air'], 0)
 
     else:
-        current_fleet = dict.fromkeys(['1', '2', '3', '4'], 0)
+        curr_fleet = dict.fromkeys(['1', '2', '3', '4'], 0)
 
     not_allowed_ships = []
 
     for ship in fleet:
 
         if len(ship) == 8:
-            current_fleet['air'] += 1
+            curr_fleet['air'] += 1
             continue
-        if str(len(ship)) in current_fleet:
+        if str(len(ship)) in curr_fleet:
             key = str(len(ship))
-            current_fleet[key] += 1
+            curr_fleet[key] += 1
         else:
-            print(2)
             not_allowed_ships.append(ship)
 
     if not not_allowed_ships:
 
         not_allowed_ship_count = [
-            {k: current_fleet[k]} for k in current_fleet.keys() if fc[k] != current_fleet[k]
+            {k: curr_fleet[k]} for k in curr_fleet.keys() if fc[k] != curr_fleet[k]
         ]
     else:
         not_allowed_ship_count = []
@@ -97,8 +95,8 @@ def check_fleet_composition(fleet, size):
         err['invalid_ship_composition'] = ships_errors
 
     dead_zone = check_dead_zone(fleet)
-    if 'forbidden_cells' in dead_zone.keys():
-        err['forbidden_cells'] = dead_zone['forbidden_cells']
+    if dead_zone:
+        err['forbidden_cells'] = dead_zone
 
     return err
 
@@ -135,12 +133,17 @@ def air_carr_validator(ship):
 
     if (len(set(vert_axle)) == 6) and (len((set(hor_axle))) == 2):
         # if refit is placed in right vertical position
-        if v_refit_place_bottom == [True, True] or v_refit_place_top == [True, True]:
+        check_top = v_refit_place_top == [True, True]
+        check_bottom = v_refit_place_bottom == [True, True]
+        if check_bottom or check_top:
             return {}
 
     if (len(set(vert_axle)) == 2) and (len(set(hor_axle)) == 6):
         # if refit is placed in right horizontal position
-        if v_refit_place_left == [True, True] or v_refit_place_right == [True, True]:
+        check_left = v_refit_place_left == [True, True]
+        check_right = v_refit_place_right == [True, True]
+
+        if check_left or check_right:
             return {}
 
     return ship
@@ -170,19 +173,17 @@ def linear_ship_validator(ship):
 
 
 def check_dead_zone(fleet):
-    dead_zone = {}
+    dead_zone = []
     f_cells = []
     for ship in fleet:
-        dead_zone[frozenset(ship)] = ship_dead_zone_handler(ship)
+        dead_zone.extend(ship_dead_zone_handler(ship))
 
     flat_fleet = [cell for ship in fleet for cell in ship]
 
-    for zone in dead_zone.copy().values():
-        for cell in zone:
-            if cell in flat_fleet:
-                f_cells.append(cell)
-                dead_zone = {'forbidden_cells': f_cells}
-    return dead_zone
+    for cell in dead_zone:
+        if cell in flat_fleet:
+            f_cells.append(cell)
+    return f_cells
 
 
 def ship_dead_zone_handler(ship):

@@ -4,9 +4,19 @@ import { connect } from 'react-redux'
 import { Redirect } from "react-router-dom";
 import { spinner } from '../../utils';
 import { Map } from './BattleMap'
+import { WAIT_FOR_ENEMY_SHOOT, WAIT_FOR_YOUR_SHOOT, WIN, LOOSE, LOOSE_DESCR, NOBODY } from '../../constants'
 
 
 class ActiveGame extends Component {
+
+    constructor(props){
+        super(props)
+        this.state = {
+            showMessage: true
+        }
+        this._stop = null
+    }
+
     componentWillMount(){
         this.props.loadActiveGame(this.props.match.params.gameId)
     }
@@ -16,6 +26,7 @@ class ActiveGame extends Component {
             this.props.getGameState(this.props.match.params.gameId)
         }, 3000)
     }
+
     componentWillUnmount(){
         clearInterval(this.timer);
     }
@@ -24,65 +35,77 @@ class ActiveGame extends Component {
     onClick = (cell) => { 
         if (this.props.canShoot) {
             this.props.shoot(cell, this.props.gameId);
+            this.setState({showMessage: true})
         }        
+    }
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (this.props.shootMsg !== prevProps.shootMsg) {
+            this._stop && clearTimeout(this._stop);
+            this._stop = setTimeout(() => {
+                this.setState({showMessage: false});
+                this._stop = null;
+            }, 2000);
+            this.setState({showMessage: true})
+        }
     }
  
     render() {
-     
         if (this.props.isLoading) {
             return spinner()
         }
         let msg = '';
+        const { gameState, auth, name, size, shootMsg, battleMap } = this.props
+        const { creator, joiner, enemyBattleMap, canShoot, turn, err } = this.props
         if (this.props.gameState === 'win') {
             clearInterval(this.timer);
-            msg = <div ><div>You win!</div><div>Congratulations!</div></div>
+            msg = WIN
         }
-        if (this.props.gameState === 'loose') {
+        if (gameState === 'loose') {
             clearInterval(this.timer);
-            msg =<div><div>You loose, bro.</div><div className='stateDescr'>Maybe next time you will be more lucky</div></div>
+            msg = <div>{LOOSE}<div className='stateDescr'>{LOOSE_DESCR}</div></div>
         }
-        if (this.props.gameState === 'waiting_for_joiner') {
-
-            msg = <div >Waiting for your opponent...</div>
+        if (gameState === 'waiting_for_joiner') {
+            msg = WAITING_FOR_ENEMY
         }
-        if (this.props.gameState === 'active') {
-            msg = this.props.turn === this.props.auth.currentUser ? 
-            <div>Ok, bro, shoot!</div> :
-            <div>Wait for your enemy's shoot...</div>
+        if (gameState === 'active') {
+            msg = turn === auth.currentUser ? 
+            WAIT_FOR_YOUR_SHOOT :
+            WAIT_FOR_ENEMY_SHOOT  
         }
-        if (!this.props.auth.authToken) { 
+        if (!auth.authToken) { 
             return <Redirect to="/login"/>;
         }
 
-        
         return (
             <div className="activeGameContainer">
-                <div className="header">{this.props.name}</div>
+                <div className="header">{name}</div>
                 <div className="userMapsContainer">
                     <div className="mapContainer">
-                        <div className="userInfoContainer">{this.props.auth.currentUser}</div>
+                        <div className="userInfoContainer">{auth.currentUser}</div>
                         <Map 
                             onClick={this.onClickSelf}
-                            size={this.props.size}
-                            battleMap={this.props.battleMap}
+                            size={size}
+                            battleMap={battleMap}
                             disabled={true}
                         />
                     </div>
                     <div>
                         <div className="stateMsg">{msg}</div> 
                         <div></div>
-                        <div className="mapContainer">{this.props.shootMsg}</div>
+                        <div className="mapContainer">{this.state.showMessage ? shootMsg : null}</div>
                         <div></div>
-                        <div className="errContainer">{this.props.err}</div>
+                        <div className="errContainer">{err}</div>
                     </div>
                     
                     <div className="mapContainer">
-                        <div className="userInfoContainer">{this.props.creator == this.props.auth.currentUser ? this.props.joiner ?  this.props.joiner : <span>Nobody yet...</span> : this.props.creator}</div>
+                        <div className="userInfoContainer">
+                            {creator == auth.currentUser ? joiner ?  joiner : NOBODY : creator}
+                        </div>
                         <Map 
                             onClick={this.onClick}
-                            size={this.props.size}
-                            battleMap={this.props.enemyBattleMap} 
-                            disabled={!this.props.canShoot}
+                            size={size}
+                            battleMap={enemyBattleMap} 
+                            disabled={!canShoot}
                         /> 
                     </div>
                 </div>
@@ -92,37 +115,36 @@ class ActiveGame extends Component {
 }
     
     const mapStateToProps = (state) => {
-        
+
         return {
+            auth: state.auth,
             isLoading: state.activeGame.isLoading,
+            
             gameState: state.activeGame.gameState,
+            
+            winner: state.activeGame.winner,
             creator: state.activeGame.creator,
             joiner: state.activeGame.joiner,
+            
             gameId: state.activeGame.gameId,
-            fleet: state.activeGame.fleet,
             name: state.activeGame.name, 
             turn: state.activeGame.turn,
             size: state.activeGame.size,
 
-            auth: state.auth,
             err: state.activeGame.err,
             shootMsg: state.activeGame.shootMsg,
 
-            isDisabled: state.activeGame.isDisabled,
+            canShoot: state.activeGame.gameState === "active" ? state.auth.currentUser === state.activeGame.turn : false,
 
             battleMap: state.activeGame.battleMap,
             enemyBattleMap: state.activeGame.enemyBattleMap,
-            
-            winner: state.activeGame.winner,
-
-            canShoot: state.gameState === "active" ? state.auth.currentUser === state.activeGame.turn : false,
         }
     }
     
     const mapDispatchToProps = (dispatch) => {
         return {
             loadActiveGame: (gameId) => dispatch(loadActiveGame(gameId)),
-            getGameState: (gameId, gameState) => dispatch(getGameState(gameId, gameState)),
+            getGameState: (gameId) => dispatch(getGameState(gameId)),
             shoot: (targetCell, gameId) => dispatch(shoot(targetCell, gameId)),
         }
     }

@@ -1,8 +1,6 @@
 
 from rest_framework import serializers
 
-from sea_battle.models import Game
-
 # Serializers define the API representation.
 from sea_battle.services import get_game_state, get_enemy_shoots
 
@@ -36,6 +34,7 @@ class StatmentGetSerializer(serializers.Serializer):
 
     state = serializers.SerializerMethodField()
     turn = serializers.CharField()
+    joiner = serializers.CharField()
 
     def get_user(self):
         return self.context['request'].user
@@ -47,7 +46,7 @@ class StatmentGetSerializer(serializers.Serializer):
     def to_representation(self, game):
         data = super().to_representation(game)
 
-        if game.joiner:
+        if game.joiner and game.battle_maps.filter(user=game.joiner):
             current_user = self.get_user()
             shoots, dead_zone = get_enemy_shoots(game.pk, current_user)
             data['shoots_of_enemy'] = shoots
@@ -59,14 +58,14 @@ class StatmentGetSerializer(serializers.Serializer):
 class NewGameSerializer(serializers.Serializer):
 
     id = serializers.IntegerField()
-    size = serializers.IntegerField()
-    turn = serializers.CharField()
+    # size = serializers.IntegerField()
+    # turn = serializers.CharField()
 
 
 class JoinFleetSerializer(serializers.Serializer):
 
     fleet = serializers.ListField()
-    dead_zone = serializers.JSONField()
+    # dead_zone = serializers.JSONField()
 
 
 class InitialStateSerializer(serializers.Serializer):
@@ -78,5 +77,3 @@ class InitialStateSerializer(serializers.Serializer):
     joiner = serializers.CharField()
     turn = serializers.CharField()
     winner = serializers.CharField(default='')
-
-

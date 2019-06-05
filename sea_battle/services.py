@@ -8,7 +8,10 @@ from django.utils import timezone
 
 from sea_battle import constants
 from sea_battle.models import BattleMap, Game
-from sea_battle.utils import prepare_to_store, ship_dead_zone_handler, mapped_shoots
+from sea_battle.utils import \
+    prepare_to_store, \
+    ship_dead_zone_handler, \
+    mapped_shoots
 
 
 def handle_shoot(last_shoot, game, current_user):
@@ -62,8 +65,10 @@ def update_game_state(game, shoot_result, current_user, shoots, enemy_map):
 
     if shoot_result == constants.SHOOT_RESULT_KILL:
 
-        tupled_fleet = [tuple(item) for ship in enemy_map.fleet for item in ship]
-        if set(tupled_fleet).issubset(shoots) :
+        tupled_fleet = [
+            tuple(item) for ship in enemy_map.fleet for item in ship
+        ]
+        if set(tupled_fleet).issubset(shoots):
             game.winner_id = current_user.pk
 
     game.save()
@@ -89,7 +94,9 @@ def get_game_state(game, current_user):
     """ apart func for generating current game
     state message for using in response"""
 
-    if not game.joiner_id:
+    if not game.joiner_id and not game.battle_maps.filter(
+            user_id=game.joiner_id
+    ):
         return constants.WAITING_FOR_JOINER
 
     if game.winner_id and game.winner_id == current_user.pk:
@@ -149,7 +156,8 @@ def create_user(data):
 
 def create_game(data, user):
 
-    """set start params of the game to db by the player, who creates the game"""
+    """set start params of the game to db by the player,
+    who creates the game"""
 
     with transaction.atomic():
 
@@ -197,11 +205,13 @@ def join_game(game_id, user):
 def join_fleet(game_id, user, fleet):
 
     with transaction.atomic():
-        battle_map = BattleMap.objects.create(
-            user=user,
-            fleet=prepare_to_store(fleet),
-            shoots=[],
-            game_id=game_id,
-        )
-
-    return battle_map.fleet
+        qs = BattleMap.objects.filter(game_id=game_id)
+        if len(qs) == 1:
+            BattleMap.objects.create(
+                user=user,
+                fleet=prepare_to_store(fleet),
+                shoots=[],
+                game_id=game_id,
+            )
+        else:
+            raise Exception(constants.FAIL_TO_ADD_FLEET)

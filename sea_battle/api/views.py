@@ -1,4 +1,3 @@
-import json
 
 from django.db.models import Q
 from django.http import JsonResponse
@@ -18,7 +17,8 @@ from sea_battle.api import serializers, validators
 from sea_battle.models import BattleMap, Game
 from sea_battle.services import get_game, get_game_state, handle_shoot, \
     create_game, join_game, join_fleet, create_user, get_game_battle_maps
-from sea_battle.utils import ship_dead_zone_handler, mapped_shoots
+from sea_battle.utils import mapped_shoots
+
 
 class CleaningAPIView(generics.GenericAPIView):
 
@@ -60,8 +60,9 @@ class WatchGamesAPIViewSet(viewsets.GenericViewSet):
 
     def get_queryset(self):
         current_user = self.request.user
-        games = Game.objects.active_games().exclude(Q(creator=current_user) | Q(joiner=current_user))
-        print("games", games)
+        games = Game.objects.active_games().exclude(
+            Q(creator=current_user) | Q(joiner=current_user)
+        )
         return games
 
     def list(self, request, *args, **kwargs):
@@ -77,33 +78,14 @@ class InitialDataAPIViewSet(viewsets.GenericViewSet):
     permission_classes = (IsAuthenticated,)
 
     def list(self, request, *args, **kwargs):
-        try:
-            game_id = int(request.query_params['gameId'])
-        except:
-            game_id  = None
+
         current_user = request.user
-        if game_id:
-            game = Game.objects.filter(
-                Q(creator=current_user) | Q(joiner=current_user),
-                pk=game_id).first()
-        else:
-            game = None
         initial_data = {
             'fleet_composition': constants.FLEET_COMPOSITION,
             'username': current_user.username,
             'isAuthenticated': current_user.is_authenticated
         }
-        if game:
 
-            initial_data['game'] = {
-                'game_id': game.pk,
-                'size': game.size,
-                'name': game.name,
-                'creator': game.creator.username,
-                'joiner': game.joiner.username if game.joiner else '',
-                'turn': game.turn.username,
-                'winner': game.winner.username if game.winner else None
-            }
         return Response(initial_data)
 
 
@@ -116,7 +98,10 @@ class GamesAPIViewSet(viewsets.GenericViewSet):
 
     def get_queryset(self):
         current_user = self.request.user
-        return Game.objects.filter(Q(creator=current_user) | Q(joiner=current_user))
+
+        return Game.objects.filter(
+            Q(creator=current_user) | Q(joiner=current_user)
+        )
 
     def list(self, request, *args, **kwargs):
 
@@ -133,25 +118,21 @@ class GamesAPIViewSet(viewsets.GenericViewSet):
 
         fleet_composition_errors = validator.check_fleet_composition()
         if fleet_composition_errors:
-            return Response(fleet_composition_errors, status=status.HTTP_400_BAD_REQUEST)
+
+            return Response(
+                fleet_composition_errors,
+                status=status.HTTP_400_BAD_REQUEST)
 
         # Pass validated data to business logic (service)
         game, battlemap = create_game(validator.validated_data, request.user)
 
         # Serialization
         data = serializers.NewGameSerializer(game).data
-        data['fleet'] = battlemap.fleet
-        data['dead_zone'] = []
-        data['state'] = constants.WAITING_FOR_JOINER
-        for ship in battlemap.fleet:
-            data['dead_zone'].append({
-               json.dumps(ship): ship_dead_zone_handler(ship)
-            })
 
         return Response(data, status=status.HTTP_201_CREATED)
 
     @action(methods=['PATCH'], detail=True)
-    def shoot(self, request, game_id, **kwargs,):
+    def shoot(self, request, game_id, **kwargs):
 
         game = get_game(game_id, request.user)
         if game.turn == request.user:
@@ -160,7 +141,11 @@ class GamesAPIViewSet(viewsets.GenericViewSet):
             validator.is_valid(raise_exception=True)
             shoot = validator.validated_data['shoot']
 
-            shoot_result, dead_zone, dead_ship = handle_shoot(shoot, game, request.user)
+            shoot_result, dead_zone, dead_ship = handle_shoot(
+                shoot,
+                game,
+                request.user
+            )
             state = get_game_state(game, request.user)
             data = {'shoot': shoot_result, 'state': state}
             data['dead_zone'] = dead_zone
@@ -196,22 +181,16 @@ class GamesAPIViewSet(viewsets.GenericViewSet):
 
         fleet_composition_errors = validator.check_fleet_composition()
         if fleet_composition_errors:
-            return Response(fleet_composition_errors, status=status.HTTP_400_BAD_REQUEST)
+
+            return Response(
+                fleet_composition_errors,
+                status=status.HTTP_400_BAD_REQUEST
+                )
 
         fleet = validator.validated_data['fleet']
+        join_fleet(game_id, request.user, fleet)
 
-        # create fleet for joiner
-        data = {'fleet': join_fleet(game_id, request.user, fleet)}
-        data['dead_zone'] = []
-        for ship in data['fleet']:
-            data['dead_zone'].append({
-                json.dumps(ship): ship_dead_zone_handler(ship)
-            })
-
-        # serialize data for using at frontend
-        data = serializers.JoinFleetSerializer(data).data
-
-        return Response(data, status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_201_CREATED)
 
     @action(methods=['GET'], detail=True)
     def state(self, *args, **kwargs):
@@ -232,28 +211,33 @@ class GamesAPIViewSet(viewsets.GenericViewSet):
 
         my_bm, enemy_bm = get_game_battle_maps(game, request.user)
 
-        my_shoots, enemy_dead_zone = [[], []]
-        enemy_shoots, my_dead_zone = [[], []]
-        fleet = []
+        my_shoots, enemy_dead_zone = [], []
+        e_shoots, my_dead_zone = [], []
+        my_fleet = []
 
-        if enemy_bm and my_bm:
-            if enemy_bm.shoots:
-                enemy_shoots, my_dead_zone = mapped_shoots(enemy_bm.shoots, my_bm.fleet)
-            if my_bm.shoots:
-                my_shoots, enemy_dead_zone = mapped_shoots(my_bm.shoots, enemy_bm.fleet)
-            fleet = my_bm.fleet
+        if my_bm:
+            my_fleet = my_bm.fleet
+            my_shoots = my_bm.shoots
+
+        if enemy_bm:
+            e_shoots = enemy_bm.shoots
+            e_fleet = enemy_bm.fleet
+
+            if e_shoots:
+                e_shoots, my_dead_zone = mapped_shoots(e_shoots, my_fleet)
+            if my_shoots:
+                my_shoots, enemy_dead_zone = mapped_shoots(my_shoots, e_fleet)
+
         self.serializer_class = serializers.InitialStateSerializer
         serializer = self.get_serializer(game)
 
         data = serializer.data
         data['my_dead_zone'] = my_dead_zone
         data['enemy_dead_zone'] = enemy_dead_zone
-        data['fleet'] = fleet
-        data['enemy_shoots'] = enemy_shoots
+        data['fleet'] = my_fleet
+        data['enemy_shoots'] = e_shoots
         data['game_state'] = get_game_state(game, request.user)
         data['my_shoots'] = my_shoots
         data['current_user'] = request.user.username
 
         return Response(data)
-
-

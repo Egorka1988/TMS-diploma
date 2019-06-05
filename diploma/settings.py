@@ -27,9 +27,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
 
-    'online_users',
     'django_registration',
-    'bootstrap4',
     'sea_battle',
 ]
 
@@ -43,8 +41,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'online_users.middleware.OnlineNowMiddleware',
-
 ]
 
 ROOT_URLCONF = 'diploma.urls'
@@ -73,7 +69,6 @@ WSGI_APPLICATION = 'diploma.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        # 'ENGINE': 'django_postgres_extensions.backends.postgresql',
         'NAME': os.getenv('DB_NAME'),
         'PORT': '5432',
         'USER': os.getenv('DB_USER'),
@@ -81,7 +76,6 @@ DATABASES = {
         'HOST': os.getenv('DB_HOST')
     }
     }
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -105,17 +99,10 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        # 'rest_framework.authentication.BasicAuthentication',  # over https only
         'rest_framework.authentication.TokenAuthentication',
-        # 'rest_framework_simplejwt.authentication.JWTAuthentication'
+
     ]
 }
-
-# SIMPLE_JWT = {
-#
-#     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',)
-#
-# }
 
 LANGUAGE_CODE = 'en-us'
 
@@ -130,14 +117,6 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATIC_ROOT = 'static'
-
-LOGIN_REDIRECT_URL = '/accounts/logged_in/'
-LOGOUT_REDIRECT_URL = '/'
-
-HTMLVALIDATOR_ENABLED = False
-
-if HTMLVALIDATOR_ENABLED:
-    MIDDLEWARE += ["htmlvalidator.middleware.HTMLValidator", ]
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 

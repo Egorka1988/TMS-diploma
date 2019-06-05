@@ -32,7 +32,6 @@ class NewGameValidator(serializers.Serializer):
         return check_fleet_composition(fleet, size)
 
 
-
 class JoinFleetValidator(serializers.Serializer):
 
     fleet = serializers.ListField()
@@ -79,6 +78,7 @@ class SignUpValidator(serializers.Serializer):
             raise exceptions.ValidationError(constants.USER_ALREADY_EXISTS)
 
         return username
+
     def validate_password(self, password, *args, **kwargs):
 
         if len(password) < 6:

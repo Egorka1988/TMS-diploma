@@ -74,9 +74,7 @@ const gamesReducer = (state = initState, action) => {
             console.log('Join fleet success')
         return {  
             ...state,      
-            battleMap: action.battleMap,
-            fleet: action.fleet,
-            deadZone: action.deadZone
+            isFleetJoined: action.isFleetJoined
         }
         case 'GAME_JOIN_FLEET_ERROR':
                 console.log('Join fleet failed')

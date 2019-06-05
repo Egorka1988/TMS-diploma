@@ -1,6 +1,4 @@
-import { getGameState } from "../actions/gamesActions";
 import _ from 'underscore';
-import { runInNewContext } from "vm";
 
 export const genBattleMapState = ({size, fleet, shoots, deadZone, disabled}) => {
    
@@ -36,7 +34,6 @@ export const genBattleMapState = ({size, fleet, shoots, deadZone, disabled}) => 
                     }
                     battleMap[i][j].content = '.';  
                 })
-
             } else if (state == 'miss') {
                 cell.content = '.'
             }
@@ -132,7 +129,6 @@ const activeGameReducer = (state = initState, action) => {
                 })
             }
             bm[x][y] = newCell;
-
             return {
                 ...state,
                 gameState: action.state,
@@ -185,6 +181,7 @@ const activeGameReducer = (state = initState, action) => {
                 battleMap: {...battleMap},
                 gameState: action.gameState,
                 enemyShoots: action.enemyShoots,
+                joiner: action.joiner,
                 turn: action.turn,
                 err: null,
             }
@@ -201,6 +198,13 @@ const activeGameReducer = (state = initState, action) => {
                 battleMap: bm
             }
         }
+        case 'STATE_MSG_RESET':
+            console.log('reset')
+            return {
+                ...state,
+                shootMsg: null,
+            }
+        
         default:
             return state;
     }

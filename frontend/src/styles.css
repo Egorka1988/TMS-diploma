@@ -115,8 +115,9 @@
   margin-bottom: 20px;  
 }
 .header {
-  text-align: center;
   font-size: 28px;
+  margin-top: 15px;
+  padding-left: 450px;
 }
 .stateMsg {
   text-align: center;
