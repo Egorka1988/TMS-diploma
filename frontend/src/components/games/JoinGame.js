@@ -60,7 +60,7 @@ class JoinGame extends Component {
         const invalidShipComposition = this.props.invalidShipComposition
         const forbiddenCells = this.props.forbiddenCells
         let msg = []
-        let battleMap = this.state.battleMap
+        let battleMap = this.props.battleMap
         
         if (emptyFleet) {
             msg.push(<div key='joinEmptyFleet'>{emptyFleet}</div>)
@@ -74,7 +74,7 @@ class JoinGame extends Component {
                     <div key={'joinInvalidShipType'+ship}>
                         The ship on 
                         <font size="+1">
-                            {ship[0][0]}{(ship[0][1] + 9).toString(36)}
+                        &nbsp; {ship[0][0]}{(ship[0][1] + 9).toString(36)} &nbsp;
                         </font>
                          is too big
                     </div>)
@@ -124,14 +124,13 @@ class JoinGame extends Component {
     }
 
     render() {
-        console.log('aaa',this.props)
         if (this.state.isLoading) {
             return spinner()
         }
         if (!this.props.auth.authToken) { 
             return <Redirect to="/login"/>;
         }
-        if (this.props.deadZone) {
+        if (this.props.isFleetJoined) {
 
             return <Redirect to={'/active-games/'+ this.props.gameId} />;
         }
@@ -166,9 +165,9 @@ class JoinGame extends Component {
                         </div>
                         
                         <div className="col s4 ">
-                        {this.props.size ? <Legend 
+                        {this.props.size && this.props.battleMap ? <Legend 
                             size={this.props.size}
-                            battleMap={this.state.battleMap}  
+                            battleMap={this.props.battleMap}  
                             disabled={true} 
                         /> : null
                         }
@@ -190,7 +189,7 @@ const mapStateToProps = (state) => {
         auth: state.auth,
         err: state.games.err,
         battleMap: state.activeGame.battleMap,
-        deadZone: state.games.deadZone,
+        isFleetJoined: state.games.isFleetJoined,
         gameId: state.activeGame.gameId,
         emptyFleet: state.games.emptyFleet,
         invalidShipType: state.games.invalidShipType,

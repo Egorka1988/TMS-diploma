@@ -15,6 +15,7 @@ class UserFactory(factory.django.DjangoModelFactory):
 
     username = factory.Sequence(lambda n: 'john%s' % n)
 
+
 class GameFactory(factory.django.DjangoModelFactory):
 
     class Meta:
@@ -49,5 +50,3 @@ class BattleMapFactory(factory.django.DjangoModelFactory):
     game = factory.SubFactory(GameFactory)
     user = factory.SubFactory(UserFactory)
     shoots = []
-
-

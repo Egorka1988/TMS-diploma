@@ -24,7 +24,6 @@ const store = createStore(
 );
 
 store.subscribe(localStoreTokenManager(store));
-store.dispatch(initialLoad(window.location.href));
-
+store.dispatch(initialLoad());
 
 ReactDOM.render(<Provider store={store} ><App /></Provider>, document.getElementById("root"));

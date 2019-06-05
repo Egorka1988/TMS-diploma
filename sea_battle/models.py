@@ -6,6 +6,10 @@ from datetime import timedelta
 
 from django.utils import timezone
 
+from sea_battle.constants import \
+    ACTIVE_GAME_TIME_LIMIT, \
+    AVAILABLE_GAME_TIME_LIMIT
+
 
 class GamesManager(models.Manager):
 
@@ -16,13 +20,17 @@ class GamesManager(models.Manager):
 class GamesQuerySet(models.QuerySet):
 
     def active_games(self):
+        now = timezone.now()
+        delta = timedelta(seconds=ACTIVE_GAME_TIME_LIMIT)
         return self.filter(
-            last_activity__gt=(timezone.now() - timedelta(seconds=60)),
+            last_activity__gt=(now - delta),
         ).exclude(joiner=None)
 
     def available_games(self):
+        now = timezone.now()
+        delta = timedelta(seconds=AVAILABLE_GAME_TIME_LIMIT)
         return self.filter(
-            last_activity__gt=(timezone.now() - timedelta(seconds=200)),
+            last_activity__gt=(now - delta),
             joiner=None,
         )
 
@@ -78,11 +86,6 @@ class Game(models.Model):
         null=True
     )
 
-    fleet_composition = JSONField(
-        verbose_name='Fleet composition up to size',
-        default=list
-    )
-
     objects = GamesManager.from_queryset(GamesQuerySet)()
 
 
@@ -106,7 +109,6 @@ class BattleMap(models.Model):
             models.PositiveSmallIntegerField(),
             default=list,
             verbose_name='Shoots'
-
         )
     )
 
@@ -124,6 +126,3 @@ class BattleMap(models.Model):
         default=False,
         verbose_name='Is template?'
     )
-
-
-

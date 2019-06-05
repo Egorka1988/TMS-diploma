@@ -201,34 +201,11 @@ class TestCheckDeadZone:
             {(9, 9)},
             {(8, 8)}
         ]
-        assert check_dead_zone(fleet) == {'forbidden_cells': [(8, 8), (9, 9)]}
+        assert check_dead_zone(fleet) == [(8, 8), (9, 9)]
 
     def test_passed(self):
         fleet = [
                 {(7, 4), (8, 4)},
                 {(8, 1), (9, 1)},
         ]
-        assert check_dead_zone(fleet) == {
-            frozenset({(8, 1), (9, 1)}):
-                [
-                    (7, 1),
-                    (7, 2),
-                    (8, 2),
-                    (9, 2),
-                    (10, 1),
-                    (10, 2)
-                ],
-            frozenset({(7, 4), (8, 4)}):
-                [
-                    (6, 3),
-                    (6, 4),
-                    (6, 5),
-                    (7, 3),
-                    (7, 5),
-                    (8, 3),
-                    (8, 5),
-                    (9, 3),
-                    (9, 4),
-                    (9, 5)
-                ],
-            }
+        assert check_dead_zone(fleet) == []

@@ -129,7 +129,6 @@ const activeGameReducer = (state = initState, action) => {
                 })
             }
             bm[x][y] = newCell;
-
             return {
                 ...state,
                 gameState: action.state,
@@ -199,6 +198,13 @@ const activeGameReducer = (state = initState, action) => {
                 battleMap: bm
             }
         }
+        case 'STATE_MSG_RESET':
+            console.log('reset')
+            return {
+                ...state,
+                shootMsg: null,
+            }
+        
         default:
             return state;
     }

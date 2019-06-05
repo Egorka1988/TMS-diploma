@@ -207,14 +207,12 @@ export const joinFleet = (stateData, gameId) => {
         console.log(stateData)
         const myRequest = new Request('http://127.0.0.1:8000/rest/games/' + gameId + '/join_fleet/', myInit);
         const response = await fetch(myRequest);
-        const respdata = await response.json();
         
         if (response.ok) {
+          
             dispatch({
                 type: 'GAME_JOIN_FLEET_SUCCESS',
-                battleMap: stateData.battleMap,
-                fleet: respdata.fleet,
-                deadZone: respdata.dead_zone
+                isFleetJoined: true
             })
         } else {
             dispatch({

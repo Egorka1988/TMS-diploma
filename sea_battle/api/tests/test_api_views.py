@@ -73,8 +73,14 @@ class TestGamesAPIViewSet(APITestCase):
         data = {
             'name': 'name',
             'size': 10,
-            'fleet': [[0, 0], [1, 0], [9, 9]],
-            'user_id': test_user.id
+            'fleet': [
+                [5, 1], [3, 1], [4, 1], [2, 1],
+                [4, 4], [3, 4], [3, 6], [3, 8],
+                [3, 10], [5, 6], [6, 6], [6, 10],
+                [7, 3], [7, 2], [7, 1], [8, 8],
+                [7, 8], [9, 5], [9, 3], [9, 4]
+            ],
+            'user': test_user.username
         }
 
         response = client.post('/rest/games/', data, format='json')
@@ -82,7 +88,7 @@ class TestGamesAPIViewSet(APITestCase):
 
         client.force_authenticate(user=test_user)
         response = client.post('/rest/games/', data, format='json')
-        self.assertEqual(2, len(BattleMap.objects.get(user=test_user).fleet))
+        self.assertEqual(10, len(BattleMap.objects.get(user=test_user).fleet))
         assert response.status_code == 201
 
     def test_shoot(self):
@@ -99,11 +105,22 @@ class TestGamesAPIViewSet(APITestCase):
             size=10
         )
         enemy_map = BattleMap.objects.get(user=game.joiner, game=game)
-        enemy_map.fleet = [[[0, 1], [0, 2]]]
+        enemy_map.fleet = [
+            [[5, 1], [3, 1], [4, 1], [2, 1]],
+            [[4, 4], [3, 4]],
+            [[3, 6]],
+            [[3, 8]],
+            [[3, 10]],
+            [[5, 6], [6, 6]],
+            [[6, 10]],
+            [[7, 3], [7, 2], [7, 1]],
+            [[8, 8], [7, 8]],
+            [[9, 5], [9, 3], [9, 4]]
+        ]
         enemy_map.save()
 
         data = {
-            'shoot': [0, 2],
+            'shoot': [5, 1],
         }
 
         url = '/rest/games/' + str(game.pk) + '/shoot/'
@@ -114,7 +131,12 @@ class TestGamesAPIViewSet(APITestCase):
         client.force_authenticate(user=test_user)
 
         response = client.patch(url, data, format='json')
-        resp_assert = {'state': constants.ACTIVE, 'shoot': constants.SHOOT_RESULT_HIT}
+        resp_assert = {
+            'state': constants.ACTIVE,
+            'shoot': constants.SHOOT_RESULT_HIT,
+            'dead_zone': [],
+            'dead_ship': []
+        }
         self.assertEqual(resp_assert, json.loads(response.content))
         assert response.status_code == 200
 
@@ -165,9 +187,14 @@ class TestGamesAPIViewSet(APITestCase):
         url = '/rest/games/' + str(game.pk) + '/join_fleet/'
 
         data = {
-            'game_id': game.pk,
-            'user_id': test_user.id,
-            'fleet': [[0, 0], [1, 0], [9, 9]]
+            'size': game.size,
+            'fleet': [
+                [5, 1], [3, 1], [4, 1], [2, 1],
+                [4, 4], [3, 4], [3, 6], [3, 8],
+                [3, 10], [5, 6], [6, 6], [6, 10],
+                [7, 3], [7, 2], [7, 1], [8, 8],
+                [7, 8], [9, 5], [9, 3], [9, 4]
+            ]
         }
 
         response = client.post(url, data, format='json')
@@ -188,9 +215,21 @@ class TestGamesAPIViewSet(APITestCase):
 
         game = ActiveGameFactory(joiner=test_user)
         j_battlemap = BattleMap.objects.get(game=game, user=game.joiner)
-        j_battlemap.shoots = [[0, 0], [1, 1]]
+        j_battlemap.shoots = [[8, 9], [4, 3]]
         c_battlemap = BattleMap.objects.get(game=game, user=game.creator)
-        c_battlemap.fleet = [[9, 9]]
+        c_battlemap.shoots = [[1, 1], [6, 5]]
+        c_battlemap.fleet = [
+            [[5, 1], [3, 1], [4, 1], [2, 1]],
+            [[4, 4], [3, 4]],
+            [[3, 6]],
+            [[3, 8]],
+            [[3, 10]],
+            [[5, 6], [6, 6]],
+            [[6, 10]],
+            [[7, 3], [7, 2], [7, 1]],
+            [[8, 8], [7, 8]],
+            [[9, 5], [9, 3], [9, 4]]
+        ]
         c_battlemap.save()
         j_battlemap.save()
 
@@ -202,7 +241,13 @@ class TestGamesAPIViewSet(APITestCase):
         client.force_authenticate(user=game.creator)
 
         response = client.get(url)
-        resp_assert = {'state': constants.ACTIVE, 'shoots_of_enemy': [[0, 0], [1, 1]]}
+        resp_assert = {
+            'state': constants.ACTIVE,
+            'shoots_of_enemy': [[8, 9, "miss"], [4, 3, "miss"]],
+            "my_dead_zone": [],
+            "joiner": test_user.username,
+            "turn": game.creator.username,
+        }
         self.assertEqual(resp_assert, json.loads(response.content))
         assert response.status_code == 200
 
