@@ -223,4 +223,4 @@ def join_fleet(game_id, user, fleet):
                 game_id=game_id,
             )
         else:
-            raise Exception(constants.FAIL_TO_ADD_FLEET)
+            return constants.FAIL_TO_ADD_FLEET

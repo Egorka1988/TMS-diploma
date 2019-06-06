@@ -54,7 +54,6 @@ const activeGameReducer = (state = initState, action) => {
     switch(action.type){
 
         case 'LOAD_ACTIVE_GAME':
-                // debugger;
 
             return {
                 ...state,
@@ -141,7 +140,7 @@ const activeGameReducer = (state = initState, action) => {
 
             }
         case 'SHOOT_RESULT_ERROR':
-            console.log('shoot results', action)
+                console.log('Shoot failed')
             return {
                 ...state,
                 err: action.err,
@@ -198,12 +197,12 @@ const activeGameReducer = (state = initState, action) => {
                 battleMap: bm
             }
         }
-        case 'STATE_MSG_RESET':
-            console.log('reset')
-            return {
-                ...state,
-                shootMsg: null,
-            }
+        // case 'STATE_MSG_RESET':
+        //     console.log('reset')
+        //     return {
+        //         ...state,
+        //         shootMsg: null,
+        //     }
         
         default:
             return state;

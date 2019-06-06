@@ -205,13 +205,12 @@ export const joinFleet = (stateData, gameId) => {
                     size: stateData.size 
                     })
                 };
-        console.log(stateData)
+
         const myRequest = new Request(SERVICE_URL +'/rest/games/' + gameId + '/join_fleet/', myInit);
         const response = await fetch(myRequest);
         const respdata =  await response.json()
         
         if (response.ok) {
-          
             dispatch({
                 type: 'GAME_JOIN_FLEET_SUCCESS',
                 isFleetJoined: true
@@ -220,6 +219,7 @@ export const joinFleet = (stateData, gameId) => {
             dispatch({
                 type: 'GAME_JOIN_FLEET_ERROR',
                 err: 'error',
+                joinErr: respdata['err'],
                 emptyFleet: respdata['fleet'],
                 invalidShipType: respdata['not_allowed_ships'],
                 invalidCount: respdata['not_allowed_ship_count'],

@@ -188,9 +188,11 @@ class GamesAPIViewSet(viewsets.GenericViewSet):
                 )
 
         fleet = validator.validated_data['fleet']
-        join_fleet(game_id, request.user, fleet)
-
-        return Response(status=status.HTTP_201_CREATED)
+        err = []
+        err = join_fleet(game_id, request.user, fleet)
+        if err:
+            return Response({'err': err}, status=status.HTTP_400_BAD_REQUEST)
+        return Response('ok', status=status.HTTP_201_CREATED)
 
     @action(methods=['GET'], detail=True)
     def state(self, *args, **kwargs):

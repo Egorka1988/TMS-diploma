@@ -21,9 +21,8 @@ class JoinGame extends Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        
-        this.props.isFleetJoined
-        && (this.props.gameId !== prevProps.gameId) 
+        this.props.isFleetJoined 
+        && prevProps.isFleetJoined !== this.props.isFleetJoined
         && this.setState({shouldRedirectToActiveGame: true});
     }
 
@@ -51,6 +50,7 @@ class JoinGame extends Component {
         () => {this.setState({isLoading: false})
         })   
     }
+    
     handleSubmit = (e) => {
         e.preventDefault();       
         this.setState({ isLoading: true, size: this.props.size}, 
@@ -58,7 +58,6 @@ class JoinGame extends Component {
                 this.props.joinFleet(this.props, this.props.gameId)
                 .finally(() => this.setState({isLoading: false, errHandleCompleted : false})); 
         });
-        
     }
 
     errorHandler = () => {
@@ -164,6 +163,7 @@ class JoinGame extends Component {
                               
                                 {this.props.err ? this.state.errHandleCompleted ? null : this.errorHandler() : null}
                                 {this.state.errMsg}
+                                {this.props.joinErr}
                             </div> 
                             <div className="input-field">
                                 <button type='button' className="btn red lighten-1 z-depth-10" onClick={this.handleReset}>Reset</button>
@@ -202,7 +202,8 @@ const mapStateToProps = (state) => {
         invalidShipType: state.games.invalidShipType,
         invalidCount: state.games.invalidCount,
         invalidShipComposition: state.games.invalidShipComposition,
-        forbiddenCells: state.games.forbiddenCells
+        forbiddenCells: state.games.forbiddenCells,
+        joinErr: state.games.joinErr,
     }
 }
 
