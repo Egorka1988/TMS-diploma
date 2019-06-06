@@ -12,7 +12,7 @@ export const getGames = () => {
                 cache: 'default'
             };
 
-        const myRequest = new Request('http://127.0.0.1:8000/rest/games/', myInit);
+        const myRequest = new Request(SERVICE_URL +'/rest/games/', myInit);
         const response = await fetch(myRequest);
         const data = await response.json();
         
@@ -55,7 +55,7 @@ export const createGame = (stateData) => {
                     })
                 };
 
-        const myRequest = new Request('http://127.0.0.1:8000/rest/games/', myInit);
+        const myRequest = new Request(SERVICE_URL +'/rest/games/', myInit);
         const response = await fetch(myRequest);
         const respdata = await response.json();
         
@@ -92,7 +92,7 @@ export const shoot = (cell, gameId) => {
                 body: JSON.stringify({shoot: cell})
                 };
 
-        const url = 'http://127.0.0.1:8000/rest/games/'+ gameId+ '/shoot/'
+        const url = SERVICE_URL +'/rest/games/'+ gameId+ '/shoot/'
         const myRequest = new Request(url, myInit);
         const response = await fetch(myRequest);
         const respdata = await response.json();
@@ -128,7 +128,7 @@ export const loadActiveGame = (gameId, settingFleetMode=false) => {
                 cache: 'default',
                 };
 
-        const url = 'http://127.0.0.1:8000/rest/games/'+ gameId+ '/initial-state/'
+        const url = SERVICE_URL +'/rest/games/'+ gameId+ '/initial-state/'
         const myRequest = new Request(url, myInit);
         const response = await fetch(myRequest);
         const data = await response.json();
@@ -155,7 +155,7 @@ export const joinGame = (game) => {
                 cache: 'default',
                 };
 
-        const url = 'http://127.0.0.1:8000/rest/games/' + game.id + '/join/'
+        const url = SERVICE_URL +'/rest/games/' + game.id + '/join/'
         const myRequest = new Request(url, myInit);
         const response = await fetch(myRequest);
 
@@ -169,6 +169,7 @@ export const joinGame = (game) => {
                 name: game.name,
                 creator: game.creator,
                 gameId: game.id,
+                joinErr: null,
             })
             return game.id
         } else {
@@ -205,7 +206,7 @@ export const joinFleet = (stateData, gameId) => {
                     })
                 };
         console.log(stateData)
-        const myRequest = new Request('http://127.0.0.1:8000/rest/games/' + gameId + '/join_fleet/', myInit);
+        const myRequest = new Request(SERVICE_URL +'/rest/games/' + gameId + '/join_fleet/', myInit);
         const response = await fetch(myRequest);
         const respdata =  await response.json()
         
@@ -241,7 +242,7 @@ export const getGameState = (gameId) => {
                 cache: 'default'
             }
                
-        const url = 'http://127.0.0.1:8000/rest/games/'+ gameId+ '/state/'
+        const url = SERVICE_URL +'/rest/games/'+ gameId+ '/state/'
         const myRequest = new Request(url, myInit);
         const response = await fetch(myRequest);
         const respdata = await response.json();

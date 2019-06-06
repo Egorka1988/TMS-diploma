@@ -8,8 +8,19 @@ import { joinGame } from '../../store/actions/gamesActions'
 
 
 class Dashboard extends Component {
+
+    state = {
+        shouldRedirectToJoin: false,
+        err: null
+    }
     componentDidMount () {
         this.props.getGames()
+    }
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        
+        this.props.gameId 
+        && (this.props.gameId !== prevProps.gameId) 
+        && this.setState({shouldRedirectToJoin: true});
     }
 
     joinHandler = (game) => {
@@ -17,14 +28,13 @@ class Dashboard extends Component {
     }
     
     render() {
-        const { authToken, availableGames, err, joinErr, gameId } = this.props; 
+        const { authToken, availableGames, joinErr, gameId } = this.props; 
         if (!authToken) {
             return <Redirect to='/login' />
         }
-        if (gameId) {
+        if (this.state.shouldRedirectToJoin) {
             return <Redirect to={'/join/'+gameId}/>
         } 
-        console.log(availableGames)
         return(
             <div className="dashboard container">
                 <div className="row">

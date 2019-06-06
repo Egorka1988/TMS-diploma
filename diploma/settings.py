@@ -121,6 +121,8 @@ STATIC_ROOT = 'static'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 CORS_ORIGIN_WHITELIST = [
-    "http://localhost:8080",
-    "http://127.0.0.1:8080"
+    # "http://localhost:8080",
+    # "http://127.0.0.1:8080",
+    "http://192.168.32.107:8080",
 ]
+# CORS_ORIGIN_ALLOW_ALL =True

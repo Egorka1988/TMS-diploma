@@ -69,7 +69,7 @@ class TestGetGameState:
 
     def test_wait_for_joiner(self):
 
-        game = GameFactory()
+        game = ActiveGameFactory()
         joiner = UserFactory()
         c_bm = game.battle_maps.filter(user=game.creator).first()
         c_bm.fleet = [[(1, 1), (1, 2), (1, 3)]]

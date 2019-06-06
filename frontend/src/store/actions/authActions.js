@@ -1,9 +1,9 @@
 
+
 export const signIn = (credentials) => {
     return async (dispatch, getState) => {
         const myHeaders = new Headers();
         myHeaders.append("content-type", "application/json")
-        // token ? myHeaders.append("authorization", `Token ${token}`) : {}
         const myInit = { 
                 method: 'POST',
                 mode: 'cors',
@@ -11,7 +11,7 @@ export const signIn = (credentials) => {
                 cache: 'default',
                 body: JSON.stringify(credentials) };
 
-        const myRequest = new Request('http://127.0.0.1:8000/rest/login/', myInit);
+        const myRequest = new Request(SERVICE_URL + '/rest/login/', myInit);
         const response = await fetch(myRequest);
         const data = await response.json();
         
@@ -46,7 +46,7 @@ export const initialLoad = () => async (dispatch, getState) => {
                 headers: myHeaders,
                 cache: 'default',
                 };
-    const url = 'http://127.0.0.1:8000/rest/initial-data/'
+    const url = SERVICE_URL + '/rest/initial-data/'
     const resp = await fetch(url, myInit);
     const data = await resp.json();
 
@@ -78,7 +78,7 @@ export const editProfile = (editInfo) => {
                 body: JSON.stringify(editInfo)
             };
 
-        const myRequest = new Request('http://127.0.0.1:8000/rest/profile/', myInit);
+        const myRequest = new Request(SERVICE_URL +'/rest/profile/', myInit);
         const response = await fetch(myRequest);
         const data = await response.json();
 
@@ -96,7 +96,7 @@ export const signUp = (credentials) => {
                 cache: 'default',
                 body: JSON.stringify(credentials) };
 
-        const myRequest = new Request('http://127.0.0.1:8000/rest/signup/', myInit);
+        const myRequest = new Request(SERVICE_URL +'/rest/signup/', myInit);
         const response = await fetch(myRequest);
         const data = await response.json();
         

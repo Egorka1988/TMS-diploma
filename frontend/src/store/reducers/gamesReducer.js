@@ -63,12 +63,13 @@ const gamesReducer = (state = initState, action) => {
                 name: action.name,
                 creator: action.creator,
                 gameId: action.gameId,
+                joinErr: action.joinErr,
             }
         case 'JOIN_ERROR':
                 console.log('Join failed')
             return {
                 ...state,
-                joinErr: respdata.values(),
+                joinErr: action.joinErr,
             }
         case 'GAME_JOIN_FLEET_SUCCESS':
             console.log('Join fleet success')

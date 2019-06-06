@@ -9,14 +9,22 @@ import { genBattleMapState } from './NewGame'
 
 
 class JoinGame extends Component {
+    
+    state = {
+        isLoading: false,
+        errHandleCompleted: false,
+        shouldRedirectToActiveGame: false,
+    }
+
     componentWillMount(){
         this.props.loadActiveGame(this.props.match.params.gameId, true)
     }
 
-    state = {
-        isLoading: false,
-        // battleMap: genBattleMapState(this.props.size),
-        errHandleCompleted: false
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        
+        this.props.isFleetJoined
+        && (this.props.gameId !== prevProps.gameId) 
+        && this.setState({shouldRedirectToActiveGame: true});
     }
 
     onClick = (cell) => { 
@@ -24,7 +32,6 @@ class JoinGame extends Component {
             let resetBattleMap = {...this.props.battleMap}
             for (let i = 1; i<this.props.size+1; i++) {
                 for (let j = 1; j<this.props.size+1;j++) {
-                    
                     resetBattleMap[i][j] = {...resetBattleMap[i][j], isError: false}
                 }
             }
@@ -32,6 +39,7 @@ class JoinGame extends Component {
         }
         this.props.clickHandle(cell, this.props.battleMap)
     }
+
     handleReset = (e) => {
         e.preventDefault();        
         this.setState({ 
@@ -124,15 +132,13 @@ class JoinGame extends Component {
     }
 
     render() {
-        debugger;
         if (this.state.isLoading) {
             return spinner()
         }
         if (!this.props.auth.authToken) { 
             return <Redirect to="/login"/>;
         }
-        if (this.props.isFleetJoined) {
-
+        if (this.state.shouldRedirectToActiveGame) {
             return <Redirect to={'/active-games/'+ this.props.gameId} />;
         }
         return (

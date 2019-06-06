@@ -179,10 +179,7 @@ class TestGamesAPIViewSet(APITestCase):
         test_user = UserFactory()
         client = APIClient()
 
-        game = ActiveGameFactory(joiner=test_user)
-        battlemap = BattleMap.objects.get(game=game, user=test_user)
-        battlemap.fleet = [[[0, 0], [1, 0]], [[9, 9]]]
-        battlemap.save()
+        game = GameFactory(joiner=test_user)
 
         url = '/rest/games/' + str(game.pk) + '/join_fleet/'
 
@@ -230,6 +227,7 @@ class TestGamesAPIViewSet(APITestCase):
             [[8, 8], [7, 8]],
             [[9, 5], [9, 3], [9, 4]]
         ]
+        j_battlemap.fleet = c_battlemap.fleet
         c_battlemap.save()
         j_battlemap.save()
 

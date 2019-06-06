@@ -1,6 +1,8 @@
 
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const webpack = require("webpack")
+
 module.exports = {
     entry: ['babel-polyfill', "./src/index.js"],
     output: {
@@ -30,7 +32,10 @@ module.exports = {
     plugins: [
         new HtmlWebpackPlugin({
         template: "./src/index.html"
-        })
+        }), 
+        new webpack.DefinePlugin({
+            'SERVICE_URL': JSON.stringify('http://192.168.32.107:8000')
+          }), 
     ],
     watch: true
     };
