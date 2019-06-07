@@ -43,7 +43,6 @@ export const genBattleMapState = ({size, fleet, shoots, deadZone, disabled}) => 
     return battleMap
 }
 
-
 const initState = {
     err: null,
     isLoading: true
@@ -136,8 +135,6 @@ const activeGameReducer = (state = initState, action) => {
                 turn: turn,
                 shootMsg: shootMsg,
                 err: null
-
-
             }
         case 'SHOOT_RESULT_ERROR':
                 console.log('Shoot failed')
@@ -197,13 +194,7 @@ const activeGameReducer = (state = initState, action) => {
                 battleMap: bm
             }
         }
-        // case 'STATE_MSG_RESET':
-        //     console.log('reset')
-        //     return {
-        //         ...state,
-        //         shootMsg: null,
-        //     }
-        
+
         default:
             return state;
     }

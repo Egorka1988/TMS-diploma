@@ -1,19 +1,18 @@
 
+import { requestWrapper } from '../../utils'
+
+
+
 export const getGames = () => {
     return async (dispatch, getState) => {
-        const myHeaders = new Headers();
         
-        myHeaders.append("content-type", "application/json")
-        myHeaders.append("authorization", `Token ${getState().auth.authToken}`)
-        const myInit = { 
-                method: 'GET',
-                mode: 'cors',
-                headers: myHeaders,
-                cache: 'default'
-            };
+        const request = requestWrapper(
+            getState,
+            "GET",
+            SERVICE_URL +'/rest/games/',   
+        )
 
-        const myRequest = new Request(SERVICE_URL +'/rest/games/', myInit);
-        const response = await fetch(myRequest);
+        const response = await fetch(request);
         const data = await response.json();
         
         if (response.ok) {
@@ -32,9 +31,6 @@ export const getGames = () => {
 
 export const createGame = (stateData) => {
     return async (dispatch, getState) => {
-        const myHeaders = new Headers();
-        myHeaders.append("content-type", "application/json")
-        myHeaders.append("authorization", `Token ${getState().auth.authToken}`)
         let fleet = []
         const size = Object.keys(stateData.battleMap).length
         for (let i=0; i<size; i++){
@@ -42,21 +38,19 @@ export const createGame = (stateData) => {
                 stateData.battleMap[i+1][j+1].isSelected ? fleet.push([i+1,j+1]) : null
             }
         }
+        const bodyData = {
+            fleet, 
+            size: stateData.size, 
+            name: stateData.name,
+        }
+        const request = requestWrapper(
+            getState,
+            "POST",
+            SERVICE_URL +'/rest/games/',  
+            bodyData 
+        )
 
-        const myInit = { 
-                method: 'POST',
-                mode: 'cors',
-                headers: myHeaders,
-                cache: 'default',
-                body: JSON.stringify({
-                    fleet, 
-                    size: stateData.size, 
-                    name: stateData.name,
-                    })
-                };
-
-        const myRequest = new Request(SERVICE_URL +'/rest/games/', myInit);
-        const response = await fetch(myRequest);
+        const response = await fetch(request);
         const respdata = await response.json();
         
         if (response.ok) {
@@ -81,20 +75,15 @@ export const createGame = (stateData) => {
 
 export const shoot = (cell, gameId) => {
     return async (dispatch, getState) => {
-        const myHeaders = new Headers();
-        myHeaders.append("content-type", "application/json")
-        myHeaders.append("authorization", `Token ${getState().auth.authToken}`)        
-        const myInit = { 
-                method: 'PATCH',
-                mode: 'cors',
-                headers: myHeaders,
-                cache: 'default',
-                body: JSON.stringify({shoot: cell})
-                };
+        
+        const request = requestWrapper(
+            getState,
+            "PATCH",
+            SERVICE_URL +'/rest/games/'+ gameId+ '/shoot/',  
+            {shoot: cell} 
+        )
 
-        const url = SERVICE_URL +'/rest/games/'+ gameId+ '/shoot/'
-        const myRequest = new Request(url, myInit);
-        const response = await fetch(myRequest);
+        const response = await fetch(request);
         const respdata = await response.json();
         
         if (response.ok) {
@@ -118,20 +107,15 @@ export const shoot = (cell, gameId) => {
 
 export const loadActiveGame = (gameId, settingFleetMode=false) => {
     return async (dispatch, getState) => {
-        const myHeaders = new Headers();
-        myHeaders.append("content-type", "application/json")
-        myHeaders.append("authorization", `Token ${getState().auth.authToken}`)        
-        const myInit = { 
-                method: 'GET',
-                mode: 'cors',
-                headers: myHeaders,
-                cache: 'default',
-                };
-
-        const url = SERVICE_URL +'/rest/games/'+ gameId+ '/initial-state/'
-        const myRequest = new Request(url, myInit);
-        const response = await fetch(myRequest);
+        
+        const request = requestWrapper(
+            getState,
+            "GET",
+            SERVICE_URL +'/rest/games/'+ gameId+ '/initial-state/',  
+        )
+        const response = await fetch(request);
         const data = await response.json();
+
         if (response.ok) {
             dispatch({
                 type: 'LOAD_ACTIVE_GAME',
@@ -140,25 +124,17 @@ export const loadActiveGame = (gameId, settingFleetMode=false) => {
             })
         }
     }
-
 }
 
 export const joinGame = (game) => {
     return async (dispatch, getState) => {
-        const myHeaders = new Headers();
-        myHeaders.append("content-type", "application/json")
-        myHeaders.append("authorization", `Token ${getState().auth.authToken}`)        
-        const myInit = { 
-                method: 'POST',
-                mode: 'cors',
-                headers: myHeaders,
-                cache: 'default',
-                };
+        const request = requestWrapper(
+            getState,
+            "POST",
+            SERVICE_URL +'/rest/games/' + game.id + '/join/',  
+        )
 
-        const url = SERVICE_URL +'/rest/games/' + game.id + '/join/'
-        const myRequest = new Request(url, myInit);
-        const response = await fetch(myRequest);
-
+        const response = await fetch(request);
         const respdata = await response;
         
         if (response.ok) {
@@ -184,9 +160,6 @@ export const joinGame = (game) => {
 
 export const joinFleet = (stateData, gameId) => {
     return async (dispatch, getState) => {
-        const myHeaders = new Headers();
-        myHeaders.append("content-type", "application/json")
-        myHeaders.append("authorization", `Token ${getState().auth.authToken}`)
         let fleet = []
         const size = Object.keys(stateData.battleMap).length
         for (let i=0; i<size; i++){
@@ -194,20 +167,18 @@ export const joinFleet = (stateData, gameId) => {
                 stateData.battleMap[i+1][j+1].isSelected ? fleet.push([i+1,j+1]) : null
             }
         }
+        const bodyData  ={
+            fleet,
+            size: stateData.size 
+        }
+        const request = requestWrapper(
+            getState,
+            "POST",
+            SERVICE_URL +'/rest/games/' + gameId + '/join_fleet/',
+            bodyData  
+        )
 
-        const myInit = { 
-                method: 'POST',
-                mode: 'cors',
-                headers: myHeaders,
-                cache: 'default',
-                body: JSON.stringify({
-                    fleet,
-                    size: stateData.size 
-                    })
-                };
-
-        const myRequest = new Request(SERVICE_URL +'/rest/games/' + gameId + '/join_fleet/', myInit);
-        const response = await fetch(myRequest);
+        const response = await fetch(request);
         const respdata =  await response.json()
         
         if (response.ok) {
@@ -232,19 +203,12 @@ export const joinFleet = (stateData, gameId) => {
 
 export const getGameState = (gameId) => {
     return async (dispatch, getState) => {
-        const myHeaders = new Headers();
-        myHeaders.append("content-type", "application/json")
-        myHeaders.append("authorization", `Token ${getState().auth.authToken}`)        
-        const myInit = { 
-                method: 'GET',
-                mode: 'cors',
-                headers: myHeaders,
-                cache: 'default'
-            }
-               
-        const url = SERVICE_URL +'/rest/games/'+ gameId+ '/state/'
-        const myRequest = new Request(url, myInit);
-        const response = await fetch(myRequest);
+        const request = requestWrapper(
+            getState,
+            "GET",
+            SERVICE_URL +'/rest/games/'+ gameId+ '/state/',  
+        )
+        const response = await fetch(request);
         const respdata = await response.json();
         
         if (response.ok) {
