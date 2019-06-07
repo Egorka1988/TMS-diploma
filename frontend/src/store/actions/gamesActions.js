@@ -63,10 +63,10 @@ export const createGame = (stateData) => {
                 type: 'GAME_CREATE_ERROR',
                 err: 'error',
                 emptyFleet: respdata['fleet'],
-                invalidShipType: respdata['not_allowed_ships'],
-                invalidCount: respdata['not_allowed_ship_count'],
-                invalidShipComposition: respdata['invalid_ship_composition'],
-                forbiddenCells: respdata['forbidden_cells'],
+                invalidShipType: respdata['notAllowedShips'],
+                invalidCount: respdata['notAllowedShipCount'],
+                invalidShipComposition: respdata['invalidShipComposition'],
+                forbiddenCells: respdata['forbiddenCells'],
             })
         }
     }
@@ -92,8 +92,8 @@ export const shoot = (cell, gameId) => {
                 state: respdata.state,
                 shootResult: respdata.shoot,
                 lastShoot: cell,
-                enemyDeadZone: respdata.dead_zone,
-                deadShip: respdata.dead_ship,
+                enemyDeadZone: respdata.deadZone,
+                deadShip: respdata.deadShip,
             })
         } else {
             dispatch({
@@ -192,10 +192,10 @@ export const joinFleet = (stateData, gameId) => {
                 err: 'error',
                 joinErr: respdata['err'],
                 emptyFleet: respdata['fleet'],
-                invalidShipType: respdata['not_allowed_ships'],
-                invalidCount: respdata['not_allowed_ship_count'],
-                invalidShipComposition: respdata['invalid_ship_composition'],
-                forbiddenCells: respdata['forbidden_cells'],
+                invalidShipType: respdata['notAllowedShips'],
+                invalidCount: respdata['notAllowedShipCount'],
+                invalidShipComposition: respdata['invalidShipComposition'],
+                forbiddenCells: respdata['forbiddenCells'],
             })
         }
     }
@@ -217,8 +217,8 @@ export const getGameState = (gameId) => {
                 turn: respdata.turn,
                 joiner: respdata.joiner,
                 gameState: respdata.state,
-                enemyShoots: respdata.shoots_of_enemy,
-                myDeadZone: respdata.my_dead_zone,
+                enemyShoots: respdata.shootsOfEnemy,
+                myDeadZone: respdata.myDeadZone,
             })
         }     
     }

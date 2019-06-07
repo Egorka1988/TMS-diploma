@@ -65,24 +65,24 @@ const activeGameReducer = (state = initState, action) => {
                 joiner: action.joiner,
                 turn: action.turn,
                 winner: action.winner,   
-                gameState: action.game_state,
-                isDisabled: action.settingFleetMode ? false: action.game_state === "active" ? action.turn === action.current_user ? false : true : true,
+                gameState: action.gameState,
+                isDisabled: action.settingFleetMode ? false: action.gameState === "active" ? action.turn === action.currentUser ? false : true : true,
                 settingFleetMode: action.settingFleetMode,
 
-                myShoots: action.my_shoots,
-                enemyShoots: action.enemy_shoots,
+                myShoots: action.myShoots,
+                enemyShoots: action.enemyShoots,
 
                 enemyBattleMap: genBattleMapState({
                     size: action.size, 
-                    shoots: action.my_shoots, 
-                    deadZone: action.enemy_dead_zone, 
-                    disabled: action.game_state === "active" ? action.turn === action.current_user ? false : true : true,
+                    shoots: action.myShoots, 
+                    deadZone: action.enemyDeadZone, 
+                    disabled: action.gameState === "active" ? action.turn === action.currentUser ? false : true : true,
                 }),
                 battleMap: genBattleMapState({
                     size: action.size, 
-                    shoots: action.enemy_shoots, 
+                    shoots: action.enemyShoots, 
                     fleet: action.fleet, 
-                    deadZone: action.my_dead_zone,
+                    deadZone: action.myDeadZone,
                     disabled: action.settingFleetMode ? false : true
                 })
             }

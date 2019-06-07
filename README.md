@@ -36,8 +36,14 @@ Linux system is recommended.I use 16.04 version
 15. First, install yarn https://yarnpkg.com/ru/docs/install#debian-stable 
 16. Then your current directory to /frontend . Then write follow: <pre><code>yarn install --check-files </code></pre>
 17. Then <pre><code>yarn start </code></pre>
-18. Application is avalable on URL http://127.0.0.1:8080/
-
-
-
-
+18. Note, that you should specify your accessing url in webpack.config.js to:
+ 
+<pre><code> new webpack.DefinePlugin({
+                'SERVICE_URL': JSON.stringify('http://127.0.0.1:8080')
+            }),  
+</code></pre>
+You can also point your IP address at your local network. In this case you can share the game in your network scope.
+Just type in your browser:
+  <pre><code>
+  http://your.IP.address:8080/
+  </code></pre>

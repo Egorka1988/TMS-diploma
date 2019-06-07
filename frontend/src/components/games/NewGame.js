@@ -208,11 +208,9 @@ class NewGame extends Component {
                         </div>
                         
                         <div className="col s4 ">
-                               <Legend 
-                                    size={this.state.size}
-                                    battleMap={this.state.battleMap} 
-                                    disabled={true} 
-                                />
+                            <Legend 
+                                size={this.state.size}
+                            />
                         </div>
                     </div>
                 </form> 
@@ -224,7 +222,6 @@ class NewGame extends Component {
 const mapStateToProps = (state) => {
    
     return {
-        fleetComposition: state.auth.fleetComposition,
         auth: state.auth,
         err: state.games.err,
         gameId: state.games.gameId,

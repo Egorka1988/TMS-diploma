@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import { signIn, editProfile } from '../../store/actions/authActions'
+// import { signIn, editProfile } from '../../store/actions/authActions'
 import { connect } from 'react-redux'
 import { Redirect } from "react-router-dom";
 import { spinner } from '../../utils';

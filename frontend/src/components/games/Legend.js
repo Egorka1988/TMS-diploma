@@ -34,10 +34,15 @@ class Legend extends Component {
             ship.push(
             <div key={'legendCell'+i+deckCount}>
                 <Cell
-                    cursor=''
-                    color='lime'
-                    disabled={this.props.disabled}
-                    style={{border:'1px solid black', borderRadius: '2px', borderTop: 'none', height: 25, width: 25, backgroundColor: 'lime', borderTop: i === 0 ? '1px solid black': null}}
+                    style={{
+                        border:'1px solid black', 
+                        borderRadius: '2px', 
+                        borderTop: 'none', 
+                        height: 25, 
+                        width: 25, 
+                        backgroundColor: 'lime', 
+                        borderTop: i === 0 ? '1px solid black': null}}
+                    disabled
                 />
             </div>)
         }
@@ -45,7 +50,7 @@ class Legend extends Component {
     }
     
     renderLegend = () => {
-
+        
         const fleetComposition = this.props.fleetComposition[this.props.size]
         const rows = [
                 <div key='shipType'>Ship type</div>, 
@@ -84,7 +89,7 @@ class Legend extends Component {
 }
 const mapStateToProps = (state) => {
     return {
-        fleetComposition: state.auth.fleetComposition,
+        fleetComposition: state.games.fleetComposition,
     }
 }
 

@@ -40,14 +40,15 @@ export const spinner = () => {
 export const requestWrapper = (getState, method, url, bodyData) => {
     const myHeaders = new Headers();
     myHeaders.append("content-type", "application/json")
-        myHeaders.append("authorization", `Token ${getState().auth.authToken}`)
-        const myInit = { 
-                method: method,
-                mode: 'cors',
-                headers: myHeaders,
-                cache: 'default',
-                body: bodyData ? JSON.stringify(bodyData) : null
-            };
+    getState().auth.authToken ? 
+    myHeaders.append("authorization", `Token ${getState().auth.authToken}`) : null
+    const myInit = { 
+            method: method,
+            mode: 'cors',
+            headers: myHeaders,
+            cache: 'default',
+            body: bodyData ? JSON.stringify(bodyData) : null
+        };
 
-        return new Request(url, myInit);
+    return new Request(url, myInit);
 }

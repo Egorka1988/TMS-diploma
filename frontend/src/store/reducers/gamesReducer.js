@@ -6,7 +6,7 @@ const gamesReducer = (state = initState, action) => {
     switch(action.type){
 
         case 'FLEET_COMPOSITION':
-                console.log(action.fleetComposition)
+             
             return {
                 ...state, 
                 fleetComposition: action.fleetComposition
