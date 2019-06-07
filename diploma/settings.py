@@ -26,8 +26,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
-
     'django_registration',
+
     'sea_battle',
 ]
 
@@ -48,10 +48,7 @@ ROOT_URLCONF = 'diploma.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-                'diploma/templates',
-                'sea_battle/templates/sea_battle',
-                 ],
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -100,8 +97,11 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'djangorestframework_camel_case.render.CamelCaseJSONRenderer',
+    ],
 
-    ]
 }
 
 LANGUAGE_CODE = 'en-us'
@@ -121,8 +121,5 @@ STATIC_ROOT = 'static'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 CORS_ORIGIN_WHITELIST = [
-    # "http://localhost:8080",
-    # "http://127.0.0.1:8080",
     "http://192.168.32.107:8080",
 ]
-# CORS_ORIGIN_ALLOW_ALL =True
