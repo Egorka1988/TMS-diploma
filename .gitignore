@@ -7,3 +7,5 @@ tricks
 .yarn_cache/*
 !.yarn_cache/.gitkeep
 node_modules
+.env
+.vscode
