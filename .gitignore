@@ -8,5 +8,4 @@ tricks
 !.yarn_cache/.gitkeep
 node_modules
 .vscode
-dist
 .env
