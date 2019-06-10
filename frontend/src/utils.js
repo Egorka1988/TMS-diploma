@@ -3,20 +3,26 @@ import style from './styles.css'
 
 export const localStoreTokenManager = store => {
     let currentToken = localStorage.getItem('authToken') || null;
+    let currRefreshToken = localStorage.getItem('refreshAuthToken') || null;
 
-    store.dispatch({type: 'SET_AUTH_TOKEN', authToken: currentToken});
+    store.dispatch({
+        type: 'SET_AUTH_TOKEN', 
+        authToken: currentToken,
+        refreshAuthToken: currRefreshToken,
+    });
 
     return () => {
         const newToken = store.getState().auth.authToken;
+        const newRefreshToken = store.getState().auth.refreshAuthToken;
+        console.log(store.getState())
         
-    
          if (newToken === null) {
             localStorage.removeItem('authToken');
         } else if (newToken !== currentToken) {
             localStorage.setItem('authToken', newToken);
+            localStorage.setItem('refreshAuthToken', newRefreshToken);
         }
-    
-        currentToken = newToken;
+        // currentToken = newToken;
     }
 }
 
@@ -40,8 +46,8 @@ export const spinner = () => {
 export const requestWrapper = (getState, method, url, bodyData) => {
     const myHeaders = new Headers();
     myHeaders.append("content-type", "application/json")
-    getState().auth.authToken ? 
-    myHeaders.append("authorization", `Token ${getState().auth.authToken}`) : null
+    getState().auth ? 
+    myHeaders.append("Authorization", `Bearer ${getState().auth.authToken}`): null
     const myInit = { 
             method: method,
             mode: 'cors',

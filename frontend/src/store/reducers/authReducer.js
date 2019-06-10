@@ -19,10 +19,12 @@ const authReducer = (state = initState, action) => {
             }
         case 'LOGIN_SUCCESS':
             console.log('login success');
+            console.log(action.refreshAuthToken);
             return {
                 ...state,
                 authError: null,
                 authToken: action.token,
+                refreshAuthToken: action.refreshAuthToken,
                 currentUser: action.currentUser 
             }
         case 'LOG_OUT_SUCCESS':

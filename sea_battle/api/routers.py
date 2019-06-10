@@ -4,6 +4,7 @@ from sea_battle.api import views as v
 
 router = routers.DefaultRouter()
 
+
 router.register(r'games', v.GamesAPIViewSet,
                 basename='games'
                 )

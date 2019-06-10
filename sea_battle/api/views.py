@@ -4,13 +4,13 @@ from django.http import JsonResponse
 from django.utils import timezone
 
 from rest_framework import viewsets, generics, exceptions
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from rest_framework import status
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from sea_battle import constants
 from sea_battle.api import serializers, validators
@@ -60,7 +60,7 @@ class WatchGamesAPIViewSet(viewsets.GenericViewSet):
 
     serializer_class = serializers.ActiveGamesSerializer
     permission_classes = (IsAuthenticated,)
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (JWTAuthentication,)
 
     def get_queryset(self):
         current_user = self.request.user
@@ -78,7 +78,7 @@ class WatchGamesAPIViewSet(viewsets.GenericViewSet):
 
 class InitialDataAPIViewSet(viewsets.GenericViewSet):
 
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated,)
 
     def list(self, request, *args, **kwargs):
@@ -97,7 +97,7 @@ class GamesAPIViewSet(viewsets.GenericViewSet):
 
     serializer_class = serializers.NewGameSerializer
     lookup_url_kwarg = 'game_id'
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):

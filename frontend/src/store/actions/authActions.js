@@ -2,6 +2,7 @@ import { requestWrapper } from '../../utils'
 
 export const signIn = (credentials) => {
     return async (dispatch, getState) => {
+
         const request = requestWrapper(
             getState,
             "POST",
@@ -15,7 +16,8 @@ export const signIn = (credentials) => {
         if (response.ok) {
             dispatch({
                 type: 'LOGIN_SUCCESS',
-                token: data.token,
+                token: data.access,
+                refreshAuthToken: data.refresh,
             })
             dispatch(initialLoad())
         } else {
@@ -39,11 +41,10 @@ export const initialLoad = () => async (dispatch, getState) => {
         "GET",
         SERVICE_URL + '/rest/initial-data/',  
     )
-
+    
     const response = await fetch(request);
     const data = await response.json();
 
-    const currentUser = data.username;
     if (data.isAuthenticated) {
         dispatch({
             'type': 'INITIAL_DATA', 
@@ -54,7 +55,25 @@ export const initialLoad = () => async (dispatch, getState) => {
             fleetComposition: data.fleetComposition    
         })
     } else {
-        dispatch({'type': 'UNSET_CURRENT_USER', currentUser})
+        const myHeaders = new Headers();
+        myHeaders.append("content-type", "application/json")
+        const myInit = { 
+            method: "POST",
+            mode: 'cors',
+            headers: myHeaders,
+            cache: 'default',
+            body: JSON.stringify({refresh: localStorage.getItem('refreshAuthToken')}),
+        };
+        const request = new Request(SERVICE_URL + '/rest/login/refresh/', myInit)
+        const response = await fetch(request);
+        const data = await response.json();
+        if (response.ok) {
+            dispatch({
+                type: 'LOGIN_SUCCESS',
+                token: data.access,
+                refreshAuthToken: data.refresh,
+            })
+        }
     }
 }
 

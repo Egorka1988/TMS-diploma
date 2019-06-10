@@ -1,9 +1,13 @@
 from django.urls import path, include
-from rest_framework.authtoken.views import ObtainAuthToken
 from sea_battle.api.routers import router
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 
 urlpatterns = [
-    path('rest/login/', ObtainAuthToken.as_view(), name='login'),
+    path('rest/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('rest/login/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('rest/', include(router.urls)),
 ]
