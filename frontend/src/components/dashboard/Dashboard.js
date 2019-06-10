@@ -30,7 +30,7 @@ class Dashboard extends Component {
     render() {
         const { authToken, availableGames, joinErr, gameId } = this.props; 
         if (!authToken) {
-            return <Redirect to='/login' />
+            return <Redirect to='/auth' />
         }
         if (this.state.shouldRedirectToJoin) {
             return <Redirect to={'/join/'+gameId}/>

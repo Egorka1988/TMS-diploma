@@ -154,7 +154,7 @@ class NewGame extends Component {
             return spinner()
         }
         if (!this.props.auth.authToken) { 
-            return <Redirect to="/login"/>;
+            return <Redirect to="/auth"/>;
         }
         if (this.props.gameId) {
 

@@ -135,7 +135,7 @@ class JoinGame extends Component {
             return spinner()
         }
         if (!this.props.auth.authToken) { 
-            return <Redirect to="/login"/>;
+            return <Redirect to="/auth"/>;
         }
         if (this.state.shouldRedirectToActiveGame) {
             return <Redirect to={'/active-games/'+ this.props.gameId} />;

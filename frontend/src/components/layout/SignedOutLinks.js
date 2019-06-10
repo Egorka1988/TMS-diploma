@@ -1,11 +1,13 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
 
-const SignedOutLinks = () => {
+
+const SignedOutLinks = (props) => {
+    const {signInLink , signUpLink} = props
     return (
         <ul className="right">
-            <li><NavLink to='/signup'>Signup</NavLink></li>
-            <li><NavLink to='/login'>Login</NavLink></li>
+            <li><NavLink to='/auth' onClick={signUpLink}>Signup</NavLink></li>
+            <li><NavLink to='/auth' onClick={signInLink}>Login</NavLink></li>
         </ul>
     )
 }

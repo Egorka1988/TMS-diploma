@@ -1,21 +1,35 @@
-import React from 'react'
+import React, {Component} from 'react'
 import { Link } from 'react-router-dom'
 import SignedInLinks from './SignedInLinks'
 import SignedOutLinks from './SignedOutLinks'
 import { connect } from 'react-redux'
+import { signData } from '../../store/actions/authActions'
 
-const Navbar = (props) => {
-    const { authToken } = props;
 
-    return (
+class Navbar extends Component {
+
+    signUpLink = () =>{
+        console.log("signUp clicked")
+        this.props.signData("signUp")
+    }
+
+    signInLink = () =>{
+        console.log("signIn clicked")
+        this.props.signData("signIn")
+    }
+
+    render() {
+        const { authToken, currentUser } = this.props;
+        return(
         <nav className="nav-wrapper grey darken-3">
             <div className="container">
                 <Link to='/' className="brand-logo">Sea Battle</Link>
-                { authToken  && props.currentUser && <SignedInLinks /> }
-                { !authToken  && <SignedOutLinks /> }
+                { authToken  && currentUser && <SignedInLinks  /> }
+                { !authToken  && <SignedOutLinks signUpLink={this.signUpLink} signInLink={this.signInLink}/> }
             </div>
         </nav>
-    )
+        )
+    }
 }
 
 const mapStateToProps = (state) => {
@@ -24,6 +38,8 @@ const mapStateToProps = (state) => {
         authToken: state.auth.authToken,
     }
 }
-export default connect(
-    mapStateToProps
-)(Navbar)
+const mapDispatchToProps = (dispatch) => ({
+    signData: (data) => dispatch(signData(data))
+   })
+
+export default connect(mapStateToProps, mapDispatchToProps)(Navbar)

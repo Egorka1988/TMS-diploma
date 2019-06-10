@@ -85,3 +85,20 @@ export const signUp = (credentials) => {
         }
     }
 }
+
+export const signData = (act) => {
+
+    return async (dispatch, getState) => {
+        if (act === "signUp") {
+
+            dispatch({
+                type: 'RENDER_SIGN_UP_DATA',
+            })
+        }
+        if (act === "signIn") {
+            dispatch({
+                type: 'RENDER_SIGN_IN_DATA',
+            })
+        }
+    }
+}

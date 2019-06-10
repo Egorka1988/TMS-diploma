@@ -55,7 +55,17 @@ const authReducer = (state = initState, action) => {
                 authToken: null,
                 username: action.username 
             }
-
+        case 'RENDER_SIGN_UP_DATA':
+            return {
+                ...state,
+                isNewUser: true,
+            }
+        case 'RENDER_SIGN_IN_DATA':
+            return {
+                ...state,
+                isNewUser: false,
+                authError: null,
+            }
         default:
             return state;
     }

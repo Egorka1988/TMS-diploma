@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import { signIn } from '../../store/actions/authActions'
+import { signIn, signUp } from '../../store/actions/authActions'
 import { connect } from 'react-redux'
 import { Redirect } from "react-router-dom";
 import { spinner } from '../../utils';
@@ -21,15 +21,21 @@ class SignIn extends Component {
     handleSubmit = (e) => {
         e.preventDefault();        
         this.setState({isLoading: true})
+        this.props.isNewUser ?
+        this.props.signUp(this.state)
+            .finally(() => this.setState({isLoading: false})):
         this.props.signIn(this.state)
             .finally(() => this.setState({isLoading: false}));
     }
 
     render() {
+        
         if (this.state.isLoading) {
             return spinner()
         }
-        const { authError, authToken }  = this.props
+        const { authError, authToken, isNewUser }  = this.props
+        
+        const msg = isNewUser ? "Sign Up" : "Sign In"
         
         if (authToken) {
             return <Redirect to="/"/>;
@@ -38,7 +44,7 @@ class SignIn extends Component {
         return (
             <div className="container">
                 <form onSubmit={this.handleSubmit} onChange={this.handleChange} className="white">
-                    <h5 className="grey-text text-darken-3">Sign In</h5>
+                    <h5 className="grey-text text-darken-3">{msg}</h5>
                     <div className="input-field">
                         <label htmlFor="username">Username</label>
                         <input type="text" id="username" />
@@ -49,10 +55,11 @@ class SignIn extends Component {
                         <input type="password" id="password"  />
                     </div>
                     <div className="input-field">
-                        <button className="btn pink lighten-1 z-depth-0">Login</button>
+                        <button className="btn pink lighten-1 z-depth-0">{msg}</button>
                         <div className="red-text center">
                             { authError ? <p>{ authError }</p> : null }
                         </div>
+                            
                     </div>
                 </form>
             </div>
@@ -64,13 +71,14 @@ const mapStateToProps = (state) => {
     return {
         authToken: state.auth.authToken,
         authError: state.auth.authError,
-        username: state.username
+        isNewUser: state.auth.isNewUser,
     }
 }
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        signIn: (creds) => dispatch(signIn(creds))
+        signIn: (creds) => dispatch(signIn(creds)),
+        signUp: (creds) => dispatch(signUp(creds))
     }
 }
 

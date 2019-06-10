@@ -1,10 +1,10 @@
 import React, { Component } from "react";
 import { BrowserRouter, Switch, Route } from 'react-router-dom'
-import SignIn from './components/auth/SignIn'
+import SignIn from './components/auth/Auth'
 import Dashboard from './components/dashboard/Dashboard'
 import Navbar from './components/layout/Navbar'
 import Profile from './components/auth/Profile'
-import SignUp from './components/auth/SignUp'
+import Auth from './components/auth/Auth'
 import NewGame from './components/games/NewGame'
 import JoinGame from './components/games/JoinGame'
 import ActiveGame from './components/games/ActiveGame'
@@ -19,8 +19,7 @@ class App extends Component {
                 <div className="App">
                     <Navbar />
                     <Route exact path='/' component={Dashboard} />
-                    <Route path='/login' component={SignIn} />
-                    <Route path='/signup' component={SignUp} />
+                    <Route path='/auth' component={Auth} />
                     <Route path='/profile' component={Profile} />
                     <Route path='/create' component={NewGame} />
                     <Route path={'/join/:gameId'} component={JoinGame} />

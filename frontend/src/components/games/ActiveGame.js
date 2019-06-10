@@ -73,7 +73,7 @@ class ActiveGame extends Component {
             WAIT_FOR_ENEMY_SHOOT  
         }
         if (!auth.authToken) { 
-            return <Redirect to="/login"/>;
+            return <Redirect to="/auth"/>;
         }
 
         return (
