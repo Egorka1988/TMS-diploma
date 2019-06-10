@@ -18,6 +18,9 @@ from sea_battle.models import BattleMap, Game
 from sea_battle.services import get_game, get_game_state, handle_shoot, \
     create_game, join_game, join_fleet, create_user, get_game_battle_maps
 from sea_battle.utils import mapped_shoots
+import logging
+
+logger = logging.getLogger("sea_battle.api.views")
 
 
 class CleaningAPIView(generics.GenericAPIView):
@@ -49,6 +52,7 @@ class RegisterFormAPIViewSet(viewsets.GenericViewSet):
 
         token, created = Token.objects.get_or_create(user=user)
         resp = {'token': token.key, 'username': user.username}
+        logger.info('new user came: %s'%(user.username))
         return Response(resp, status=status.HTTP_201_CREATED)
 
 
@@ -118,7 +122,8 @@ class GamesAPIViewSet(viewsets.GenericViewSet):
 
         fleet_composition_errors = validator.check_fleet_composition()
         if fleet_composition_errors:
-
+            logger.debug(
+                "%s tried to create game. These errors occur: %s" %(request.user, fleet_composition_errors))
             return Response(
                 fleet_composition_errors,
                 status=status.HTTP_400_BAD_REQUEST)

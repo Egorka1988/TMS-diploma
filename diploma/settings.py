@@ -27,7 +27,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_registration',
-
     'sea_battle',
 ]
 
@@ -124,3 +123,52 @@ CORS_ORIGIN_WHITELIST = [
     "http://192.168.32.107:8080",
     "http://127.0.0.1:8080"
 ]
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file_debug': {
+            'level': 'DEBUG',
+            'formatter': 'verbose',
+            'class': 'logging.FileHandler',
+            'filename': 'sea_battle/logging/sb_logger_debug.log',
+        },
+        'file_info': {
+            'level': 'INFO',
+            'formatter': 'verbose',
+            'class': 'logging.FileHandler',
+            'filename': 'sea_battle/logging/sb_logger_info.log',
+        },
+        'file_warning': {
+            'level': 'WARNING',
+            'formatter': 'verbose',
+            'class': 'logging.FileHandler',
+            'filename': 'sea_battle/logging/sb_logger_warning.log',
+        },
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'sea_battle.api.views': {
+            'handlers': ['file_debug', 'console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'django': {
+            'handlers': ['console', 'file_warning'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'WARNING'),
+        },
+    },
+}

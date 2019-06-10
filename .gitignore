@@ -9,3 +9,4 @@ tricks
 node_modules
 .vscode
 .env
+logging
