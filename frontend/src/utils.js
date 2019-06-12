@@ -15,8 +15,10 @@ export const localStoreTokenManager = store => {
         const newToken = store.getState().auth.authToken;
         const newRefreshToken = store.getState().auth.refreshAuthToken;
         
-         if (newToken === null) {
+        if (newToken === null) {
             localStorage.removeItem('authToken');
+            localStorage.removeItem('refreshAuthToken')
+        
         } else if (newToken !== currentToken) {
             localStorage.setItem('authToken', newToken);
             newRefreshToken &&
