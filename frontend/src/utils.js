@@ -14,15 +14,14 @@ export const localStoreTokenManager = store => {
     return () => {
         const newToken = store.getState().auth.authToken;
         const newRefreshToken = store.getState().auth.refreshAuthToken;
-        console.log(store.getState())
         
          if (newToken === null) {
             localStorage.removeItem('authToken');
         } else if (newToken !== currentToken) {
             localStorage.setItem('authToken', newToken);
-            localStorage.setItem('refreshAuthToken', newRefreshToken);
+            newRefreshToken &&
+                localStorage.setItem('refreshAuthToken', newRefreshToken);
         }
-        // currentToken = newToken;
     }
 }
 
@@ -43,11 +42,9 @@ export const spinner = () => {
             </div>
 )}
 
-export const requestWrapper = (getState, method, url, bodyData) => {
+export const requestWrapper = (method, url, bodyData) => {
     const myHeaders = new Headers();
     myHeaders.append("content-type", "application/json")
-    getState().auth ? 
-    myHeaders.append("Authorization", `Bearer ${getState().auth.authToken}`): null
     const myInit = { 
             method: method,
             mode: 'cors',
@@ -58,3 +55,4 @@ export const requestWrapper = (getState, method, url, bodyData) => {
 
     return new Request(url, myInit);
 }
+

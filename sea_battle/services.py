@@ -214,8 +214,8 @@ def join_game(game_id, user):
 def join_fleet(game_id, user, fleet):
 
     with transaction.atomic():
-        qs = BattleMap.objects.filter(game_id=game_id)
-        if len(qs) == 1:
+        map_number = BattleMap.objects.filter(game_id=game_id).count()
+        if map_number == 1:
             BattleMap.objects.create(
                 user=user,
                 fleet=prepare_to_store(fleet),

@@ -1,6 +1,5 @@
-import React, { Component } from "react";
-import { BrowserRouter, Switch, Route } from 'react-router-dom'
-import SignIn from './components/auth/Auth'
+import React, { Component } from 'react';
+import { BrowserRouter, Route } from 'react-router-dom'
 import Dashboard from './components/dashboard/Dashboard'
 import Navbar from './components/layout/Navbar'
 import Profile from './components/auth/Profile'
@@ -8,7 +7,7 @@ import Auth from './components/auth/Auth'
 import NewGame from './components/games/NewGame'
 import JoinGame from './components/games/JoinGame'
 import ActiveGame from './components/games/ActiveGame'
-import { connect } from "react-redux"
+import { connect } from 'react-redux'
 
 class App extends Component {
 

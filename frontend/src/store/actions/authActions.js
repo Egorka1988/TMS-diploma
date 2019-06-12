@@ -1,19 +1,19 @@
 import { requestWrapper } from '../../utils'
+import { fetch } from './refreshTokenAction'
 
 export const signIn = (credentials) => {
     return async (dispatch, getState) => {
 
         const request = requestWrapper(
-            getState,
             "POST",
             SERVICE_URL + '/rest/login/',  
             credentials
         )
 
         const response = await fetch(request);
-        const data = await response.json();
+        const data = await response.body;
         
-        if (response.ok) {
+        if (response.response.ok) {
             dispatch({
                 type: 'LOGIN_SUCCESS',
                 token: data.access,
@@ -31,19 +31,39 @@ export const signIn = (credentials) => {
     }
 }
 
-export const signOut = () => ({'type': 'LOG_OUT_SUCCESS'});
+
+export const signOut = () => {
+    return async (dispatch, getState) => {
+        const request = requestWrapper(
+            "POST",
+            SERVICE_URL +'/rest/logout/',  
+            {refresh: localStorage.getItem('refreshAuthToken')} 
+        )
+        const response = await fetch(request)
+            .catch(
+                error => {
+                    dispatch({
+                        type: 'LOG_OUT_ERROR',
+                        authError: error.body,
+                    })
+                }
+            )
+        const data = await response.body;
+
+        if (response.response.ok) {
+            dispatch({
+                type: 'LOG_OUT_SUCCESS'      
+            })
+        }
+    }
+}
+
 
 export const initialLoad = () => async (dispatch, getState) => {
     if (!getState().auth.authToken) return;
     
-    const request = requestWrapper(
-        getState,
-        "GET",
-        SERVICE_URL + '/rest/initial-data/',  
-    )
-    
-    const response = await fetch(request);
-    const data = await response.json();
+    const response = await fetch(SERVICE_URL + '/rest/initial-data/', {method: "GET"});
+    const data = await response.body;
 
     if (data.isAuthenticated) {
         dispatch({
@@ -54,53 +74,35 @@ export const initialLoad = () => async (dispatch, getState) => {
             'type': 'FLEET_COMPOSITION', 
             fleetComposition: data.fleetComposition    
         })
-    } else {
-        const myHeaders = new Headers();
-        myHeaders.append("content-type", "application/json")
-        const myInit = { 
-            method: "POST",
-            mode: 'cors',
-            headers: myHeaders,
-            cache: 'default',
-            body: JSON.stringify({refresh: localStorage.getItem('refreshAuthToken')}),
-        };
-        const request = new Request(SERVICE_URL + '/rest/login/refresh/', myInit)
-        const response = await fetch(request);
-        const data = await response.json();
-        if (response.ok) {
-            dispatch({
-                type: 'LOGIN_SUCCESS',
-                token: data.access,
-                refreshAuthToken: data.refresh,
-            })
-        }
     }
 }
 
 export const signUp = (credentials) => {
     return async (dispatch, getState) => {
         const request = requestWrapper(
-            getState,
             "POST",
             SERVICE_URL +'/rest/signup/',  
             credentials
         )
-        const response = await fetch(request);
-        const data = await response.json();
-        
-        if (response.ok) {
+        const response = await fetch(request)
+            .catch(
+                error => {
+                    dispatch({
+                        type: 'SIGN_UP_ERROR',
+                        authError: error.body.username || error.body.password,
+                        token: null
+                    })
+                }
+            )
+        const data = await response.body;
+        if (response.response.ok) {
             dispatch({
                 type: 'SIGN_UP_SUCCESS',
-                token: data.token,
+                authToken: data.access,
+                refreshAuthToken: data.refresh,
                 username: data.username
             })
             dispatch(initialLoad())
-        } else {
-            dispatch({
-                type: 'SIGN_UP_ERROR',
-                authError: data.username || data.password,
-                token: null
-            })
         }
     }
 }

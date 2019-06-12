@@ -4,13 +4,14 @@ from django.http import JsonResponse
 from django.utils import timezone
 
 from rest_framework import viewsets, generics, exceptions
-from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from rest_framework import status
 from rest_framework_simplejwt.authentication import JWTAuthentication
+
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from sea_battle import constants
 from sea_battle.api import serializers, validators
@@ -49,11 +50,13 @@ class RegisterFormAPIViewSet(viewsets.GenericViewSet):
         validator.is_valid(raise_exception=True)
 
         user = create_user(validator.validated_data)
-
-        token, created = Token.objects.get_or_create(user=user)
-        resp = {'token': token.key, 'username': user.username}
+        refresh = RefreshToken.for_user(user)
+        data = {}
+        data['refresh'] = str(refresh)
+        data['access'] = str(refresh.access_token)
+        data['username'] = user.username
         logger.info('new user came: %s'%(user.username))
-        return Response(resp, status=status.HTTP_201_CREATED)
+        return Response(data, status=status.HTTP_201_CREATED)
 
 
 class WatchGamesAPIViewSet(viewsets.GenericViewSet):
@@ -248,3 +251,13 @@ class GamesAPIViewSet(viewsets.GenericViewSet):
         data['current_user'] = request.user.username
 
         return Response(data)
+
+
+class LogoutViewSet(viewsets.GenericViewSet):
+    authentication_classes = (JWTAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def create(self, request, *args, **kwargs):
+        token = RefreshToken(request.data['refresh'])
+        token.blacklist()
+        return Response("logout completed", status=status.HTTP_200_OK)

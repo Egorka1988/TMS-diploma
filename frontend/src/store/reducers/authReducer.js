@@ -19,7 +19,6 @@ const authReducer = (state = initState, action) => {
             }
         case 'LOGIN_SUCCESS':
             console.log('login success');
-            console.log(action.refreshAuthToken);
             return {
                 ...state,
                 authError: null,
@@ -32,7 +31,13 @@ const authReducer = (state = initState, action) => {
             return {
                 ...state,
                 authToken: null,
+                refreshAuthToken: null,
                 currentUser: null,
+            }
+        case 'LOG_OUT_ERROR':
+            return {
+                ...state,
+                authError: action.authError,
             }
 
         case 'INITIAL_DATA': 
@@ -46,7 +51,8 @@ const authReducer = (state = initState, action) => {
             return {
                 ...state,
                 authError: null,
-                authToken: action.token,
+                authToken: action.authToken,
+                refreshAuthToken: action.refreshAuthToken,
                 username: action.username 
             }
         case 'SIGN_UP_ERROR':
@@ -68,6 +74,19 @@ const authReducer = (state = initState, action) => {
                 isNewUser: false,
                 authError: null,
             }
+        case 'REFRESH_SUCCESS':
+            console.log('refresh success')
+            return {
+                ...state,
+                authToken: action.authToken,
+            }   
+        case 'CLEAR_TOKEN_SUCCESS':
+            console.log('clear token succeed')
+            return {
+                ...state,
+                authToken: null,
+                refreshAuthToken: null
+            }   
         default:
             return state;
     }

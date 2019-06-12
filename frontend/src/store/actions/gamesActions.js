@@ -1,21 +1,21 @@
 
 import { requestWrapper } from '../../utils'
-
+import { fetch } from './refreshTokenAction'
 
 
 export const getGames = () => {
     return async (dispatch, getState) => {
         
         const request = requestWrapper(
-            getState,
             "GET",
             SERVICE_URL +'/rest/games/',   
         )
 
         const response = await fetch(request);
-        const data = await response.json();
+       
+        const data = await response.body;
         
-        if (response.ok) {
+        if (response.response.ok) {
             dispatch({
                 type: 'AVAILABLE_GAMES_LIST',
                 availableGames: data,
@@ -44,29 +44,30 @@ export const createGame = (stateData) => {
             name: stateData.name,
         }
         const request = requestWrapper(
-            getState,
             "POST",
             SERVICE_URL +'/rest/games/',  
             bodyData 
         )
 
-        const response = await fetch(request);
-        const respdata = await response.json();
-        
-        if (response.ok) {
+        const response = await fetch(request)
+            .catch(
+                error => {
+                    dispatch({
+                        type: 'GAME_CREATE_ERROR',
+                        err: 'error',
+                        emptyFleet: error.body['fleet'],
+                        invalidShipType: error.body['notAllowedShips'],
+                        invalidCount: error.body['notAllowedShipCount'],
+                        invalidShipComposition: error.body['invalidShipComposition'],
+                        forbiddenCells: error.body['forbiddenCells'],
+                    })
+                }
+            )
+        const respdata = await response;
+        if (response.response.ok) {
             dispatch({
                 type: 'GAME_CREATE_SUCCESS',
-                gameId: respdata.id,
-            })
-        } else {
-            dispatch({
-                type: 'GAME_CREATE_ERROR',
-                err: 'error',
-                emptyFleet: respdata['fleet'],
-                invalidShipType: respdata['notAllowedShips'],
-                invalidCount: respdata['notAllowedShipCount'],
-                invalidShipComposition: respdata['invalidShipComposition'],
-                forbiddenCells: respdata['forbiddenCells'],
+                gameId: respdata.body.id,
             })
         }
     }
@@ -77,16 +78,23 @@ export const shoot = (cell, gameId) => {
     return async (dispatch, getState) => {
         
         const request = requestWrapper(
-            getState,
             "PATCH",
             SERVICE_URL +'/rest/games/'+ gameId+ '/shoot/',  
             {shoot: cell} 
         )
 
-        const response = await fetch(request);
-        const respdata = await response.json();
+        const response = await fetch(request)
+            .catch(
+                error => {
+                    dispatch({
+                        type: 'SHOOT_RESULT_ERROR',
+                        err: error.body.detail,
+                    })
+                }
+            )
+        const respdata = await response.body;
         
-        if (response.ok) {
+        if (response.response.ok) {
             dispatch({
                 type: 'SHOOT_RESULT_SUCCESS',
                 state: respdata.state,
@@ -94,11 +102,6 @@ export const shoot = (cell, gameId) => {
                 lastShoot: cell,
                 enemyDeadZone: respdata.deadZone,
                 deadShip: respdata.deadShip,
-            })
-        } else {
-            dispatch({
-                type: 'SHOOT_RESULT_ERROR',
-                err: respdata.detail,
             })
         }
     }
@@ -109,14 +112,13 @@ export const loadActiveGame = (gameId, settingFleetMode=false) => {
     return async (dispatch, getState) => {
         
         const request = requestWrapper(
-            getState,
             "GET",
             SERVICE_URL +'/rest/games/'+ gameId+ '/initial-state/',  
         )
         const response = await fetch(request);
-        const data = await response.json();
+        const data = await response.body;
 
-        if (response.ok) {
+        if (response.response.ok) {
             dispatch({
                 type: 'LOAD_ACTIVE_GAME',
                 ...data,
@@ -129,15 +131,21 @@ export const loadActiveGame = (gameId, settingFleetMode=false) => {
 export const joinGame = (game) => {
     return async (dispatch, getState) => {
         const request = requestWrapper(
-            getState,
             "POST",
             SERVICE_URL +'/rest/games/' + game.id + '/join/',  
         )
 
-        const response = await fetch(request);
-        const respdata = await response;
+        const response = await fetch(request)
+            .catch(
+                error => {
+                    dispatch({
+                        type: 'JOIN_ERROR',
+                        joinErr: error.body,
+                    })
+                }
+            );
         
-        if (response.ok) {
+        if (response.response.ok) {
             
             dispatch({
                 type: 'JOIN_SUCCESS',
@@ -148,12 +156,6 @@ export const joinGame = (game) => {
                 joinErr: null,
             })
             return game.id
-        } else {
-            
-            dispatch({
-                type: 'JOIN_ERROR',
-                joinErr: respdata.json(),
-            })
         }
     }
 }
@@ -172,30 +174,31 @@ export const joinFleet = (stateData, gameId) => {
             size: stateData.size 
         }
         const request = requestWrapper(
-            getState,
             "POST",
             SERVICE_URL +'/rest/games/' + gameId + '/join_fleet/',
             bodyData  
         )
 
-        const response = await fetch(request);
-        const respdata =  await response.json()
+        const response = await fetch(request)
+            .catch(
+                error => {
+                    dispatch({
+                        type: 'GAME_JOIN_FLEET_ERROR',
+                        err: 'error',
+                        joinErr: error.body['err'],
+                        emptyFleet: error.body['fleet'],
+                        invalidShipType: error.body['notAllowedShips'],
+                        invalidCount: error.body['notAllowedShipCount'],
+                        invalidShipComposition: error.body['invalidShipComposition'],
+                        forbiddenCells: error.body['forbiddenCells'],
+                    })
+                }
+            )
         
-        if (response.ok) {
+        if (response.response.ok) {
             dispatch({
                 type: 'GAME_JOIN_FLEET_SUCCESS',
                 isFleetJoined: true
-            })
-        } else {
-            dispatch({
-                type: 'GAME_JOIN_FLEET_ERROR',
-                err: 'error',
-                joinErr: respdata['err'],
-                emptyFleet: respdata['fleet'],
-                invalidShipType: respdata['notAllowedShips'],
-                invalidCount: respdata['notAllowedShipCount'],
-                invalidShipComposition: respdata['invalidShipComposition'],
-                forbiddenCells: respdata['forbiddenCells'],
             })
         }
     }
@@ -204,14 +207,13 @@ export const joinFleet = (stateData, gameId) => {
 export const getGameState = (gameId) => {
     return async (dispatch, getState) => {
         const request = requestWrapper(
-            getState,
             "GET",
             SERVICE_URL +'/rest/games/'+ gameId+ '/state/',  
         )
         const response = await fetch(request);
-        const respdata = await response.json();
+        const respdata = await response.body;
         
-        if (response.ok) {
+        if (response.response.ok) {
             dispatch({
                 type: 'GAME_STATE',
                 turn: respdata.turn,

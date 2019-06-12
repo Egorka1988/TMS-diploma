@@ -17,7 +17,7 @@ const initialState = {
     auth: {'authToken':null}
 };
 
-const store = createStore(
+export const store = createStore(
     rootReducer,
     initialState,
     applyMiddleware(thunk)

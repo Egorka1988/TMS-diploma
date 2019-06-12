@@ -28,7 +28,7 @@ class NewGame extends Component {
         isLoading: false,
         battleMap: genBattleMapState(),
         errHandleCompleted: false
-    }
+    }    
 
     
     handleSizeChange = (e) => {
