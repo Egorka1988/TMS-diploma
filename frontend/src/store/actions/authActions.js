@@ -3,16 +3,21 @@ import { fetch } from './refreshTokenAction'
 
 export const signIn = (credentials) => {
     return async (dispatch, getState) => {
+        dispatch({
+            type: 'LOGIN_ERROR',
+            authError: null
+        })
 
         const request = requestWrapper(
             "POST",
             SERVICE_URL + '/rest/login/',  
             credentials
         )
-
-        const response = await fetch(request);
+        const response = await fetch(request)
+        .catch(function (error){
+            return error;
+        })
         const data = await response.body;
-        
         if (response.response.ok) {
             dispatch({
                 type: 'LOGIN_SUCCESS',
@@ -23,9 +28,12 @@ export const signIn = (credentials) => {
         } else {
             dispatch({
                 type: 'LOGIN_ERROR',
-                authError: 'Login failed',
-                token: null
+                authError: "Login failed"
             })
+            // setTimeout(() => dispatch({
+            //     type: 'LOGIN_ERROR',
+            //     authError: null
+            // }), 2000)
         }
         return data;
     }
@@ -79,6 +87,11 @@ export const initialLoad = () => async (dispatch, getState) => {
 
 export const signUp = (credentials) => {
     return async (dispatch, getState) => {
+        dispatch({
+            type: 'LOGIN_ERROR',
+            authError: null
+        })
+
         const request = requestWrapper(
             "POST",
             SERVICE_URL +'/rest/signup/',  

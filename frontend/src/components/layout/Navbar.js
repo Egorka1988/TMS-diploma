@@ -20,6 +20,7 @@ class Navbar extends Component {
 
     render() {
         const { authToken, currentUser } = this.props;
+        console.log('navbar rendered')
         return(
         <nav className="nav-wrapper grey darken-3">
             <div className="container">

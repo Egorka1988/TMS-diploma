@@ -6,6 +6,7 @@ import { spinner} from '../../utils';
 import { Map } from './BattleMap'
 import Legend from './Legend'
 
+export const MyContext = React.createContext(1);
 
 export const genBattleMapState = (size=10) => {
    
@@ -150,15 +151,16 @@ class NewGame extends Component {
     }
 
     render() {
+
         if (this.state.isLoading) {
             return spinner()
         }
         if (!this.props.auth.authToken) { 
-            return <Redirect to="/auth"/>;
+            return <Redirect to="/auth"/>
         }
         if (this.props.gameId) {
 
-            return <Redirect to={"/active-games/" + this.props.gameId} />;
+            return <Redirect to={"/active-games/" + this.props.gameId} />
         }
         return (
             <div className="container">
@@ -208,9 +210,7 @@ class NewGame extends Component {
                         </div>
                         
                         <div className="col s4 ">
-                            <Legend 
-                                size={this.state.size}
-                            />
+                            <Legend size={this.state.size} />
                         </div>
                     </div>
                 </form> 

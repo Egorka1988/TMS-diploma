@@ -66,7 +66,7 @@ const activeGameReducer = (state = initState, action) => {
                 turn: action.turn,
                 winner: action.winner,   
                 gameState: action.gameState,
-                isDisabled: action.settingFleetMode ? false: action.gameState === "active" ? action.turn === action.currentUser ? false : true : true,
+                // isDisabled: action.settingFleetMode ? false: action.gameState === "active" ? action.turn === action.currentUser ? false : true : true,
                 settingFleetMode: action.settingFleetMode,
 
                 myShoots: action.myShoots,

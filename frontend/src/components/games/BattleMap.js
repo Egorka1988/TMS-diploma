@@ -46,16 +46,18 @@ export const Map = ({ size, battleMap, onClick, disabled }) => {
                 bulk.push(<LegendCell key={[i,j]}>{i}</LegendCell>)
             } else {
                 const cellData = battleMap[i] ? battleMap[i][j] || {} : {};
-                bulk.push(<Cell 
-                    key={'cell_' + [i,j]}
-                    index={[i,j]} 
-                    onClick={onClick}
-                    isSelected={cellData.isSelected}
-                    isError={cellData.isError}
-                    disabled={disabled}
-                    isHit={cellData.isHit}
-                    content={cellData.content}
-                />)
+                bulk.push(
+                    <Cell 
+                        key={'cell_' + [i,j]}
+                        index={[i,j]} 
+                        onClick={onClick}
+                        isSelected={cellData.isSelected}
+                        isError={cellData.isError}
+                        disabled={disabled}
+                        isHit={cellData.isHit}
+                        content={cellData.content}
+                    />
+                )
             }
         }
     }

@@ -75,18 +75,20 @@ class Legend extends Component {
         }
         return rows
     }
-
+    
     render() {
         return (
-            <div className="legendContainer">
+            <div className="legendContainer"> 
                 <div style={{gridArea: 'header1'}}>
                     <h6  className="grey-text text-darken-3">Your available ships for this field-size:</h6>
                 </div>
                     {this.props.fleetComposition && this.renderLegend()}
             </div>
+            
         )
     }
 }
+
 const mapStateToProps = (state) => {
     return {
         fleetComposition: state.games.fleetComposition,

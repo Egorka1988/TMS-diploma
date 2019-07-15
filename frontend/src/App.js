@@ -10,12 +10,11 @@ import ActiveGame from './components/games/ActiveGame'
 import { connect } from 'react-redux'
 
 class App extends Component {
-
     render() {
         return (
             <BrowserRouter>
-            
                 <div className="App">
+                    
                     <Navbar />
                     <Route exact path='/' component={Dashboard} />
                     <Route path='/auth' component={Auth} />

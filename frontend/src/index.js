@@ -16,7 +16,7 @@ import { localStoreTokenManager } from './utils';
 const initialState = {
     auth: {'authToken':null}
 };
-
+export const MyContext = React.createContext(1);
 export const store = createStore(
     rootReducer,
     initialState,
