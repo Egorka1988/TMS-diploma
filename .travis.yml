@@ -23,4 +23,4 @@ env:
     - PGPORT=5432
 
 script:
-  - pytest
+  - pytest -v
