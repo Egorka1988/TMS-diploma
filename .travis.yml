@@ -16,7 +16,8 @@ before_install:
   - touch $PWD/sea_battle/logging/sb_logger_debug.log
 
 install:
-  - pip install --trusted-host pypi.python.org -r requirements.txt
+  - pip3 install --upgrade pip
+  - pip3 install --trusted-host pypi.python.org -r requirements.txt
 
 env:
   global:

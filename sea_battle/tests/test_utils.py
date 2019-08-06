@@ -188,9 +188,9 @@ class TestShipDeadZoneHandler:
     ship = {
         (3, 1), (4, 1), (5, 1), (6, 1), (7, 1), (8, 1), (4, 2), (5, 2)
     }
-    assert ship_dead_zone_handler(ship) == [
+    assert sorted(ship_dead_zone_handler(ship)) == sorted([
         (3, 2), (9, 1), (3, 3), (8, 2), (9, 2), (2, 1), (6, 3), (6, 2), (2, 2), (5, 3), (4, 3), (7, 2)
-    ]
+    ])
 
 
 class TestCheckDeadZone:
