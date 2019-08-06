@@ -8,6 +8,7 @@ services:
   - postgresql
 
 before_script:
+  - touch /home/travis/build/EgorChernik/TMS-diploma/sea_battle/logging/sb_logger_debug.log
   - psql -c 'create database travis_ci_test;' -U postgres
 
 install:
