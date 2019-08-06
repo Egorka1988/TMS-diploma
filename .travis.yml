@@ -8,8 +8,12 @@ services:
   - postgresql
 
 before_script:
-  - touch /home/travis/build/EgorChernik/TMS-diploma/sea_battle/logging/sb_logger_debug.log
   - psql -c 'create database travis_ci_test;' -U postgres
+
+before_install:
+  - echo $PWD
+  - mkdir $PWD/sea_battle/logging/
+  - touch $PWD/sea_battle/logging/sb_logger_debug.log
 
 install:
   - pip install --trusted-host pypi.python.org -r requirements.txt
