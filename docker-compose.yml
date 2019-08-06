@@ -7,6 +7,7 @@ services:
             - "8000:8000"
         depends_on:
             - db
+            - redis
         environment:
             - "DB_USER=${DB_USER}" 
             - "DB_PASSWORD=${DB_PASSWORD}"
@@ -18,11 +19,17 @@ services:
     db:
         image: postgres
         ports: 
-            - "5433:5433"
+            - "5432:5432"
         environment:
             - "POSTGRES_USER=${DB_USER}" 
             - "POSTGRES_PASSWORD=${DB_PASSWORD}"
             - "POSTGRES_DB=${DB_NAME}"
+
+    redis:
+        image: redis:5.0
+        ports:
+            - "6379:6379"
+
 
     frontend_django:
         tty: true

@@ -134,8 +134,8 @@ class TestGamesAPIViewSet(APITestCase):
         resp_assert = {
             'state': constants.ACTIVE,
             'shoot': constants.SHOOT_RESULT_HIT,
-            'dead_zone': [],
-            'dead_ship': []
+            'deadZone': [],
+            'deadShip': []
         }
         self.assertEqual(resp_assert, json.loads(response.content))
         assert response.status_code == 200
@@ -241,8 +241,8 @@ class TestGamesAPIViewSet(APITestCase):
         response = client.get(url)
         resp_assert = {
             'state': constants.ACTIVE,
-            'shoots_of_enemy': [[8, 9, "miss"], [4, 3, "miss"]],
-            "my_dead_zone": [],
+            'shootsOfEnemy': [[8, 9, "miss"], [4, 3, "miss"]],
+            "myDeadZone": [],
             "joiner": test_user.username,
             "turn": game.creator.username,
         }

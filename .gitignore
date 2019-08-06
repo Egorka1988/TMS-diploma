@@ -11,3 +11,8 @@ node_modules
 .env
 logging
 graphql_api
+conftest
+t.py
+tasks.py
+winners_list
+celeryconfig.py

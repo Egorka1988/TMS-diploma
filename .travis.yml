@@ -1,0 +1,22 @@
+language: python
+python:
+  - "3.6.8-slim"
+  - "3.7"
+  - "3.7-dev"  # 3.7 development branch
+  - "3.8-dev"  # 3.8 development branch
+
+services:
+  - postgresql
+
+before_script:
+  - psql -c 'create database travis_ci_test;' -U postgres
+
+install:
+  - pip install --trusted-host pypi.python.org -r requirements.txt
+
+env:
+  global:
+    - PGPORT=5432
+
+script:
+  - pytest
