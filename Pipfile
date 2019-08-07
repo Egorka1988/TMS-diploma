@@ -10,6 +10,7 @@ pytest-cov = "*"
 pytest-django = "*"
 pytest-docker-compose = "*"
 flake8 = "*"
+pluggy = "*"
 
 [packages]
 celery = "==4.2.1"
