@@ -11,13 +11,11 @@ before_script:
   - psql -c 'create database travis_ci_test;' -U postgres
 
 before_install:
-  - echo $PWD
   - mkdir $PWD/sea_battle/logging/
   - touch $PWD/sea_battle/logging/sb_logger_debug.log
 
 install:
-  - pip3 install --upgrade pip
-  - pip3 install --trusted-host pypi.python.org -r requirements.txt
+  - pipenv install
 
 env:
   global:

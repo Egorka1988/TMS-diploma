@@ -9,18 +9,21 @@ WORKDIR /TMS-diploma
 # Copy the current directory contents into the container at /app
 COPY . /TMS-diploma
 
-RUN apt-get update && apt-get install -y gcc python3-dev
-RUN pip install --upgrade pip
+RUN apt-get update && apt-get install -y --allow-unauthenticated gcc python3-dev
+RUN pip3 install --upgrade pip
+RUN pip3 install pipenv
 
 
 # Install any needed packages specified in requirements.txt
-RUN pip install --trusted-host pypi.python.org -r requirements.txt
+
+RUN pipenv install -d
+
 
 # Make port 80 available to the world outside this container
 EXPOSE 8000
 
 # Run app.py when the container launches
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-
+# CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["bash", "./runtime_middleware.sh"]
 
 

@@ -59,8 +59,11 @@ class TestShootHandlerServices:
         )
         enemy.fleet = [[(1, 1), (1, 2), (1, 3)]]
         enemy.save()
+        real_res = handle_shoot(last_shoot, game, game.creator)
         res = (SHOOT_RESULT_KILL, [(2, 2), (2, 1), (1, 4), (2, 3), (2, 4)], {(1, 1), (1, 2), (1, 3)})
-        assert res == handle_shoot(last_shoot, game, game.creator)
+        assert res[0] == real_res[0]
+        assert sorted(res[1]) == sorted(real_res[1])
+        assert res[2] == real_res[2]
         assert Game.objects.get(pk=game.pk).turn == game.creator
 
 
