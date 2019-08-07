@@ -15,7 +15,7 @@ before_install:
   - touch $PWD/sea_battle/logging/sb_logger_debug.log
 
 install:
-  - pipenv install
+  - pipenv install -d
 
 env:
   global:
