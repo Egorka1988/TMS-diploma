@@ -3,7 +3,9 @@ from rest_framework import serializers
 
 # Serializers define the API representation.
 from sea_battle.services import get_game_state, get_enemy_shoots
+import logging
 
+logger = logging.getLogger(__name__)
 
 class ActiveGamesSerializer(serializers.Serializer):
 
@@ -14,12 +16,27 @@ class ActiveGamesSerializer(serializers.Serializer):
     joiner_id = serializers.IntegerField()
 
 
-class AvailableGamesSerializer(serializers.Serializer):
+class GamesListSerializer(serializers.Serializer):
+    games = serializers.SerializerMethodField()
 
-    id = serializers.IntegerField()
-    name = serializers.CharField()
-    size = serializers.IntegerField()
-    creator = serializers.CharField()
+    def get_games(self, *args, **kwargs):
+        data = self.instance
+        res = {}
+        for game_bulk in data.keys():
+            game_items = []
+            for game in data[game_bulk]:
+                print(game)
+                content = {}
+                content["id"] = game.id
+                content["creator"] = game.creator.username
+                content["size"] = game.size
+                content["name"] = game.name
+                if game_bulk == "my_games":
+                    content["joiner"] = game.joiner.username if game.joiner else ""
+                    content["turn"] = game.turn.username
+                game_items.append(content)
+            res.update({game_bulk: game_items})
+        return res
 
 
 class ShootResultSerializer(serializers.Serializer):
@@ -58,14 +75,11 @@ class StatmentGetSerializer(serializers.Serializer):
 class NewGameSerializer(serializers.Serializer):
 
     id = serializers.IntegerField()
-    # size = serializers.IntegerField()
-    # turn = serializers.CharField()
 
 
 class JoinFleetSerializer(serializers.Serializer):
 
     fleet = serializers.ListField()
-    # dead_zone = serializers.JSONField()
 
 
 class InitialStateSerializer(serializers.Serializer):

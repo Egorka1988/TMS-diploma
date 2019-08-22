@@ -1,41 +1,21 @@
 import { requestWrapper } from "../../utils";
 import { fetch } from "./refreshTokenAction";
+import { store } from "../../index"
 
-export const signIn = credentials => {
-  return async (dispatch, getState) => {
-    dispatch({
-      type: "LOGIN_ERROR",
-      authError: null
-    });
-
-    const request = requestWrapper(
-      "POST",
-      SERVICE_URL + "/rest/login/",
-      credentials
-    );
-    const response = await fetch(request).catch(function(error) {
-      return error;
-    });
-    const data = await response.body;
-    if (response.response.ok) {
-      dispatch({
-        type: "LOGIN_SUCCESS",
-        token: data.access,
-        refreshAuthToken: data.refresh
-      });
-      dispatch(initialLoad());
-    } else {
-      dispatch({
-        type: "LOGIN_ERROR",
-        authError: "Login failed"
-      });
-      // setTimeout(() => dispatch({
-      //     type: 'LOGIN_ERROR',
-      //     authError: null
-      // }), 2000)
-    }
-    return data;
+export const handshake = () => {
+  const request = requestWrapper("GET", SERVICE_URL + "/");
+  return async () => {
+    const resp = await fetch(request);
+    return resp;
   };
+};
+
+export const serveToken = token => {
+    store.dispatch({
+      type: "LOGIN_SUCCESS",
+      token: token
+    });
+    // dispatch(initialLoad())
 };
 
 export const signOut = () => {
@@ -103,7 +83,6 @@ export const signUp = credentials => {
       dispatch({
         type: "SIGN_UP_SUCCESS",
         authToken: data.access,
-        refreshAuthToken: data.refresh,
         username: data.username
       });
       dispatch(initialLoad());

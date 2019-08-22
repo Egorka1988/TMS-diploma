@@ -1,11 +1,16 @@
+from typing import List, Optional, Tuple, Set, Any, Union, Iterable
 
 from sea_battle import constants
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def extract_ships_from(ship_indexes):
 
     """ Function for making ships from their coords """
-
+    print()
     ship_indexes = [tuple(idx) for idx in ship_indexes]
 
     fleet = []
@@ -217,15 +222,20 @@ def prepare_to_store(fleet):
     return fleet
 
 
-def mapped_shoots(shoots, fleet):
+def mapped_shoots(
+        shoots: List,
+        fleet: List[List[List[int]]]) -> Tuple[
+            List,
+            Set[Tuple[int, int]]]:
+
     tupled_fleet = []
     for ship in fleet:
         tupled_fleet.append(set([tuple(cell) for cell in ship]))
 
     tupled_shoots = set([tuple(shoot) for shoot in shoots])
-    _flat_fleet = []
-    shoots = []
-    dead_zone = []
+    _flat_fleet: List = []
+    shoots: List = []
+    dead_zone: List = []
     for ship in tupled_fleet:
         _flat_fleet.extend(set(ship))
 

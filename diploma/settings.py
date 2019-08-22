@@ -3,7 +3,7 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 from datetime import timedelta
 
-from django.conf.global_settings import AUTH_PASSWORD_VALIDATORS
+from corsheaders.defaults import default_headers
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -15,7 +15,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-CSRF_TRUSTED_ORIGINS = ['127.0.0.1:8080']
+CSRF_TRUSTED_ORIGINS = ['127.0.0.1:8080', '127.0.0.1:8000']
 
 INSTALLED_APPS = [
     'django.contrib.postgres',
@@ -26,14 +26,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'graphene_django',
     'rest_framework',
-    'rest_framework_simplejwt.token_blacklist',
+    # 'rest_framework_simplejwt.token_blacklist',
     'django_registration',
     'sea_battle',
 ]
 
 MIDDLEWARE = [
+    'diploma.middleware.DebugMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+
     'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -75,6 +78,13 @@ DATABASES = {
     }
     }
 
+GRAPHENE = {
+    'SCHEMA': 'sea_battle.gcl_api.schema.schema',
+    'MIDDLEWARE': [
+        'graphql_jwt.middleware.JSONWebTokenMiddleware',
+    ],
+}
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -90,15 +100,20 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'graphql_jwt.backends.JSONWebTokenBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ],
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ],
+    # 'DEFAULT_AUTHENTICATION_CLASSES': [
+    #     'rest_framework_simplejwt.authentication.JWTAuthentication',
+    # ],
     'DEFAULT_RENDERER_CLASSES': [
         'djangorestframework_camel_case.render.CamelCaseJSONRenderer',
     ],
@@ -125,6 +140,13 @@ CORS_ORIGIN_WHITELIST = [
     "http://192.168.32.107:8080",
     "http://127.0.0.1:8080"
 ]
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'Set-Cookie',
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
 
 LOGGING = {
     'version': 1,
@@ -163,9 +185,9 @@ LOGGING = {
         },
     },
     'loggers': {
-        'sea_battle.api.views': {
-            'handlers': ['file_debug', 'console'],
-            'level': 'DEBUG',
+        '': {
+            'handlers': ['file_info', 'console'],
+            'level': 'INFO',
             'propagate': True,
         },
         'django': {
@@ -175,8 +197,15 @@ LOGGING = {
     },
 }
 
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-    'ROTATE_REFRESH_TOKENS': False,
+# SIMPLE_JWT = {
+#     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+#     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+#     'ROTATE_REFRESH_TOKENS': False,
+# }
+
+GRAPHQL_JWT = {
+    'JWT_VERIFY_EXPIRATION': True,
+    'JWT_EXPIRATION_DELTA': timedelta(minutes=5),
+    'JWT_REFRESH_EXPIRATION_DELTA': timedelta(days=1),
+    'JWT_AUTH_HEADER_PREFIX': "Bearer",
 }

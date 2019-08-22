@@ -11,6 +11,8 @@ pytest-django = "*"
 pytest-docker-compose = "*"
 flake8 = "*"
 pluggy = "*"
+mypy = "*"
+django-stubs = "*"
 
 [packages]
 celery = "==4.2.1"
@@ -27,6 +29,8 @@ graphql-relay = "*"
 pytz = "*"
 psycopg2-binary = "*"
 django-registration = "*"
+graphene-django = "*"
+django-graphql-jwt = "*"
 
 [requires]
 python_version = "3.6.8"

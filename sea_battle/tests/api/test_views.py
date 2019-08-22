@@ -1,6 +1,7 @@
 import json
 
 import pytest
+from django.db.models.query_utils import Q
 
 from rest_framework.test import APIClient, APITestCase
 
@@ -46,21 +47,50 @@ class TestGamesAPIViewSet(APITestCase):
         test_user = UserFactory()
         client = APIClient()
 
-        ActiveGameFactory()
-        ActiveGameFactory()
-        ActiveGameFactory()
+        game_1 = ActiveGameFactory()
+        game_2 = ActiveGameFactory()
+        game_3 = ActiveGameFactory()
 
+        game_1.creator = test_user
+        game_2.creator = test_user
+        game_3.creator = test_user
+        game_3.winner = test_user
+
+        game_1.save()
+        game_2.save()
+        game_3.save()
+
+        ActiveGameFactory()
+        GameFactory()
         GameFactory()
 
         response = client.get('/rest/games/')
         assert response.status_code == 401
 
         client.force_authenticate(user=test_user)
-        response = client.get('/rest/games/')
-        print(response.data)
 
-        self.assertEqual(len(response.data), 1)
+        games = Game.objects.all()
+
+        av_games = games.filter(joiner=None)
+        av_games_ids = []
+        for game in av_games:
+            av_games_ids.append(game.id)
+
+        my_games = games.filter(Q(winner=None), (Q(creator=test_user) | Q(joiner=test_user)))
+        my_games_ids = []
+        for game in my_games:
+            my_games_ids.append(game.id)
+
+        response = client.get('/rest/games/')
+
         assert response.status_code == 200
+
+        fact_games = response.data['games']
+        fav_games = fact_games['av_games']
+        fmy_games = fact_games['my_games']
+
+        assert sorted(list([game['id'] for game in fav_games])) == sorted(av_games_ids)
+        assert sorted(list([game['id'] for game in fmy_games])) == sorted(my_games_ids)
 
     def test_create(self):
 

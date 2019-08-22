@@ -1,4 +1,4 @@
-
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from django.http import JsonResponse
 from django.utils import timezone
@@ -21,7 +21,7 @@ from sea_battle.services import get_game, get_game_state, handle_shoot, \
 from sea_battle.utils import mapped_shoots
 import logging
 
-logger = logging.getLogger("sea_battle.api.views")
+logger = logging.getLogger(__name__)
 
 
 class CleaningAPIView(generics.GenericAPIView):
@@ -75,7 +75,6 @@ class WatchGamesAPIViewSet(viewsets.GenericViewSet):
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
-
         return Response(serializer.data)
 
 
@@ -98,25 +97,33 @@ class InitialDataAPIViewSet(viewsets.GenericViewSet):
 
 class GamesAPIViewSet(viewsets.GenericViewSet):
 
-    serializer_class = serializers.NewGameSerializer
+    # serializer_class = serializers.NewGameSerializer
     lookup_url_kwarg = 'game_id'
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         current_user = self.request.user
+        qs = {}
+        qs['av_games'] = Game.objects.available_games(current_user)
+        qs['my_games'] = Game.objects.my_games(current_user)
+        return qs
 
-        return Game.objects.filter(
-            Q(creator=current_user) | Q(joiner=current_user)
-        )
+    def get_object(self):
+        try:
+            game = Game.objects.get(pk=self.kwargs[self.lookup_url_kwarg])
+            return game
+        except ObjectDoesNotExist:
+            message = "game with id={} does not exist".format(kwargs[self.lookup_url_kwarg])
+            raise (Exception(message))
+
 
     def list(self, request, *args, **kwargs):
-
-        games = Game.objects.available_games().exclude(creator=request.user)
-        self.serializer_class = serializers.AvailableGamesSerializer
-        serializer = self.get_serializer(games, many=True)
-
-        return Response(serializer.data)
+        qs = self.get_queryset()
+        # serializer = self.get_serializer(qs, many=True)
+        self.serializer_class = serializers.GamesListSerializer
+        serializer = self.get_serializer(instance=qs, many=True)
+        return Response(serializer.data[0])
 
     def create(self, request, *args, **kwargs):
         # Validation
@@ -208,7 +215,6 @@ class GamesAPIViewSet(viewsets.GenericViewSet):
         game = self.get_object()
         game.last_activity = timezone.now()
         game.save()
-
         self.serializer_class = serializers.StatmentGetSerializer
         serializer = self.get_serializer(game)
 

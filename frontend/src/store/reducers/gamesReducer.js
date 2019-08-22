@@ -15,11 +15,12 @@ const gamesReducer = (state = initState, action) => {
         ...state,
         err: action.err
       };
-    case "AVAILABLE_GAMES_LIST":
+    case "GAMES_LIST":
       console.log("Load games completed");
       return {
         ...state,
-        availableGames: action.availableGames
+        availableGames: action.availableGames,
+        myGames: action.myGames
       };
     case "AVAILABLE_GAMES_ERROR":
       console.log("Load games failed");

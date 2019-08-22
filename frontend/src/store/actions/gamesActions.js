@@ -10,13 +10,15 @@ export const getGames = () => {
     const data = await response.body;
 
     if (response.response.ok) {
+      console.log(data.myGames)
       dispatch({
-        type: "AVAILABLE_GAMES_LIST",
-        availableGames: data
+        type: "GAMES_LIST",
+        availableGames: data.games.avGames,
+        myGames: data.games.myGames
       });
     } else {
       dispatch({
-        type: "AVAILABLE_GAMES_ERROR",
+        type: "GAMES_ERROR",
         err: data.detail
       });
     }

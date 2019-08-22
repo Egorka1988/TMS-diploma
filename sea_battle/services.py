@@ -1,9 +1,13 @@
 from datetime import datetime
+from typing import List, NamedTuple, Tuple, Dict, Union, Set, Optional, Iterable, TypeVar, Any, Collection
 
 from django.contrib.auth.models import User
 from django.core import exceptions
 from django.db import transaction
 from django.db.models import Q
+from django.db.models.expressions import Combinable
+from django.db.models.fields import AutoField
+from django.db.models.query import QuerySet
 from django.utils import timezone
 
 from sea_battle import constants
@@ -13,24 +17,52 @@ from sea_battle.utils import \
     ship_dead_zone_handler, \
     mapped_shoots
 
+import logging
 
-def handle_shoot(last_shoot, game, current_user):
+logger = logging.getLogger(__name__)
 
+
+# class for using in annotating
+class ShootResult(NamedTuple):
+    result: str
+    dead_zone: List[Tuple[int, int]]
+    dead_ship: List[Tuple[int, int]]
+
+
+class GameType(Game):
+    creator_id: AutoField
+    joiner_id: AutoField
+    winner_id: AutoField
+    turn_id: AutoField
+    battle_maps: QuerySet
+
+
+T = TypeVar("T", List, Tuple)
+
+
+def handle_shoot(
+        last_shoot: List[int],
+        game: GameType,
+        current_user: User):
+    logger.info("handle shoot. Args: \n last_shoot: %s %s", last_shoot, type(last_shoot))
     """ func gives a state-message of shooting result,
     saves shoot in db  """
 
-    last_shoot = tuple(last_shoot)
     my_map, enemy_map = get_game_battle_maps(game, current_user)
-    dead_zone = []
-    dead_ship = []
+    last_shoot = tuple(last_shoot)
+    dead_zone: List = []
+    dead_ship: List = []
 
     if not my_map or not enemy_map:
         raise ValueError('Invalid game')
 
-    my_map.shoots.append(last_shoot)
+    my_map.shoots.append(last_shoot)  # type: ignore
     my_map.save()
 
-    shoots = set(map(tuple, my_map.shoots))
+    shoots = list(map(tuple, my_map.shoots))  # type: ignore
+    print(type(shoots[0]), type(shoots[0][0]))
+
+    shoots = set(shoots)
 
     shoot_result = constants.SHOOT_RESULT_MISS
 
@@ -47,12 +79,17 @@ def handle_shoot(last_shoot, game, current_user):
             break
 
     # update game state if necessary
-    update_game_state(game, shoot_result, current_user, shoots, enemy_map)
+    update_game_state(game, shoot_result, current_user, shoots, enemy_map)  # type: ignore
 
-    return shoot_result, dead_zone, dead_ship
+    return ShootResult(shoot_result, dead_zone, dead_ship)
 
 
-def update_game_state(game, shoot_result, current_user, shoots, enemy_map):
+def update_game_state(
+        game: GameType,
+        shoot_result: str,
+        current_user: User,
+        shoots: Set[Tuple[int, int]],
+        enemy_map: BattleMap) -> None:
 
     """ changes turn between users if res of shoot is 'miss'
     or sets winner to game, if shooter killed the whole enemy's fleet"""
@@ -117,7 +154,9 @@ def get_game_state(game, current_user):
     return constants.ACTIVE
 
 
-def get_enemy_shoots(game_id, current_user):
+def get_enemy_shoots(
+        game_id: int,
+        current_user: User):
 
     """ We get array of enemy's shoots, if exists,
     for further sending it to frontend.
@@ -132,7 +171,8 @@ def get_enemy_shoots(game_id, current_user):
     return []
 
 
-def get_game_battle_maps(game, current_user):
+def get_game_battle_maps(game: GameType, current_user: User) -> \
+        Tuple[Optional[BattleMap], Optional[BattleMap]]:
 
     """ Necessary for inspection,
     whether ship is hurt, fleet is alive """
@@ -154,7 +194,7 @@ def get_game_battle_maps(game, current_user):
     return None, None
 
 
-def create_user(data):
+def create_user(data: Dict) -> User:
 
     user = User.objects.create_user(
         username=data['username'],
@@ -163,7 +203,7 @@ def create_user(data):
     return user
 
 
-def create_game(data, user):
+def create_game(data: Dict, user: User) -> Tuple[Game, BattleMap]:
 
     """set start params of the game to db by the player,
     who creates the game"""
@@ -197,7 +237,7 @@ def join_game(game_id, user):
 
     with transaction.atomic():
         try:
-            game = Game.objects.available_games(). \
+            game = Game.objects.available_games(user). \
                 select_for_update().\
                 get(pk=game_id)
         except exceptions.ObjectDoesNotExist:

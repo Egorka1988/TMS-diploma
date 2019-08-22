@@ -22,4 +22,5 @@ env:
     - PGPORT=5432
 
 script:
+  - export PYTHONPATH=${PYTHONPATH}:${PWD}
   - pytest -v

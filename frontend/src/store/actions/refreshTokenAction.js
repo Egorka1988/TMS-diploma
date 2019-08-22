@@ -48,6 +48,6 @@ const refreshToken = () => {
 
 export const fetch = configureRefreshFetch({
   fetch: fetchJSONWithToken,
-  shouldRefreshToken,
-  refreshToken
+  // shouldRefreshToken,
+  // refreshToken
 });

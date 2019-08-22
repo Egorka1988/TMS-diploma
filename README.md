@@ -17,15 +17,14 @@ Linux system is recommended. I use 16.04 version
 1. Clone repo to your local machine. <br> 
     https://github.com/EgorChernik/TMS-diploma.git
 
-
 2. Note, that you should specify your accessing url in webpack.config.js to:
  
-<pre><code> new webpack.DefinePlugin({
+    <pre><code> new webpack.DefinePlugin({
                 'SERVICE_URL': JSON.stringify('http://127.0.0.1:8080')
             }),  
-</code></pre>
-You can also point your IP address at your local network. In this case you can share the game in your network scope.
-3. Note, that you need [docker](https://www.docker.com) to be installed. <br>
+    </code></pre>
+    You can also point your IP address at your local network. In this case you can share the game in your network scope.
+3.  Note, that you need [docker](https://www.docker.com) to be installed. <br>
    
 4. Specify your enviroment variables:
    <pre>

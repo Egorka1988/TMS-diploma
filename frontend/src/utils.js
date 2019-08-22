@@ -3,25 +3,20 @@ import style from "./styles.css";
 
 export const localStoreTokenManager = store => {
   let currentToken = localStorage.getItem("authToken") || null;
-  let currRefreshToken = localStorage.getItem("refreshAuthToken") || null;
-
+  
   store.dispatch({
     type: "SET_AUTH_TOKEN",
     authToken: currentToken,
-    refreshAuthToken: currRefreshToken
   });
 
   return () => {
+    console.log("localStore")
     const newToken = store.getState().auth.authToken;
-    const newRefreshToken = store.getState().auth.refreshAuthToken;
 
     if (newToken === null) {
       localStorage.removeItem("authToken");
-      localStorage.removeItem("refreshAuthToken");
     } else if (newToken !== currentToken) {
       localStorage.setItem("authToken", newToken);
-      newRefreshToken &&
-        localStorage.setItem("refreshAuthToken", newRefreshToken);
     }
   };
 };
@@ -49,13 +44,25 @@ export const spinner = () => {
 export const requestWrapper = (method, url, bodyData) => {
   const myHeaders = new Headers();
   myHeaders.append("content-type", "application/json");
+  myHeaders.append("Access-Control-Request-Headers", "set-cookie");
   const myInit = {
     method: method,
     mode: "cors",
+    credentials: "include",
     headers: myHeaders,
     cache: "default",
     body: bodyData ? JSON.stringify(bodyData) : null
   };
 
   return new Request(url, myInit);
+};
+
+export const getTokenCsrf = () => {
+  const CookList = document.cookie.split(";");
+  for (let i = 0; i < CookList.length; i++) {
+    if (CookList[i].includes("csrftoken=")) {
+      const token = CookList[i].slice(CookList[i].indexOf("=") + 1);
+      return token;
+    }
+  }
 };

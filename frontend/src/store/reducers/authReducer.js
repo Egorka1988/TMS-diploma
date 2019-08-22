@@ -3,6 +3,7 @@ const initState = {
 };
 
 const authReducer = (state = initState, action) => {
+  console.log("reducer", action.type)
   switch (action.type) {
     case "SET_AUTH_TOKEN":
       return { ...state, authToken: action.authToken };
@@ -20,7 +21,6 @@ const authReducer = (state = initState, action) => {
         ...state,
         authError: null,
         authToken: action.token,
-        refreshAuthToken: action.refreshAuthToken,
         currentUser: action.currentUser
       };
     case "LOG_OUT_SUCCESS":

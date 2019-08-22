@@ -16,3 +16,6 @@ t.py
 tasks.py
 winners_list
 celeryconfig.py
+.env-site-packages
+.mypy_cache
+.pytest_cache
