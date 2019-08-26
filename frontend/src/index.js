@@ -12,33 +12,22 @@ import { Provider } from "react-redux";
 import { createStore, applyMiddleware } from "redux";
 import thunk from "redux-thunk";
 import rootReducer from "./store/reducers/rootReducer";
-import { initialLoad } from "./store/actions/authActions";
+// import { initialLoad } from "./store/actions/gamesActions";
 import { localStoreTokenManager, getTokenCsrf } from "./utils";
-import { onError } from "apollo-link-error";
-import { ApolloLink } from "apollo-link";
 
-const errorLink = onError(({ graphQLErrors, networkError }) => {
-  if (graphQLErrors) {
-    console.log("graphQLErrors", graphQLErrors);
-  }
-  if (networkError) {
-    console.log("networkError", networkError);
-  }
-});
 
 const cache = new InMemoryCache();
-const httpLink = new HttpLink({
+const link = new HttpLink({
   uri: SERVICE_URL + "/graphql/",
   credentials: "include",
   headers: {
-    "X-Csrftoken": getTokenCsrf()
+    "X-Csrftoken": getTokenCsrf(),
+    "Authorization": "Bearer " + localStorage.getItem("authToken") 
   },
   fetchOptions: {
     mode: "cors"
   }
 });
-
-const link = ApolloLink.from([errorLink, httpLink]);
 
 const client = new ApolloClient({
   cache,
@@ -56,7 +45,7 @@ export const store = createStore(
 );
 
 store.subscribe(localStoreTokenManager(store));
-store.dispatch(initialLoad());
+// store.dispatch(initialLoad());
 
 ReactDOM.render(
   <ApolloProvider client={client}>

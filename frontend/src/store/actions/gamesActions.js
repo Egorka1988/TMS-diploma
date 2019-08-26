@@ -1,5 +1,23 @@
 import { requestWrapper } from "../../utils";
-import { fetch } from "./refreshTokenAction";
+import { store } from "../../index"
+import gql from "graphql-tag"
+
+
+
+export const initialLoad = async () => {
+  const request = requestWrapper(
+    "POST",
+    SERVICE_URL + "/graphql/",
+    QUERY_FLEET_COMPOSITION);
+
+  const response = await fetch(request);
+  const data = await response.body;
+
+  return store.dispatch({
+    type: "FLEET_COMPOSITION",
+    fleetComposition: data.fleetComposition
+  });
+};
 
 export const getGames = () => {
   return async (dispatch, getState) => {
@@ -10,7 +28,7 @@ export const getGames = () => {
     const data = await response.body;
 
     if (response.response.ok) {
-      console.log(data.myGames)
+      console.log(data.myGames);
       dispatch({
         type: "GAMES_LIST",
         availableGames: data.games.avGames,

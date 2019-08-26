@@ -3,17 +3,17 @@ import style from "./styles.css";
 
 export const localStoreTokenManager = store => {
   let currentToken = localStorage.getItem("authToken") || null;
-  
+
   store.dispatch({
     type: "SET_AUTH_TOKEN",
-    authToken: currentToken,
+    authToken: currentToken
   });
 
   return () => {
-    console.log("localStore")
+    console.log("localStore");
     const newToken = store.getState().auth.authToken;
 
-    if (newToken === null) {
+    if (newToken === null) { // logout flow
       localStorage.removeItem("authToken");
     } else if (newToken !== currentToken) {
       localStorage.setItem("authToken", newToken);
@@ -45,6 +45,9 @@ export const requestWrapper = (method, url, bodyData) => {
   const myHeaders = new Headers();
   myHeaders.append("content-type", "application/json");
   myHeaders.append("Access-Control-Request-Headers", "set-cookie");
+  const token = "Bearer " + localStorage.getItem("authToken");
+  myHeaders.append("Authorization", token);
+  myHeaders.append("X-Csrftoken", getTokenCsrf()); 
   const myInit = {
     method: method,
     mode: "cors",

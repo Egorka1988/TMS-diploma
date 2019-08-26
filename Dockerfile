@@ -9,7 +9,7 @@ WORKDIR /TMS-diploma
 # Copy the current directory contents into the container at /app
 COPY . /TMS-diploma
 
-RUN apt-get update && apt-get install -y --allow-unauthenticated gcc python3-dev
+# RUN apt-get update && apt-get install -y --allow-unauthenticated gcc python3-dev
 RUN pip3 install --upgrade pip
 RUN pip3 install pipenv
 

@@ -1,8 +1,11 @@
+import json
+
 import graphene
 import graphql_jwt
 from django.contrib.auth.models import User
 from graphene_django import DjangoObjectType
 
+from sea_battle import constants
 from sea_battle.models import Game
 
 
@@ -29,6 +32,7 @@ class ObtainJSONWebToken(graphql_jwt.JSONWebTokenMutation):
 class Query(graphene.ObjectType):
     my_games = graphene.List(GameType)
     av_games = graphene.List(GameType)
+    fleet_composition = graphene.JSONString()
 
     def resolve_my_games(self, info, **kwargs):
         print("*********", info.context.headers)
@@ -36,6 +40,9 @@ class Query(graphene.ObjectType):
 
     def resolve_av_games(self, info, **kwargs):
         return Game.objects.available_games(User.objects.get(username="qwerty"))
+
+    def resolve_fleet_composition(self, info, **kwargs):
+        return constants.FLEET_COMPOSITION
 
 
 class Mutation(graphene.ObjectType):

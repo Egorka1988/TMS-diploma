@@ -23,7 +23,7 @@ const SignedInLinks = props => {
 
 const mapStateToProps = state => {
   return {
-    username: state.auth.currentUser
+    username: state.auth.currUser
   };
 };
 

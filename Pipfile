@@ -13,6 +13,7 @@ flake8 = "*"
 pluggy = "*"
 mypy = "*"
 django-stubs = "*"
+pgcli = "*"
 
 [packages]
 celery = "==4.2.1"

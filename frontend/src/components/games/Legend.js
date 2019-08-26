@@ -1,14 +1,23 @@
-import React, { Component } from "react";
+import React, { Component, useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { Cell } from "./BattleMap";
+import { useQuery } from "react-apollo";
+import gql from "graphql-tag";
 
-class Legend extends Component {
-  getShipCount = shipType => {
-    const shipCount = this.props.fleetComposition[this.props.size][shipType];
+const QUERY_FLEET_COMPOSITION = gql`
+  {
+    fleetComposition
+  }
+`;
+
+export default function Legend(props) {
+  const { data, loading, error } = useQuery(QUERY_FLEET_COMPOSITION);
+
+  const getShipCount = (fleetComp, shipType) => {
+    const shipCount = fleetComp[props.size][shipType];
     return <div>{shipCount}</div>;
   };
-
-  renderAircraftCarrier = () => {
+  const renderAircraftCarrier = () => {
     let body = [];
     for (let i = 0; i < 6; i++) {
       body.push(<div key={"body" + i} className="aircraftbody" />);
@@ -27,9 +36,9 @@ class Legend extends Component {
     );
   };
 
-  renderShip = deckCount => {
+  const renderShip = deckCount => {
     let ship = [];
-    deckCount === "air" ? ship.push(this.renderAircraftCarrier()) : null;
+    deckCount === "air" ? ship.push(renderAircraftCarrier()) : null;
     for (let i = 0; i < deckCount; i++) {
       ship.push(
         <div key={"legendCell" + i + deckCount}>
@@ -50,46 +59,45 @@ class Legend extends Component {
     }
     return <div>{ship}</div>;
   };
-
-  renderLegend = () => {
-    const fleetComposition = this.props.fleetComposition[this.props.size];
+  const renderLegend = fleetComp => {
+    const currFleetComp = fleetComp[props.size];
     const rows = [
       <div key="shipType">Ship type</div>,
       <div key="x">X</div>,
       <div key="count">Count</div>
     ];
-    const ShipTypes = Object.keys(fleetComposition);
+    const ShipTypes = Object.keys(currFleetComp);
 
     for (let i = 0; i < ShipTypes.length; i++) {
-      rows.push(
-        <div key={"renderShip" + i}>{this.renderShip(ShipTypes[i])}</div>
-      );
+      rows.push(<div key={"renderShip" + i}>{renderShip(ShipTypes[i])}</div>);
       rows.push(<div key={"x" + i}>X</div>);
       rows.push(
-        <div key={"getShipCount" + i}>{this.getShipCount(ShipTypes[i])}</div>
+        <div key={"getShipCount" + i}>{getShipCount(fleetComp, ShipTypes[i])}</div>
       );
     }
     return rows;
   };
 
-  render() {
-    return (
-      <div className="legendContainer">
-        <div style={{ gridArea: "header1" }}>
-          <h6 className="grey-text text-darken-3">
-            Your available ships for this field-size:
-          </h6>
-        </div>
-        {this.props.fleetComposition && this.renderLegend()}
+  return (
+    <div className="legendContainer">
+      <div style={{ gridArea: "header1" }}>
+        <h6 className="grey-text text-darken-3">
+          Your available ships for this field-size:
+        </h6>
       </div>
-    );
-  }
+      {data &&
+        data.fleetComposition &&
+        renderLegend(JSON.parse(data.fleetComposition))}
+      {loading ? <div>Loading...</div> : null}
+    </div>
+  );
 }
 
-const mapStateToProps = state => {
-  return {
-    fleetComposition: state.games.fleetComposition
-  };
-};
 
-export default connect(mapStateToProps)(Legend);
+// const mapStateToProps = state => {
+//   return {
+//     fleetComposition: state.games.fleetComposition
+//   };
+// };
+
+// export default connect(mapStateToProps)(Legend);

@@ -17,14 +17,14 @@ class Navbar extends Component {
   };
 
   render() {
-    const { authToken, currentUser } = this.props;
+    const { authToken, currUser } = this.props;
     return (
       <nav className="nav-wrapper grey darken-3">
         <div className="container">
           <Link to="/" className="brand-logo">
             Sea Battle
           </Link>
-          {authToken && currentUser && <SignedInLinks />}
+          {authToken && currUser && <SignedInLinks />}
           {!authToken && (
             <SignedOutLinks
               signUpLink={this.signUpLink}
@@ -38,8 +38,9 @@ class Navbar extends Component {
 }
 
 const mapStateToProps = state => {
+ 
   return {
-    currentUser: state.auth.currentUser,
+    currUser: state.auth.currUser,
     authToken: state.auth.authToken
   };
 };

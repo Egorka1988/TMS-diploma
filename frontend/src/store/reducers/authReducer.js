@@ -1,12 +1,23 @@
 const initState = {
   authError: null
 };
+const jwt = require("jsonwebtoken");
+let decoded;
 
 const authReducer = (state = initState, action) => {
-  console.log("reducer", action.type)
+  console.log("reducer", action.type);
   switch (action.type) {
     case "SET_AUTH_TOKEN":
-      return { ...state, authToken: action.authToken };
+      if (action.authToken) {
+        decoded = jwt.decode(action.authToken);
+      }
+      return {
+        ...state,
+        authToken: action.authToken,
+        currUser: decoded ? decoded.username : null,
+        exp: decoded ? decoded.exp : null,
+        origIat: decoded ? decoded.origIat : null
+      };
     case "LOGIN_ERROR":
       console.log("login failed");
       return {
@@ -17,19 +28,23 @@ const authReducer = (state = initState, action) => {
       };
     case "LOGIN_SUCCESS":
       console.log("login success");
+      if (action.authToken) {
+        decoded = jwt.decode(action.authToken);
+      }
       return {
         ...state,
         authError: null,
-        authToken: action.token,
-        currentUser: action.currentUser
+        authToken: action.authToken,
+        currUser: decoded ? decoded.username : null,
+        exp: decoded ? decoded.exp : null,
+        origIat: decoded ? decoded.origIat : null
       };
     case "LOG_OUT_SUCCESS":
       console.log("user logged out");
       return {
         ...state,
         authToken: null,
-        refreshAuthToken: null,
-        currentUser: null
+        currUser: null
       };
     case "LOG_OUT_ERROR":
       return {
@@ -40,7 +55,7 @@ const authReducer = (state = initState, action) => {
     case "INITIAL_DATA":
       return {
         ...state,
-        currentUser: action.currentUser,
+        currUser: action.currUser,
         fleetComposition: action.fleetComposition
       };
     case "SIGN_UP_SUCCESS":

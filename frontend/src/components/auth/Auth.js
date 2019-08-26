@@ -26,12 +26,12 @@ function Auth(props) {
   }, []);
 
   useEffect(() => {
-    let clearTimeontId = null;
+    let clearTimeoutId = null;
     if (error) {
-      clearTimeontId = setTimeout(() => setShowError(false), 3000);
+      clearTimeoutId = setTimeout(() => setShowError(false), 3000);
     }
     return () => {
-      clearTimeontId && clearTimeout(clearTimeontId);
+      clearTimeoutId && clearTimeout(clearTimeoutId);
     };
   }, [error]);
 

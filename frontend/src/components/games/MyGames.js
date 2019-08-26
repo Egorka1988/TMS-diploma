@@ -18,7 +18,6 @@ const MyGames = ({ currUser, myGames }) => {
   };
   const deleteHandler = id => {
     dispatch({type: 'DELETE_GAME'})
-
   };
   const giveUpHandler = id => {
     console.log("player gave up");
@@ -46,16 +45,16 @@ const MyGames = ({ currUser, myGames }) => {
                   <td>{game.name}</td>
                   <td>{game.size}</td>
                   <td>
-                    {game.creator == currUser ? <div>You</div> : game.creator}
+                    {game.creator.username == currUser ? <div>You</div> : game.creator.username}
                   </td>
                   <td>
                     {game.joiner ? (
-                      game.joiner
+                      game.joiner.username
                     ) : (
                       <div style={{ color: "red" }}>Not came yet</div>
                     )}
                   </td>
-                  <td>{game.turn}</td>
+                  <td>{game.turn.username}</td>
 
                   <td>
                     <button

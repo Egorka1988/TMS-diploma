@@ -6,8 +6,6 @@ import { spinner } from "../../utils";
 import { Map } from "./BattleMap";
 import Legend from "./Legend";
 
-export const MyContext = React.createContext(1);
-
 export const genBattleMapState = (size = 10) => {
   let battleMap = {};
   for (let i = 1; i < size + 1; i++) {
