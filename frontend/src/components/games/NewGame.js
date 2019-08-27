@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useState } from "react";
 import { createGame } from "../../store/actions/gamesActions";
 import { connect } from "react-redux";
 import { Redirect } from "react-router-dom";
@@ -16,80 +16,86 @@ export const genBattleMapState = (size = 10) => {
   }
   return battleMap;
 };
+const initialState = {
+  name: "",
+  size: 10,
+  isLoading: false,
+  battleMap: genBattleMapState(),
+  errHandleCompleted: false
+};
 
-class NewGame extends Component {
-  state = {
-    name: "",
-    size: 10,
-    isLoading: false,
-    battleMap: genBattleMapState(),
-    errHandleCompleted: false
-  };
-
-  handleSizeChange = e => {
+function NewGame(props) {
+  const [state, setState] = useState(initialState);
+  const handleSizeChange = e => {
     const size = parseInt(e.target.value);
-    this.setState({ size, battleMap: genBattleMapState(size), errMsg: null });
+    setState({
+      ...state,
+      size,
+      battleMap: genBattleMapState(size),
+      errMsg: null
+    });
   };
 
-  handleNameChange = e => {
-    this.setState({ name: e.target.value });
+  const handleNameChange = e => {
+    setState({ ...state, name: e.target.value });
   };
 
-  onClick = cell => {
-    if (this.state.errHandleCompleted) {
-      let resetBattleMap = this.state.battleMap;
-      for (let i = 1; i < this.state.size + 1; i++) {
-        for (let j = 1; j < this.state.size + 1; j++) {
+  const onClick = cell => {
+    if (state.errHandleCompleted) {
+      let resetBattleMap = state.battleMap;
+      for (let i = 1; i < state.size + 1; i++) {
+        for (let j = 1; j < state.size + 1; j++) {
           resetBattleMap[i][j].isError = false;
         }
       }
-      this.setState({ battleMap: resetBattleMap });
+      setState({ ...state, battleMap: resetBattleMap });
     }
     const [x, y] = cell;
-    let battleMap = this.state.battleMap;
+    let battleMap = state.battleMap;
 
     let oldCell = battleMap[x][y];
     let newCell = { ...oldCell, isSelected: !oldCell.isSelected };
 
-    this.setState({
+    setState({
+      ...state,
       battleMap: {
         ...battleMap,
         [x]: { ...battleMap[x], [y]: newCell }
       }
     });
   };
-  handleReset = e => {
+  const handleReset = e => {
     e.preventDefault();
-    this.setState(
+    setState(
       {
+        ...state,
         isLoading: true,
         size: 10,
         battleMap: genBattleMapState(),
         errMsg: null
       },
       () => {
-        this.setState({ isLoading: false });
+        setState({ ...state, isLoading: false });
       }
     );
   };
-  handleSubmit = e => {
+  const handleSubmit = e => {
     e.preventDefault();
-    this.setState({ isLoading: true });
-    this.props
-      .createGame(this.state)
+    setState({ ...state, isLoading: true });
+    props
+      .createGame(state)
       .finally(() =>
-        this.setState({ isLoading: false, errHandleCompleted: false })
+        setState({ ...state, isLoading: false, errHandleCompleted: false })
       );
   };
-
-  errorHandler = () => {
-    const emptyFleet = this.props.emptyFleet;
-    const invalidShipType = this.props.invalidShipType;
-    const invalidCount = this.props.invalidCount;
-    const invalidShipComposition = this.props.invalidShipComposition;
-    const forbiddenCells = this.props.forbiddenCells;
+  const errorHandler = () => {
+    const emptyFleet = props.emptyFleet;
+    const invalidShipType = props.invalidShipType;
+    const invalidCount = props.invalidCount;
+    const invalidShipComposition = props.invalidShipComposition;
+    const forbiddenCells = props.forbiddenCells;
     let msg = [];
-    let battleMap = this.state.battleMap;
+    let battleMap = state.battleMap;
 
     if (emptyFleet) {
       msg.push(<div key="emptyFleet">{emptyFleet}</div>);
@@ -150,94 +156,90 @@ class NewGame extends Component {
         );
       }
     }
-    this.setState({
+    setState({
+      ...state,
       errHandleCompleted: true,
       battleMap: battleMap,
       errMsg: msg
     });
   };
 
-  render() {
-    if (this.state.isLoading) {
-      return spinner();
-    }
-    if (!this.props.auth.authToken) {
-      return <Redirect to="/auth" />;
-    }
-    if (this.props.gameId) {
-      return <Redirect to={"/active-games/" + this.props.gameId} />;
-    }
-    return (
-      <div className="container">
-        <form
-          onSubmit={this.handleSubmit}
-          onChange={this.handleChange}
-          className="white"
-        >
-          <h5 className="grey-text text-darken-3">New Game</h5>
-          <div className="range-field">
-            <span>
-              <h6 className="grey-text text-darken-3">Size</h6>
-            </span>
-            <input
-              type="range"
-              id="size"
-              max="15"
-              min="10"
-              value={this.state.size}
-              onChange={this.handleSizeChange}
+  return (
+    <div className="container">
+      <form onSubmit={handleSubmit} className="white">
+        <h5 className="grey-text text-darken-3">New Game</h5>
+        <div className="range-field">
+          <span>
+            <h6 className="grey-text text-darken-3">Size</h6>
+          </span>
+          <input
+            type="range"
+            id="size"
+            max="15"
+            min="10"
+            value={state.size}
+            onChange={handleSizeChange}
+          />
+        </div>
+
+        <div className="input-field">
+          <input
+            type="text"
+            id="name"
+            placeholder="Name of the game"
+            value={state.name}
+            onChange={handleNameChange}
+          />
+        </div>
+        <div className="row">
+          <div className="col s8 ">
+            <Map
+              onClick={onClick}
+              size={state.size}
+              battleMap={state.battleMap}
             />
-          </div>
 
-          <div className="input-field">
-            <input
-              type="text"
-              id="name"
-              placeholder="Name of the game"
-              value={this.state.name}
-              onChange={this.handleNameChange}
-            />
-          </div>
-          <div className="row">
-            <div className="col s8 ">
-              <Map
-                onClick={this.onClick}
-                size={this.state.size}
-                battleMap={this.state.battleMap}
-              />
+            <div className="input-field">
+              <button className="btn pink lighten-1 z-depth-20">Create</button>
 
-              <div className="input-field">
-                <button className="btn pink lighten-1 z-depth-20">
-                  Create
-                </button>
-
-                {this.props.err
-                  ? this.state.errHandleCompleted
-                    ? null
-                    : this.errorHandler()
-                  : null}
-                {this.state.errMsg}
-              </div>
-              <div className="input-field">
-                <button
-                  type="button"
-                  className="btn red lighten-1 z-depth-10"
-                  onClick={this.handleReset}
-                >
-                  Reset
-                </button>
-              </div>
+              {props.err
+                ? state.errHandleCompleted
+                  ? null
+                  : errorHandler()
+                : null}
+              {state.errMsg}
             </div>
-
-            <div className="col s4 ">
-              <Legend size={this.state.size} />
+            <div className="input-field">
+              <button
+                type="button"
+                className="btn red lighten-1 z-depth-10"
+                onClick={handleReset}
+              >
+                Reset
+              </button>
             </div>
           </div>
-        </form>
-      </div>
-    );
-  }
+
+          <div className="col s4 ">
+            <Legend size={state.size} />
+          </div>
+        </div>
+      </form>
+    </div>
+  );
 }
+
+
+    // if (this.state.isLoading) {
+    //   return spinner();
+    // }
+    // if (!this.props.auth.authToken) {
+    //   return <Redirect to="/auth" />;
+    // }
+    // if (this.props.gameId) {
+    //   return <Redirect to={"/active-games/" + this.props.gameId} />;
+    // }
+   
 
 const mapStateToProps = state => {
   return {

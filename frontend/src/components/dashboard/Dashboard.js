@@ -54,7 +54,6 @@ function Dashboard(props) {
     resumeGame(game);
   };
   useEffect(() => {
-    console.log("dash_data", data);
     if (!error && data) {
       setAvGames(data.avGames);
       setMyGames(data.myGames);
