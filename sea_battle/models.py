@@ -34,10 +34,10 @@ class GamesQuerySet(models.QuerySet):
         )
 
     def available_games(self, user):
-        now = timezone.now()
-        delta = timedelta(seconds=AVAILABLE_GAME_TIME_LIMIT)
+        # now = timezone.now()
+        # delta = timedelta(seconds=AVAILABLE_GAME_TIME_LIMIT)
         return self.filter(
-            last_activity__gt=(now - delta),
+            # last_activity__gt=(now - delta),
             joiner=None,
         ).exclude(creator=user)
 
