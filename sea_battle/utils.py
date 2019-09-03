@@ -60,13 +60,17 @@ def check_fleet_composition(fleet, size):
     for ship in fleet:
 
         if len(ship) == 8:
-            curr_fleet['air'] += 1
-            continue
+            if 'air' in fc.keys():
+                curr_fleet['air'] += 1
+                continue
+            else:
+                not_allowed_ships.append(list(ship))
         if str(len(ship)) in curr_fleet:
             key = str(len(ship))
             curr_fleet[key] += 1
         else:
-            not_allowed_ships.append(ship)
+            print("11", ship)
+            not_allowed_ships.append(list(ship))
 
     if not not_allowed_ships:
 
@@ -87,12 +91,12 @@ def check_fleet_composition(fleet, size):
     for ship in fleet:
 
         if len(ship) == 8:
-            air_error = air_carr_validator(ship)
+            air_error = air_carr_validator(list(ship))
             if air_error:
                 ships_errors.append(air_error)
 
         else:
-            ship_error = linear_ship_validator(ship)
+            ship_error = linear_ship_validator(list(ship))
             if ship_error:
                 ships_errors.append(ship_error)
 
@@ -226,7 +230,7 @@ def mapped_shoots(
         shoots: List,
         fleet: List[List[List[int]]]) -> Tuple[
             List,
-            Set[Tuple[int, int]]]:
+            List[Tuple[int, int]]]:
 
     tupled_fleet = []
     for ship in fleet:
@@ -251,4 +255,5 @@ def mapped_shoots(
 
     for shoot in (tupled_shoots-set(_flat_fleet)):
         shoots.append([*shoot, 'miss'])
-    return shoots, set(dead_zone)
+
+    return shoots, list(set(dead_zone))

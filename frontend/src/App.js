@@ -31,14 +31,14 @@ function App(props) {
       console.log("token invalidated. Redirect to Auth... ");
       setRedirect(true);
     }
-    const delta = exp - origIat - 10; //seconds
-    let timerId = setTimeout(
-      refreshToken({
-        variables: { token: authToken }
-      }),
-      delta * 1000
-    );
-    return () => { console.log("refreshing timer skipped"); clearTimeout(timerId) };
+    // const delta = exp - origIat - 10; //seconds
+    // let timerId = setTimeout(
+    //   refreshToken({
+    //     variables: { token: authToken }
+    //   }),
+    //   delta * 1000
+    // );
+    // return () => { console.log("refreshing timer skipped"); clearTimeout(timerId) };
   }, [authToken]);
 
   const redirectHandler = comp => {

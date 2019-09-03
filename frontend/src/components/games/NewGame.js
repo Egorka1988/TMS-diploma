@@ -1,21 +1,16 @@
-import React, { Component, useState } from "react";
-import { createGame } from "../../store/actions/gamesActions";
+import React, { useState, useEffect } from "react";
+import { serveCreationData } from "../../store/actions/gamesActions";
 import { connect } from "react-redux";
 import { Redirect } from "react-router-dom";
-import { spinner } from "../../utils";
+import { spinner, genBattleMapState, prepareFleet } from "../../utils";
+import { errorHandler } from "../../errorHandler";
+import { MUTATION_CREATE_GAME } from "../../gql";
 import { Map } from "./BattleMap";
 import Legend from "./Legend";
+import { useMutation } from "react-apollo";
+import { EMPTY_FLEET } from "../../constants";
 
-export const genBattleMapState = (size = 10) => {
-  let battleMap = {};
-  for (let i = 1; i < size + 1; i++) {
-    battleMap[i] = {};
-    for (let j = 1; j < size + 1; j++) {
-      battleMap[i][j] = { isSelected: false };
-    }
-  }
-  return battleMap;
-};
+
 const initialState = {
   name: "",
   size: 10,
@@ -26,6 +21,22 @@ const initialState = {
 
 function NewGame(props) {
   const [state, setState] = useState(initialState);
+  const [fleetErr, setFleeterr] = useState(null);
+  const [createGame, { data, error }] = useMutation(MUTATION_CREATE_GAME);
+  useEffect(() => {
+    let err;
+    if (data) {
+      err = JSON.parse(data.createGame.fleetErrors);
+      const gameId = data.createGame.gameId
+      gameId && serveCreationData(gameId);
+    }
+    err && setFleeterr(err);
+  }, [data, error]);
+
+  useEffect(() => {
+    fleetErr && errorHandler(fleetErr, state, setState);
+  }, [fleetErr]);
+
   const handleSizeChange = e => {
     const size = parseInt(e.target.value);
     setState({
@@ -34,6 +45,7 @@ function NewGame(props) {
       battleMap: genBattleMapState(size),
       errMsg: null
     });
+    setFleeterr(null);
   };
 
   const handleNameChange = e => {
@@ -52,12 +64,12 @@ function NewGame(props) {
     }
     const [x, y] = cell;
     let battleMap = state.battleMap;
-
     let oldCell = battleMap[x][y];
     let newCell = { ...oldCell, isSelected: !oldCell.isSelected };
 
     setState({
       ...state,
+      errHandleCompleted: true,
       battleMap: {
         ...battleMap,
         [x]: { ...battleMap[x], [y]: newCell }
@@ -65,105 +77,46 @@ function NewGame(props) {
     });
   };
   const handleReset = e => {
-    e.preventDefault();
-    setState(
-      {
-        ...state,
-        isLoading: true,
-        size: 10,
-        battleMap: genBattleMapState(),
-        errMsg: null
-      },
-      () => {
-        setState({ ...state, isLoading: false });
-      }
-    );
+    setState({
+      ...state,
+      size: 10,
+      battleMap: genBattleMapState(),
+      errMsg: null
+    });
   };
   const handleSubmit = e => {
     e.preventDefault();
-    setState({ ...state, isLoading: true });
-    props
-      .createGame(state)
-      .finally(() =>
+    setFleeterr(null);
+
+    const fleet = prepareFleet(state.battleMap);
+
+    if (fleet.length) {
+      createGame({
+        variables: {
+          size: state.size,
+          fleet: fleet,
+          name: state.name
+        }
+      }).finally(() =>
         setState({ ...state, isLoading: false, errHandleCompleted: false })
       );
-  };
-  const errorHandler = () => {
-    const emptyFleet = props.emptyFleet;
-    const invalidShipType = props.invalidShipType;
-    const invalidCount = props.invalidCount;
-    const invalidShipComposition = props.invalidShipComposition;
-    const forbiddenCells = props.forbiddenCells;
-    let msg = [];
-    let battleMap = state.battleMap;
-
-    if (emptyFleet) {
-      msg.push(<div key="emptyFleet">{emptyFleet}</div>);
+    } else {
+      setFleeterr({
+        emptyFleet:
+          EMPTY_FLEET
+      });
     }
-    if (invalidCount) {
-      msg.push(<div>The ships' count is not correct. Check the schema. </div>);
-    }
-    if (invalidShipType) {
-      for (const ship of invalidShipType) {
-        msg.push(
-          <div key={"invalidShipType" + ship}>
-            The ship on
-            <font size="+1">
-              &nbsp; {ship[0][0]}
-              {(ship[0][1] + 9).toString(36)} &nbsp;
-            </font>
-            is too big
-          </div>
-        );
-        for (const cell of ship) {
-          const [x, y] = cell;
-          battleMap[x][y] = { ...battleMap[x][y], isError: true };
-        }
-      }
-    }
-
-    if (invalidShipComposition) {
-      for (const ship of invalidShipComposition) {
-        msg.push(
-          <div key={"invalidShipComposition" + ship}>
-            The ship on
-            <font size="+1">
-              &nbsp; {ship[0][0]}
-              {(ship[0][1] + 9).toString(36)} &nbsp;
-            </font>
-            is not properly built. Check the schema
-          </div>
-        );
-        for (const cell of ship) {
-          const [x, y] = cell;
-          battleMap[x][y] = { ...battleMap[x][y], isError: true };
-        }
-      }
-    }
-    if (forbiddenCells) {
-      for (const cell of forbiddenCells) {
-        const [x, y] = cell;
-        battleMap[x][y] = { ...battleMap[x][y], isError: true };
-        msg.push(
-          <div key={"forbiddenCells" + cell}>
-            The ship on
-            <font size="+1">
-              &nbsp; {x}
-              {(y + 9).toString(36)} &nbsp;
-            </font>
-            is too close to other ship
-          </div>
-        );
-      }
-    }
-    setState({
-      ...state,
-      errHandleCompleted: true,
-      battleMap: battleMap,
-      errMsg: msg
-    });
   };
 
+  if (state.isLoading) {
+    return spinner();
+  }
+  if (!props.auth.authToken) {
+    return <Redirect to="/auth" />;
+  }
+  if (props.gameId) {
+    return <Redirect to={"/active-games/" + props.gameId} />;
+  }
   return (
     <div className="container">
       <form onSubmit={handleSubmit} className="white">
@@ -201,12 +154,6 @@ function NewGame(props) {
 
             <div className="input-field">
               <button className="btn pink lighten-1 z-depth-20">Create</button>
-
-              {props.err
-                ? state.errHandleCompleted
-                  ? null
-                  : errorHandler()
-                : null}
               {state.errMsg}
             </div>
             <div className="input-field">
@@ -229,34 +176,17 @@ function NewGame(props) {
   );
 }
 
-
-    // if (this.state.isLoading) {
-    //   return spinner();
-    // }
-    // if (!this.props.auth.authToken) {
-    //   return <Redirect to="/auth" />;
-    // }
-    // if (this.props.gameId) {
-    //   return <Redirect to={"/active-games/" + this.props.gameId} />;
-    // }
-   
-
 const mapStateToProps = state => {
   return {
     auth: state.auth,
     err: state.games.err,
-    gameId: state.games.gameId,
-    emptyFleet: state.games.emptyFleet,
-    invalidShipType: state.games.invalidShipType,
-    invalidCount: state.games.invalidCount,
-    invalidShipComposition: state.games.invalidShipComposition,
-    forbiddenCells: state.games.forbiddenCells
+    gameId: state.games.gameId
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
-    createGame: data => dispatch(createGame(data))
+    serveCreationData: (gameId) => dispatch(serveCreationData(gameId))
   };
 };
 

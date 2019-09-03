@@ -1,8 +1,9 @@
 import React from "react";
 
-const AvailableGames = ({ availableGames, joinHandler, joinErr }) => {
+const AvailableGames = ({ availableGames, joinHandler }) => {
   return (
     <div className="highlight">
+        
       <table>
         <thead>
           <tr>
@@ -25,7 +26,7 @@ const AvailableGames = ({ availableGames, joinHandler, joinErr }) => {
                   <td>{game.id}</td>
                   <td>{game.name}</td>
                   <td>{game.size}</td>
-                  <td>{game.creator}</td>
+                  <td>{game.creator.username}</td>
                   <td>
                     <button
                       renderas="button"
@@ -35,7 +36,6 @@ const AvailableGames = ({ availableGames, joinHandler, joinErr }) => {
                       <span>Join</span>
                     </button>
                   </td>
-                  <td>{joinErr}</td>
                 </tr>
               );
             })}

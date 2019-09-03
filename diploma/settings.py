@@ -79,7 +79,7 @@ DATABASES = {
     }
 
 GRAPHENE = {
-    'SCHEMA': 'sea_battle.gcl_api.schema.schema',
+    'SCHEMA': 'sea_battle.gql_api.schema.schema',
     'MIDDLEWARE': [
         'graphql_jwt.middleware.JSONWebTokenMiddleware',
     ],
@@ -111,9 +111,9 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ],
-    # 'DEFAULT_AUTHENTICATION_CLASSES': [
-    #     'rest_framework_simplejwt.authentication.JWTAuthentication',
-    # ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
     'DEFAULT_RENDERER_CLASSES': [
         'djangorestframework_camel_case.render.CamelCaseJSONRenderer',
     ],
@@ -197,15 +197,15 @@ LOGGING = {
     },
 }
 
-# SIMPLE_JWT = {
-#     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
-#     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-#     'ROTATE_REFRESH_TOKENS': False,
-# }
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=35),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': False,
+}
 
 GRAPHQL_JWT = {
     'JWT_VERIFY_EXPIRATION': True,
-    'JWT_EXPIRATION_DELTA': timedelta(minutes=35),
-    'JWT_REFRESH_EXPIRATION_DELTA': timedelta(days=1),
+    'JWT_EXPIRATION_DELTA': timedelta(days=3),
+    'JWT_REFRESH_EXPIRATION_DELTA': timedelta(days=100),
     'JWT_AUTH_HEADER_PREFIX': "Bearer",
 }

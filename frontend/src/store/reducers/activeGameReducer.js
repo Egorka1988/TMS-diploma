@@ -8,6 +8,7 @@ export const genBattleMapState = ({
   disabled
 }) => {
   let battleMap = {};
+
   for (let i = 1; i < size + 1; i++) {
     battleMap[i] = {};
     for (let j = 1; j < size + 1; j++) {
@@ -31,7 +32,8 @@ export const genBattleMapState = ({
   if (shoots) {
     shoots.forEach(index => {
       const [x, y, state] = index;
-      let cell = battleMap[x][y];
+
+      let cell = battleMap[Number(x)][Number(y)];
       if (state == "hit") {
         cell.isHit = true;
       } else if (state == "kill") {
@@ -61,37 +63,40 @@ const initState = {
 const activeGameReducer = (state = initState, action) => {
   switch (action.type) {
     case "LOAD_ACTIVE_GAME":
+      const game = action.gameDetails;
+      if (!game || !action.fleet) {
+        return state;
+      }
       return {
         ...state,
         err: null,
         isLoading: false,
-        creator: action.creator,
-        gameId: action.id,
-        size: action.size,
-        name: action.name,
-        joiner: action.joiner,
-        turn: action.turn,
-        winner: action.winner,
+        creator: game.creator.username,
+        gameId: game.id,
+        size: game.size,
+        name: game.name,
+        joiner: game.joiner.username,
+        turn: game.turn.username,
+        winner: game.winner ? game.winner.username : null,
         gameState: action.gameState,
-        // isDisabled: action.settingFleetMode ? false: action.gameState === "active" ? action.turn === action.currentUser ? false : true : true,
         settingFleetMode: action.settingFleetMode,
 
         myShoots: action.myShoots,
         enemyShoots: action.enemyShoots,
 
         enemyBattleMap: genBattleMapState({
-          size: action.size,
+          size: game.size,
           shoots: action.myShoots,
           deadZone: action.enemyDeadZone,
           disabled:
             action.gameState === "active"
-              ? action.turn === action.currentUser
+              ? action.turn === action.currUser
                 ? false
                 : true
               : true
         }),
         battleMap: genBattleMapState({
-          size: action.size,
+          size: game.size,
           shoots: action.enemyShoots,
           fleet: action.fleet,
           deadZone: action.myDeadZone,
@@ -152,11 +157,12 @@ const activeGameReducer = (state = initState, action) => {
       console.log("Shoot failed");
       return {
         ...state,
-        err: action.err
+        shootError: action.shootError
       };
 
     case "GAME_STATE":
       const enemyShoots = action.enemyShoots;
+
       let battleMap = { ...state.battleMap };
 
       if (
@@ -168,6 +174,7 @@ const activeGameReducer = (state = initState, action) => {
       if (enemyShoots) {
         enemyShoots.forEach(shoot => {
           const [x, y, shootResult] = shoot;
+
           if (shootResult === "miss") {
             battleMap[x][y] = { ...battleMap[x][y], content: "." };
           }

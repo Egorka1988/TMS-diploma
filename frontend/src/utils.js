@@ -13,7 +13,8 @@ export const localStoreTokenManager = store => {
     console.log("localStore");
     const newToken = store.getState().auth.authToken;
 
-    if (newToken === null) { // logout flow
+    if (newToken === null) {
+      // logout flow
       localStorage.removeItem("authToken");
     } else if (newToken !== currentToken) {
       localStorage.setItem("authToken", newToken);
@@ -47,7 +48,7 @@ export const requestWrapper = (method, url, bodyData) => {
   myHeaders.append("Access-Control-Request-Headers", "set-cookie");
   const token = "Bearer " + localStorage.getItem("authToken");
   myHeaders.append("Authorization", token);
-  myHeaders.append("X-Csrftoken", getTokenCsrf()); 
+  myHeaders.append("X-Csrftoken", getTokenCsrf());
   const myInit = {
     method: method,
     mode: "cors",
@@ -68,4 +69,26 @@ export const getTokenCsrf = () => {
       return token;
     }
   }
+};
+
+export const prepareFleet = data => {
+  let fleet = [];
+  const size = Object.keys(data).length;
+  for (let i = 0; i < size; i++) {
+    for (let j = 0; j < size; j++) {
+      data[i + 1][j + 1].isSelected ? fleet.push([i + 1, j + 1]) : null;
+    }
+  }
+  return fleet;
+};
+
+export const genBattleMapState = (size = 10) => {
+  let battleMap = {};
+  for (let i = 1; i < size + 1; i++) {
+    battleMap[i] = {};
+    for (let j = 1; j < size + 1; j++) {
+      battleMap[i][j] = { isSelected: false };
+    }
+  }
+  return battleMap;
 };

@@ -1,7 +1,6 @@
 import graphene
 from graphql_jwt.decorators import login_required
 
-from sea_battle import constants
 from sea_battle.api import validators
 from sea_battle.gql_api.types import InitialForJoinerType, FleetErrorsType, GameType
 from sea_battle.models import Game

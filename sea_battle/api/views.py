@@ -63,7 +63,7 @@ class WatchGamesAPIViewSet(viewsets.GenericViewSet):
 
     serializer_class = serializers.ActiveGamesSerializer
     permission_classes = (IsAuthenticated,)
-    authentication_classes = (JWTAuthentication,)
+    # authentication_classes = (JWTAuthentication,)
 
     def get_queryset(self):
         current_user = self.request.user
@@ -99,7 +99,7 @@ class GamesAPIViewSet(viewsets.GenericViewSet):
 
     # serializer_class = serializers.NewGameSerializer
     lookup_url_kwarg = 'game_id'
-    authentication_classes = (JWTAuthentication,)
+    # authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
@@ -114,9 +114,8 @@ class GamesAPIViewSet(viewsets.GenericViewSet):
             game = Game.objects.get(pk=self.kwargs[self.lookup_url_kwarg])
             return game
         except ObjectDoesNotExist:
-            message = "game with id={} does not exist".format(kwargs[self.lookup_url_kwarg])
+            message = "game with id={} does not exist".format(self.kwargs[self.lookup_url_kwarg])
             raise (Exception(message))
-
 
     def list(self, request, *args, **kwargs):
         qs = self.get_queryset()

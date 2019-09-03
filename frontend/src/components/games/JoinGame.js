@@ -1,241 +1,195 @@
-import React, { Component } from "react";
+import React, { Component, useState, useEffect } from "react";
 import {
   joinFleet,
+  serveJoinerInitial,
   loadActiveGame,
   clickHandle
 } from "../../store/actions/gamesActions";
 import { connect } from "react-redux";
 import { Redirect } from "react-router-dom";
-import { spinner } from "../../utils";
+import { spinner, genBattleMapState, prepareFleet } from "../../utils";
+import { errorHandler } from "../../errorHandler";
 import { Map } from "./BattleMap";
 import Legend from "./Legend";
-import { genBattleMapState } from "./NewGame";
+import { MUTATION_JOIN_FLEET, QUERY_INITIAL_FOR_JOINER } from "../../gql";
+import { client } from "../../index";
+import { EMPTY_FLEET } from "../../constants";
 
-class JoinGame extends Component {
-  state = {
+function JoinGame(props) {
+  const [state, setState] = useState({
     isLoading: false,
     errHandleCompleted: false,
     shouldRedirectToActiveGame: false
-  };
-
-  componentWillMount() {
-    this.props.loadActiveGame(this.props.match.params.gameId, true);
+  });
+  if (!props.battleMap) {
+    client
+      .query({
+        query: QUERY_INITIAL_FOR_JOINER,
+        variables: {
+          gameId: props.match.params.gameId
+        }
+      })
+      .then(res => {
+        res.data.initialForJoiner &&
+          serveJoinerInitial(res.data.initialForJoiner);
+      });
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    this.props.isFleetJoined &&
-      prevProps.isFleetJoined !== this.props.isFleetJoined &&
-      this.setState({ shouldRedirectToActiveGame: true });
-  }
+  useEffect(() => {
+    setState({ ...state, battleMap: props.battleMap });
+  }, [props.battleMap]);
 
-  onClick = cell => {
-    if (this.state.errHandleCompleted) {
-      let resetBattleMap = { ...this.props.battleMap };
-      for (let i = 1; i < this.props.size + 1; i++) {
-        for (let j = 1; j < this.props.size + 1; j++) {
-          resetBattleMap[i][j] = { ...resetBattleMap[i][j], isError: false };
+
+  const onClick = cell => {
+    if (state.errHandleCompleted) {
+      let resetBattleMap = state.battleMap;
+      for (let i = 1; i < props.size + 1; i++) {
+        for (let j = 1; j < props.size + 1; j++) {
+          resetBattleMap[i][j].isError = false;
         }
       }
-      this.setState({ battleMap: resetBattleMap });
+      setState({
+        ...state,
+        battleMap: resetBattleMap,
+      });
     }
-    this.props.clickHandle(cell, this.props.battleMap);
-  };
-
-  handleReset = e => {
-    e.preventDefault();
-    this.setState(
-      {
-        isLoading: true,
-        size: this.props.size,
-        battleMap: genBattleMapState(this.props.size),
-        errMsg: null
-      },
-      () => {
-        this.setState({ isLoading: false });
-      }
-    );
-  };
-
-  handleSubmit = e => {
-    e.preventDefault();
-    this.setState({ isLoading: true, size: this.props.size }, () => {
-      this.props
-        .joinFleet(this.props, this.props.gameId)
-        .finally(() =>
-          this.setState({ isLoading: false, errHandleCompleted: false })
-        );
-    });
-  };
-
-  errorHandler = () => {
-    const emptyFleet = this.props.emptyFleet;
-    const invalidShipType = this.props.invalidShipType;
-    const invalidCount = this.props.invalidCount;
-    const invalidShipComposition = this.props.invalidShipComposition;
-    const forbiddenCells = this.props.forbiddenCells;
-    let msg = [];
-    let battleMap = this.props.battleMap;
-
-    if (emptyFleet) {
-      msg.push(<div key="joinEmptyFleet">{emptyFleet}</div>);
-    }
-    if (invalidCount) {
-      msg.push(
-        <div key="invalidJoinCount">
-          The ships' count is not correct. Check the schema.{" "}
-        </div>
-      );
-    }
-    if (invalidShipType) {
-      for (const ship of invalidShipType) {
-        msg.push(
-          <div key={"joinInvalidShipType" + ship}>
-            The ship on
-            <font size="+1">
-              &nbsp; {ship[0][0]}
-              {(ship[0][1] + 9).toString(36)} &nbsp;
-            </font>
-            is too big
-          </div>
-        );
-        for (const cell of ship) {
-          const [x, y] = cell;
-          battleMap[x][y] = { ...battleMap[x][y], isError: true };
-        }
-      }
-    }
-
-    if (invalidShipComposition) {
-      for (const ship of invalidShipComposition) {
-        msg.push(
-          <div key={"joinInvalidShipComposition" + ship}>
-            The ship on
-            <font size="+1">
-              &nbsp; {ship[0][0]}
-              {(ship[0][1] + 9).toString(36)} &nbsp;
-            </font>
-            is not properly built. Check the schema
-          </div>
-        );
-        for (const cell of ship) {
-          const [x, y] = cell;
-          battleMap[x][y] = { ...battleMap[x][y], isError: true };
-        }
-      }
-    }
-    if (forbiddenCells) {
-      for (const cell of forbiddenCells) {
-        const [x, y] = cell;
-        battleMap[x][y] = { ...battleMap[x][y], isError: true };
-        msg.push(
-          <div key={"joinForbiddenCells" + cell}>
-            The ship on
-            <font size="+1">
-              &nbsp; {x}
-              {(y + 9).toString(36)} &nbsp;
-            </font>
-            is too close to other ship
-          </div>
-        );
-      }
-    }
-    this.setState({
+    const [x, y] = cell;
+    let battleMap = state.battleMap;
+    let oldCell = battleMap[x][y];
+    let newCell = { ...oldCell, isSelected: !oldCell.isSelected };
+    setState({
+      ...state,
       errHandleCompleted: true,
-      battleMap: battleMap,
-      errMsg: msg
+      battleMap: {
+        ...battleMap,
+        [x]: { ...battleMap[x], [y]: newCell }
+      }
     });
   };
-
-  render() {
-    if (this.state.isLoading) {
-      return spinner();
+  const handleReset = e => {
+    setState({
+      ...state,
+      battleMap: genBattleMapState(props.size),
+      errMsg: null
+    });
+  };
+  const handleSubmit = e => {
+    e.preventDefault();
+    const fleet = prepareFleet(state.battleMap);
+    if (fleet.length) {
+      client
+        .mutate({
+          mutation: MUTATION_JOIN_FLEET,
+          variables: {
+            fleet: fleet,
+            gameId: props.gameId,
+            size: props.size
+          }
+        })
+        .then(res => {
+          if (res.data) {
+            if (!res.data.joinFleet.gameId) {
+              const data = errorHandler(
+                res.data.joinFleet.fleetErrors,
+                state.battleMap
+              );
+              setState({
+                ...state,
+                errHandleCompleted: data.errHandleCompleted,
+                battleMap: data.battleMap,
+                errMsg: data.errMsg
+              });
+            } else {
+              console.log("game!")
+              setState({
+                ...state,
+                isFleetJoined: true
+              })
+            }
+          }
+        });
+    } else {
+      setState({
+        ...state,
+        errMsg: <div>{EMPTY_FLEET}</div>
+      });
     }
-    if (!this.props.auth.authToken) {
-      return <Redirect to="/auth" />;
-    }
-    if (this.state.shouldRedirectToActiveGame) {
-      return <Redirect to={"/active-games/" + this.props.gameId} />;
-    }
-    return (
-      <div className="container">
-        <div>
-          <h5 className="grey-text text-darken-3">
-            Name of the game: {this.props.name}
-          </h5>
-        </div>
-        <div className="input-field">
-          <h5 className="grey-text text-darken-3">
-            Your opponent's name is {this.props.creator}
-          </h5>
-        </div>
-        <form
-          onSubmit={this.handleSubmit}
-          onChange={this.handleChange}
-          className="white"
-        >
-          <div className="row">
-            <div className="col s8 ">
-              <Map
-                onClick={this.onClick}
-                size={this.props.size}
-                battleMap={this.props.battleMap}
-              />
+  };
 
-              <div className="input-field">
-                <button className="btn pink lighten-1 z-depth-20">Join</button>
+  if (state.isLoading) {
+    return spinner();
+  }
+  if (!props.auth.authToken) {
+    return <Redirect to="/auth" />;
+  }
+  // if () {
+  //   return <Redirect to={"/active-games/" + props.gameId} />;
+  // }
+ 
+  return (
+    
+    <div className="container">
+      {/* {state.isFleetJoined && <Redirect to={"/active-games/" + props.gameId} />} */}
+      <div>
+        <h5 className="grey-text text-darken-3">
+          Name of the game: {props.name}
+        </h5>
+      </div>
+      <div className="input-field">
+        <h5 className="grey-text text-darken-3">
+          Your opponent's name is {props.creator}
+        </h5>
+      </div>
+      <form onSubmit={handleSubmit} className="white">
+        <div className="row">
+          <div className="col s8 ">
+            <Map
+              onClick={onClick}
+              size={props.size}
+              battleMap={state.battleMap ? state.battleMap : props.battleMap}
+            />
 
-                {this.props.err
-                  ? this.state.errHandleCompleted
-                    ? null
-                    : this.errorHandler()
-                  : null}
-                {this.state.errMsg}
-                {this.props.joinErr}
-              </div>
-              <div className="input-field">
-                <button
-                  type="button"
-                  className="btn red lighten-1 z-depth-10"
-                  onClick={this.handleReset}
-                >
-                  Reset
-                </button>
-              </div>
+            <div className="input-field">
+              <button className="btn pink lighten-1 z-depth-20">Join</button>
+              {state.errMsg}
             </div>
-
-            <div className="col s4 ">
-              {this.props.size && this.props.battleMap ? (
-                <Legend
-                  size={this.props.size}
-                  battleMap={this.props.battleMap}
-                  disabled={true}
-                />
-              ) : null}
+            <div className="input-field">
+              <button
+                type="button"
+                className="btn red lighten-1 z-depth-10"
+                onClick={handleReset}
+              >
+                Reset
+              </button>
             </div>
           </div>
-        </form>
-      </div>
-    );
-  }
+
+          <div className="col s4 ">
+            {props.size && props.battleMap ? (
+              <Legend
+                size={props.size}
+                battleMap={props.battleMap}
+                disabled={true}
+              />
+            ) : null}
+          </div>
+        </div>
+      </form>
+    </div>
+  );
 }
+
 
 const mapStateToProps = state => {
   return {
-    size: state.activeGame.size,
-    name: state.activeGame.name,
-    creator: state.activeGame.creator,
+    size: state.games.size,
+    name: state.games.name,
+    creator: state.games.creator,
     fleetComposition: state.auth.fleetComposition,
     auth: state.auth,
     err: state.games.err,
-    battleMap: state.activeGame.battleMap,
-    isFleetJoined: state.games.isFleetJoined,
-    gameId: state.activeGame.gameId,
-    emptyFleet: state.games.emptyFleet,
-    invalidShipType: state.games.invalidShipType,
-    invalidCount: state.games.invalidCount,
-    invalidShipComposition: state.games.invalidShipComposition,
-    forbiddenCells: state.games.forbiddenCells,
-    joinErr: state.games.joinErr
+    battleMap: state.games.battleMap,
+    gameId: state.games.gameId
   };
 };
 

@@ -1,3 +1,5 @@
+import { genBattleMapState } from "../../utils";
+
 const initState = {
   err: null
 };
@@ -32,14 +34,7 @@ const gamesReducer = (state = initState, action) => {
       console.log("Game created");
       return {
         ...state,
-        fleet: action.fleet,
-        turn: action.turn,
-        size: action.size,
         gameId: action.gameId,
-        deadZone: action.deadZone,
-        name: action.name,
-        battleMap: action.battleMap,
-        gameState: action.gameState,
         err: null
       };
     case "GAME_CREATE_ERROR":
@@ -47,12 +42,7 @@ const gamesReducer = (state = initState, action) => {
 
       return {
         ...state,
-        err: "error",
-        emptyFleet: action.emptyFleet,
-        invalidShipType: action.invalidShipType,
-        invalidCount: action.invalidCount,
-        invalidShipComposition: action.invalidShipComposition,
-        forbiddenCells: action.forbiddenCells
+        err: "error"
       };
     case "JOIN_SUCCESS":
       console.log("Join success");
@@ -62,7 +52,17 @@ const gamesReducer = (state = initState, action) => {
         name: action.name,
         creator: action.creator,
         gameId: action.gameId,
-        joinErr: action.joinErr
+        joinErr: null,
+        battleMap: action.size && genBattleMapState(action.size)
+      };
+    case "JOIN_INITIAL_DATA":
+      console.log("JOIN_INITIAL_DATA");
+      return {
+        name: action.name,
+        size: action.size,
+        creator: action.creator,
+        gameId: action.gameId,
+        battleMap: genBattleMapState(action.size)
       };
     case "JOIN_ERROR":
       console.log("Join failed");
@@ -80,13 +80,7 @@ const gamesReducer = (state = initState, action) => {
       console.log("Join fleet failed");
       return {
         ...state,
-        err: "error",
-        emptyFleet: action.emptyFleet,
-        invalidShipType: action.invalidShipType,
-        invalidCount: action.invalidCount,
-        invalidShipComposition: action.invalidShipComposition,
-        forbiddenCells: action.forbiddenCells,
-        joinErr: action.joinErr
+        err: "error"
       };
 
     default:

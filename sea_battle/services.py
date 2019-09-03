@@ -44,6 +44,7 @@ def handle_shoot(
         last_shoot: List[int],
         game: GameType,
         current_user: User):
+
     logger.info("handle shoot. Args: \n last_shoot: %s %s", last_shoot, type(last_shoot))
     """ func gives a state-message of shooting result,
     saves shoot in db  """
@@ -236,19 +237,26 @@ def join_game(game_id, user):
     """try to join to the particular game"""
 
     with transaction.atomic():
+        fail_message = ""
         try:
-            game = Game.objects.available_games(user). \
-                select_for_update().\
-                get(pk=game_id)
+            game = Game.objects\
+                .filter(Q(pk=game_id), ~Q(creator=user))\
+                .select_for_update()\
+                .first()
+
         except exceptions.ObjectDoesNotExist:
-            return constants.GAME_NOT_FOUND
+                fail_message = constants.GAME_NOT_FOUND
+                game = None
+                return game, fail_message
 
         if game.joiner:
-            return constants.FAIL_TO_JOIN
+            fail_message = constants.FAIL_TO_JOIN
+            game = None
+            return game, fail_message
 
         game.joiner = user
         game.save()
-    return game
+        return game, fail_message
 
 
 def join_fleet(game_id, user, fleet):

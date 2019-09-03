@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from graphene_django.utils import GraphQLTestCase
 from graphql_jwt.testcases import JSONWebTokenTestCase
 
-from sea_battle.gcl_api import schema
+from sea_battle.gql_api import schema
 
 
 class UsersTests(JSONWebTokenTestCase):

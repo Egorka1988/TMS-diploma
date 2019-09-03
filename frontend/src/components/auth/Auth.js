@@ -5,14 +5,8 @@ import { serveToken, signUp, handshake } from "../../store/actions/authActions";
 import { connect } from "react-redux";
 import { Redirect } from "react-router-dom";
 import { spinner } from "../../utils";
+import { LOGIN_MUTATION } from "../../gql";
 
-const LOGIN_MUTATION = gql`
-  mutation TokenAuth($username: String!, $password: String!) {
-    tokenAuth(username: $username, password: $password) {
-      token
-    }
-  }
-`;
 
 function Auth(props) {
   const [state, changeFormData] = useState({ isLoading: false });

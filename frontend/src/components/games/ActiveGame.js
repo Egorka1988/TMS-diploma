@@ -1,10 +1,6 @@
 import React from "react";
 import { useState, useEffect, useMemo } from "react";
-import {
-  shoot,
-  getGameState,
-  loadActiveGame
-} from "../../store/actions/gamesActions";
+import { shoot, updateGame, serveData } from "../../store/actions/gamesActions";
 import { connect } from "react-redux";
 import { Redirect } from "react-router-dom";
 import { spinner } from "../../utils";
@@ -18,35 +14,56 @@ import {
   NOBODY,
   WAITING_FOR_ENEMY
 } from "../../constants";
+import { useQuery, useMutation } from "react-apollo";
+import {
+  QUERY_LOAD_ACTIVE_GAME,
+  QUERY_GET_GAME_STATE,
+  MUTATION_SHOOT
+} from "../../gql";
+import { client } from "../../index";
 
 function ActiveGame(props) {
-  const [showMessage, allowShowMsg] = useState(true);
-  const [msg, setMsg] = useState("");
   const gameId = props.match.params.gameId;
+  const [state, setState] = useState();
+  const [showMessage, allowShowMsg] = useState(true);
+  const loadActGam = useQuery(QUERY_LOAD_ACTIVE_GAME, {
+    variables: { gameId }
+  });
   const { gameState, auth, name, size, shootMsg, battleMap } = props;
+
+  const [msg, setMsg] = useState("");
   const { creator, joiner, enemyBattleMap, canShoot, turn, err } = props;
-  const enemy = auth.currentUser == creator ? joiner : creator;
+  const enemy = auth.currUser == creator ? joiner : creator;
 
   if (!auth.authToken) {
     return <Redirect to="/auth" />;
   }
-
   const timer = useMemo(
     () =>
       setInterval(() => {
-        props.getGameState(gameId);
+        //polling for fetching fresh game state.
+        client
+          .query({
+            query: QUERY_GET_GAME_STATE,
+            variables: { gameId },
+            fetchPolicy: "no-cache"
+          })
+          .then(data => {
+            props.updateGame(data.data.gameStateData);
+          });
         console.log("tick");
       }, 3000),
     [gameId]
   );
-
   useEffect(() => {
-    props.loadActiveGame(gameId);
     return () => {
-      console.log("unmount. timerId=", timer, "skip");
       clearInterval(timer);
     };
   }, []);
+
+  useEffect(() => {
+    loadActGam.data && props.serveData(loadActGam.data);
+  }, [loadActGam.data.activeGame]);
 
   useEffect(() => {
     let clearTimeoutMsg = null;
@@ -59,6 +76,7 @@ function ActiveGame(props) {
         console.log("skip timeout of shootmsg");
     };
   }, [shootMsg]);
+
 
   useEffect(() => {
     switch (gameState) {
@@ -82,7 +100,7 @@ function ActiveGame(props) {
         break;
       case "active":
         setMsg(
-          turn === auth.currentUser ? WAIT_FOR_YOUR_SHOOT : WAIT_FOR_ENEMY_SHOOT
+          turn === auth.currUser ? WAIT_FOR_YOUR_SHOOT : WAIT_FOR_ENEMY_SHOOT
         );
         break;
       default:
@@ -92,26 +110,39 @@ function ActiveGame(props) {
 
   const onClick = cell => {
     if (canShoot) {
-      props.shoot(cell, gameId);
-      allowShowMsg(true);
+      client
+        .mutate({
+          mutation: MUTATION_SHOOT,
+          variables: {
+            gameId,
+            shoot: cell
+          }
+        })
+        .then(resp => {
+          if (resp.data) {
+            props.shoot(resp.data.shoot, cell);
+            allowShowMsg(true);
+          }
+        });
     }
   };
 
   if (props.isLoading) {
     return spinner();
   }
+  console.log("render");
   return (
     <div className="activeGameContainer">
       <div className="header">{name}</div>
       <div className="userMapsContainer">
         <div className="mapContainer">
-          <div className="userInfoContainer">{auth.currentUser}</div>
-          <Map
-            onClick={null}
-            size={size}
-            battleMap={battleMap}
-            disabled={true}
-          />
+          <div className="userInfoContainer">{auth.currUser}</div>
+            <Map
+              onClick={null}
+              size={size}
+              battleMap={battleMap}
+              disabled={true}
+            />
         </div>
         <div>
           <div className="stateMsg">{msg}</div>
@@ -122,12 +153,12 @@ function ActiveGame(props) {
 
         <div className="mapContainer">
           <div className="userInfoContainer">{enemy ? enemy : NOBODY}</div>
-          <Map
-            onClick={onClick}
-            size={size}
-            battleMap={enemyBattleMap}
-            disabled={!canShoot}
-          />
+            <Map
+              onClick={onClick}
+              size={size}
+              battleMap={enemyBattleMap}
+              disabled={!canShoot}
+            />
         </div>
       </div>
     </div>
@@ -149,12 +180,12 @@ const mapStateToProps = state => {
     turn: state.activeGame.turn,
     size: state.activeGame.size,
 
-    err: state.activeGame.err,
+    shootError: state.activeGame.shootError,
     shootMsg: state.activeGame.shootMsg,
 
     canShoot:
       state.activeGame.gameState === "active"
-        ? state.auth.currentUser === state.activeGame.turn
+        ? state.auth.currUser === state.activeGame.turn
         : false,
 
     battleMap: state.activeGame.battleMap,
@@ -164,8 +195,8 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    loadActiveGame: gameId => dispatch(loadActiveGame(gameId)),
-    getGameState: gameId => dispatch(getGameState(gameId)),
+    serveData: data => dispatch(serveData(data)),
+    updateGame: data => dispatch(updateGame(data)),
     shoot: (targetCell, gameId) => dispatch(shoot(targetCell, gameId))
   };
 };

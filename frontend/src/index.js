@@ -15,23 +15,34 @@ import rootReducer from "./store/reducers/rootReducer";
 // import { initialLoad } from "./store/actions/gamesActions";
 import { localStoreTokenManager, getTokenCsrf } from "./utils";
 
-
 const cache = new InMemoryCache();
 const link = new HttpLink({
   uri: SERVICE_URL + "/graphql/",
   credentials: "include",
   headers: {
     "X-Csrftoken": getTokenCsrf(),
-    "Authorization": "Bearer " + localStorage.getItem("authToken") 
+    Authorization: "Bearer " + localStorage.getItem("authToken")
   },
   fetchOptions: {
     mode: "cors"
   }
 });
 
-const client = new ApolloClient({
+const defaultOptions = {
+  // watchQuery: {
+  //   fetchPolicy: "no-cache",
+  //   errorPolicy: "ignore"
+  // },
+  // query: {
+  //   fetchPolicy: "no-cache",
+  //   errorPolicy: "all"
+  // }
+};
+
+export const client = new ApolloClient({
   cache,
-  link
+  link,
+  defaultOptions
 });
 
 const initialState = {
