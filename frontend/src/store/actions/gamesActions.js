@@ -66,15 +66,35 @@ export const serveData = (rawData, settingFleetMode = false) => {
   });
 };
 
-export const handleJoinGameResponse = data => {
+export const handleRecievedGamesList = data => {
+  if (data) {
+    if (data.availableGames) {
+      return store.dispatch({
+        type: "AVAILABLE_GAMES_LIST",
+        avGames: data.availableGames.edges,
+        avGamesTotal: data.availableGamesCount,
+        avGamesPageInfo: data.availableGames.pageInfo
+      });
+    }
+    if (data.allMyGames) {
+      return store.dispatch({
+        type: "ALL_MY_GAMES_LIST",
+        myGames: data.allMyGames.edges,
+        allMyGamesTotal: data.allMyGamesCount,
+        allMyGamesPageInfo: data.allMyGames.pageInfo
+      });
+    }
+  }
+};
 
+export const handleJoinGameResponse = data => {
   if (data.game) {
     return store.dispatch({
       type: "JOIN_SUCCESS",
       size: data.game.size,
       name: data.game.name,
       creator: data.game.creator.username,
-      gameId: data.game.gameId
+      gameId: data.game.id
     });
   }
   if (data.failMessage) {

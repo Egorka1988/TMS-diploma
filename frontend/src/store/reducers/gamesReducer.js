@@ -46,15 +46,32 @@ const gamesReducer = (state = initState, action) => {
       };
     case "JOIN_SUCCESS":
       console.log("Join success");
+      console.log(action);
       return {
         ...state,
         size: action.size,
         name: action.name,
         creator: action.creator,
         gameId: action.gameId,
+        redirectFromDashboard: true,
         joinErr: null,
         battleMap: action.size && genBattleMapState(action.size)
       };
+    case "AVAILABLE_GAMES_LIST":
+      return {
+        ...state,
+        avGames: action.avGames,
+        avGamesTotal: action.avGamesTotal,
+        avGamesPageInfo: action.avGamesPageInfo
+      };
+    case "ALL_MY_GAMES_LIST":
+      return {
+        ...state,
+        allMyGames: action.myGames,
+        allMyGamesTotal: action.allMyGamesTotal,
+        allMyGamesPageInfo: action.allMyGamesPageInfo
+      };
+
     case "JOIN_INITIAL_DATA":
       console.log("JOIN_INITIAL_DATA");
       return {
@@ -82,7 +99,11 @@ const gamesReducer = (state = initState, action) => {
         ...state,
         err: "error"
       };
-
+    case "RESTRICT_REDIRECT":
+      return ({
+        ...state,
+        redirectFromDashboard: false
+      });
     default:
       return state;
   }

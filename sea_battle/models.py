@@ -22,7 +22,7 @@ class GamesQuerySet(models.QuerySet):
 
     def my_games(self, user):
         # games of request.user
-        return self.filter(Q(creator=user) | Q(joiner=user), Q(winner=None))
+        return self.filter(Q(creator=user) | Q(joiner=user), Q(winner=None)).order_by("id")
 
     def active_games(self):
         now = timezone.now()

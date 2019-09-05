@@ -194,6 +194,10 @@ LOGGING = {
             'handlers': ['console', 'file_warning'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'WARNING'),
         },
+        # 'django.db.backends': {
+        #     'handlers': ['console'],
+        #     'level': "DEBUG",
+        # },
     },
 }
 

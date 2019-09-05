@@ -21,7 +21,10 @@ class Navbar extends Component {
     return (
       <nav className="nav-wrapper grey darken-3">
         <div className="container">
-          <Link to="/" className="brand-logo">
+          <Link
+            to="/"
+            className="brand-logo"
+          >
             Sea Battle
           </Link>
           {authToken && currUser && <SignedInLinks />}
@@ -38,7 +41,6 @@ class Navbar extends Component {
 }
 
 const mapStateToProps = state => {
- 
   return {
     currUser: state.auth.currUser,
     authToken: state.auth.authToken

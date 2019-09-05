@@ -10,6 +10,7 @@ import ActiveGame from "./components/games/ActiveGame";
 import { connect } from "react-redux";
 import { useMutation } from "react-apollo";
 import gql from "graphql-tag";
+import MuiThemeProvider from "material-ui/styles/MuiThemeProvider";
 
 const MUTATION_REFRESH_TOKEN = gql`
   mutation RefreshToken($token: String!) {
@@ -49,8 +50,9 @@ function App(props) {
       return comp;
     }
   };
-  
+
   return (
+  <MuiThemeProvider>
     <BrowserRouter>
       <div className="App">
         <Navbar />
@@ -59,9 +61,13 @@ function App(props) {
         <Route path="/profile" component={Profile} />
         <Route path="/create" component={redirectHandler(NewGame)} />
         <Route path={"/join/:gameId"} component={redirectHandler(JoinGame)} />
-        <Route path={"/active-games/:gameId"} component={redirectHandler(ActiveGame)} />
+        <Route
+          path={"/active-games/:gameId"}
+          component={redirectHandler(ActiveGame)}
+        />
       </div>
-    </BrowserRouter>
+      </BrowserRouter>
+  </MuiThemeProvider>
   );
 }
 

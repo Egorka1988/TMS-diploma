@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import { Redirect } from "react-router-dom";
 import { spinner, genBattleMapState, prepareFleet } from "../../utils";
 import { errorHandler } from "../../errorHandler";
-import { MUTATION_CREATE_GAME } from "../../gql";
+import { MUTATION_CREATE_GAME } from "../../graphQL/newGame/mutations";
 import { Map } from "./BattleMap";
 import Legend from "./Legend";
 import { useMutation } from "react-apollo";

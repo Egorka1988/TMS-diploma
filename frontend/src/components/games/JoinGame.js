@@ -1,8 +1,7 @@
-import React, { Component, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   joinFleet,
   serveJoinerInitial,
-  loadActiveGame,
   clickHandle
 } from "../../store/actions/gamesActions";
 import { connect } from "react-redux";
@@ -11,7 +10,8 @@ import { spinner, genBattleMapState, prepareFleet } from "../../utils";
 import { errorHandler } from "../../errorHandler";
 import { Map } from "./BattleMap";
 import Legend from "./Legend";
-import { MUTATION_JOIN_FLEET, QUERY_INITIAL_FOR_JOINER } from "../../gql";
+import { QUERY_INITIAL_FOR_JOINER } from "../../graphQL/joinGame/queries";
+import { MUTATION_JOIN_FLEET } from "../../graphQL/joinGame/mutations";
 import { client } from "../../index";
 import { EMPTY_FLEET } from "../../constants";
 
@@ -39,7 +39,6 @@ function JoinGame(props) {
     setState({ ...state, battleMap: props.battleMap });
   }, [props.battleMap]);
 
-
   const onClick = cell => {
     if (state.errHandleCompleted) {
       let resetBattleMap = state.battleMap;
@@ -50,7 +49,7 @@ function JoinGame(props) {
       }
       setState({
         ...state,
-        battleMap: resetBattleMap,
+        battleMap: resetBattleMap
       });
     }
     const [x, y] = cell;
@@ -100,11 +99,11 @@ function JoinGame(props) {
                 errMsg: data.errMsg
               });
             } else {
-              console.log("game!")
+              console.log("game!");
               setState({
                 ...state,
                 isFleetJoined: true
-              })
+              });
             }
           }
         });
@@ -125,9 +124,8 @@ function JoinGame(props) {
   // if () {
   //   return <Redirect to={"/active-games/" + props.gameId} />;
   // }
- 
+
   return (
-    
     <div className="container">
       {/* {state.isFleetJoined && <Redirect to={"/active-games/" + props.gameId} />} */}
       <div>
@@ -178,7 +176,6 @@ function JoinGame(props) {
     </div>
   );
 }
-
 
 const mapStateToProps = state => {
   return {

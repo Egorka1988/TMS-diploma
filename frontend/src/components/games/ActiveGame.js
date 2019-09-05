@@ -17,9 +17,9 @@ import {
 import { useQuery, useMutation } from "react-apollo";
 import {
   QUERY_LOAD_ACTIVE_GAME,
-  QUERY_GET_GAME_STATE,
-  MUTATION_SHOOT
-} from "../../gql";
+  QUERY_GET_GAME_STATE
+} from "../../graphQL/activeGame/queries";
+import { MUTATION_SHOOT } from "../../graphQL/activeGame/mutations";
 import { client } from "../../index";
 
 function ActiveGame(props) {
@@ -76,7 +76,6 @@ function ActiveGame(props) {
         console.log("skip timeout of shootmsg");
     };
   }, [shootMsg]);
-
 
   useEffect(() => {
     switch (gameState) {
@@ -137,12 +136,12 @@ function ActiveGame(props) {
       <div className="userMapsContainer">
         <div className="mapContainer">
           <div className="userInfoContainer">{auth.currUser}</div>
-            <Map
-              onClick={null}
-              size={size}
-              battleMap={battleMap}
-              disabled={true}
-            />
+          <Map
+            onClick={null}
+            size={size}
+            battleMap={battleMap}
+            disabled={true}
+          />
         </div>
         <div>
           <div className="stateMsg">{msg}</div>
@@ -153,12 +152,12 @@ function ActiveGame(props) {
 
         <div className="mapContainer">
           <div className="userInfoContainer">{enemy ? enemy : NOBODY}</div>
-            <Map
-              onClick={onClick}
-              size={size}
-              battleMap={enemyBattleMap}
-              disabled={!canShoot}
-            />
+          <Map
+            onClick={onClick}
+            size={size}
+            battleMap={enemyBattleMap}
+            disabled={!canShoot}
+          />
         </div>
       </div>
     </div>

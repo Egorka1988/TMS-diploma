@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
-import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
 import { serveToken, signUp, handshake } from "../../store/actions/authActions";
 import { connect } from "react-redux";
 import { Redirect } from "react-router-dom";
 import { spinner } from "../../utils";
-import { LOGIN_MUTATION } from "../../gql";
+import { LOGIN_MUTATION } from "../../graphQL/auth/mutations";
 
 
 function Auth(props) {
