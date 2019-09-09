@@ -8,14 +8,14 @@ import { QUERY_GET_ALL_MY_GAMES } from "../../graphQL/dashboard/queries";
 const MyGames = props => {
   const { myGamesTotal, myGames, myGamesPerPage, currUser } = props;
   const [cursor, setCursor] = useState("");
-  const [currPage, setCurrPage] = useState(1);
-  const myGamesPagesTotal = Math.ceil(myGamesTotal / myGamesPerPage);
-  const { data, loading, error, refetch } = useQuery(QUERY_GET_ALL_MY_GAMES, {
+  const { data, errors, loading, refetch } = useQuery(QUERY_GET_ALL_MY_GAMES, {
     variables: {
       allMyGamesAfter: cursor,
-      allMyGamesFirst: myGamesPerPage,
+      allMyGamesFirst: myGamesPerPage
     }
   });
+  const [currPage, setCurrPage] = useState(1);
+  const myGamesPagesTotal = Math.ceil(myGamesTotal / myGamesPerPage);
   const resumeHandler = id => {
     return <Redirect to={"/active-game/" + id} />;
   };
@@ -27,27 +27,28 @@ const MyGames = props => {
   };
   const handlePageChange = page => {
     setCurrPage(page);
-    const encodedCur = btoa("arrayconnection:" + ((page - 1) * myGamesPerPage - 1))
+    const encodedCur = btoa(
+      "arrayconnection:" + ((page - 1) * myGamesPerPage - 1)
+    );
     //for making proper query on each page regardless both direction and step of move
     setCursor(encodedCur);
     refetch();
   };
   useEffect(() => {
-    if (!error && data) {
+    if (!errors && data) {
       handleRecievedGamesList(data);
     }
   }, [data]);
 
-  if (loading) {
-    return <p>loading...</p>;
-  }
   return (
     <div className="highlight">
+      {loading && <p>loading...</p>}
       <UltimatePagination
         currentPage={currPage}
         totalPages={myGamesPagesTotal ? myGamesPagesTotal : 1}
         onChange={handlePageChange}
       />
+      {loading}
       <table>
         <thead>
           <tr>
@@ -128,6 +129,7 @@ const MyGames = props => {
 const mapStateToProps = state => {
   return {
     currUser: state.auth.curUser,
+    authToken: state.auth.authToken,
     myGames: state.games.allMyGames,
     myGamesTotal: state.games.allMyGamesTotal
   };

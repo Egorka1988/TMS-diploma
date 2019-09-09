@@ -6,6 +6,18 @@ from sea_battle.models import Game
 from sea_battle.services import get_game_state, get_enemy_shoots
 
 
+class UserAlreadyExists(graphene.ObjectType):
+    err_msg = graphene.String()
+
+
+class PasswordTooWeak(graphene.ObjectType):
+    err_msg = graphene.String()
+
+
+class CreateUserSuccess(graphene.ObjectType):
+    token = graphene.String()
+
+
 class GameType(DjangoObjectType):
 
     class Meta:
@@ -71,3 +83,4 @@ class FleetErrorsType(graphene.ObjectType):
     not_allowed_ships = graphene.List(graphene.List(graphene.List(graphene.Int)))
     invalid_ship_composition = graphene.List(graphene.List(graphene.List(graphene.Int)))
     err_msg = graphene.String()
+

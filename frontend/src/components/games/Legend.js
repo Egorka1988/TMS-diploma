@@ -1,14 +1,8 @@
-import React, { Component, useEffect, useState } from "react";
-import { connect } from "react-redux";
+import React from "react";
 import { Cell } from "./BattleMap";
 import { useQuery } from "react-apollo";
-import gql from "graphql-tag";
+import {QUERY_FLEET_COMPOSITION } from "../../graphQL/newGame/queries"
 
-const QUERY_FLEET_COMPOSITION = gql`
-  {
-    fleetComposition
-  }
-`;
 
 export default function Legend(props) {
   const { data, loading, error } = useQuery(QUERY_FLEET_COMPOSITION);
@@ -92,12 +86,3 @@ export default function Legend(props) {
     </div>
   );
 }
-
-
-// const mapStateToProps = state => {
-//   return {
-//     fleetComposition: state.games.fleetComposition
-//   };
-// };
-
-// export default connect(mapStateToProps)(Legend);

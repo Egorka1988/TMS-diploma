@@ -10,7 +10,6 @@ import Legend from "./Legend";
 import { useMutation } from "react-apollo";
 import { EMPTY_FLEET } from "../../constants";
 
-
 const initialState = {
   name: "",
   size: 10,
@@ -27,7 +26,7 @@ function NewGame(props) {
     let err;
     if (data) {
       err = JSON.parse(data.createGame.fleetErrors);
-      const gameId = data.createGame.gameId
+      const gameId = data.createGame.gameId;
       gameId && serveCreationData(gameId);
     }
     err && setFleeterr(err);
@@ -102,23 +101,15 @@ function NewGame(props) {
       );
     } else {
       setFleeterr({
-        emptyFleet:
-          EMPTY_FLEET
+        emptyFleet: EMPTY_FLEET
       });
     }
   };
 
-  if (state.isLoading) {
-    return spinner();
-  }
-  if (!props.auth.authToken) {
-    return <Redirect to="/auth" />;
-  }
-  if (props.gameId) {
-    return <Redirect to={"/active-games/" + props.gameId} />;
-  }
   return (
     <div className="container">
+      {state.loading && spinner()}
+      {props.gameId && <Redirect to={"/active-games/" + props.gameId} />}
       <form onSubmit={handleSubmit} className="white">
         <h5 className="grey-text text-darken-3">New Game</h5>
         <div className="range-field">
@@ -186,7 +177,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    serveCreationData: (gameId) => dispatch(serveCreationData(gameId))
+    serveCreationData: gameId => dispatch(serveCreationData(gameId))
   };
 };
 

@@ -35,9 +35,6 @@ function ActiveGame(props) {
   const { creator, joiner, enemyBattleMap, canShoot, turn, err } = props;
   const enemy = auth.currUser == creator ? joiner : creator;
 
-  if (!auth.authToken) {
-    return <Redirect to="/auth" />;
-  }
   const timer = useMemo(
     () =>
       setInterval(() => {
@@ -126,12 +123,9 @@ function ActiveGame(props) {
     }
   };
 
-  if (props.isLoading) {
-    return spinner();
-  }
-  console.log("render");
   return (
     <div className="activeGameContainer">
+      {props.isLoading && spinner()}
       <div className="header">{name}</div>
       <div className="userMapsContainer">
         <div className="mapContainer">

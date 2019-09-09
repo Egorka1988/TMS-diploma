@@ -195,15 +195,6 @@ def get_game_battle_maps(game: GameType, current_user: User) -> \
     return None, None
 
 
-def create_user(data: Dict) -> User:
-
-    user = User.objects.create_user(
-        username=data['username'],
-        password=data['password']
-    )
-    return user
-
-
 def create_game(data: Dict, user: User) -> Tuple[Game, BattleMap]:
 
     """set start params of the game to db by the player,

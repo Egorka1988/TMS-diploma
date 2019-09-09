@@ -38,17 +38,15 @@ function Dashboard(props) {
     resumeGame(game);
   };
   useEffect(() => {
-    // allow pass to "/" from everywhere and whenever 
+    // allow pass to "/" from everywhere and whenever (if authenticated, of course)
     return () => 
       store.dispatch({
         type: "RESTRICT_REDIRECT"
       });
   }, [props.redirectFromDashboard]);
-
   return (
     <div className="container">
       {props.redirectFromDashboard && <Redirect to={"/join/" + props.gameId} />}
-      {!props.authToken && <Redirect to="/auth/" />}
       <div className="row">
         <div className="col s12 m6">
           <p />
@@ -66,7 +64,7 @@ function Dashboard(props) {
         <div className="col s12 m5 offset-m1">
           <p />
           <button className="btn-large  red">
-            <span>my arhive games</span>
+            <span>my archive games</span>
           </button>
           <MyGames
             resumeHandler={resumeHandler}
@@ -82,7 +80,6 @@ function Dashboard(props) {
 
 const mapStateToProps = state => {
   return {
-    authToken: state.auth.authToken,
     gameId: state.games.gameId,
     redirectFromDashboard: state.games.redirectFromDashboard
   };

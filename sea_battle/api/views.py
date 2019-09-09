@@ -17,7 +17,7 @@ from sea_battle import constants
 from sea_battle.api import serializers, validators
 from sea_battle.models import BattleMap, Game
 from sea_battle.services import get_game, get_game_state, handle_shoot, \
-    create_game, join_game, join_fleet, create_user, get_game_battle_maps
+    create_game, join_game, join_fleet, get_game_battle_maps
 from sea_battle.utils import mapped_shoots
 import logging
 
@@ -43,20 +43,20 @@ class RegisterFormAPIViewSet(viewsets.GenericViewSet):
 
         return self.request.data
 
-    def create(self, request, *args, **kwargs):
-        # Validation
-
-        validator = validators.SignUpValidator(data=request.data)
-        validator.is_valid(raise_exception=True)
-
-        user = create_user(validator.validated_data)
-        refresh = RefreshToken.for_user(user)
-        data = {}
-        data['refresh'] = str(refresh)
-        data['access'] = str(refresh.access_token)
-        data['username'] = user.username
-        logger.info('new user came: %s'%(user.username))
-        return Response(data, status=status.HTTP_201_CREATED)
+    # def create(self, request, *args, **kwargs):
+    #     # Validation
+    #
+    #     validator = validators.SignUpValidator(data=request.data)
+    #     validator.is_valid(raise_exception=True)
+    #
+    #     user = create_user(validator.validated_data)
+    #     refresh = RefreshToken.for_user(user)
+    #     data = {}
+    #     data['refresh'] = str(refresh)
+    #     data['access'] = str(refresh.access_token)
+    #     data['username'] = user.username
+    #     logger.info('new user came: %s'%(user.username))
+    #     return Response(data, status=status.HTTP_201_CREATED)
 
 
 class WatchGamesAPIViewSet(viewsets.GenericViewSet):

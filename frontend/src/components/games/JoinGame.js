@@ -118,9 +118,7 @@ function JoinGame(props) {
   if (state.isLoading) {
     return spinner();
   }
-  if (!props.auth.authToken) {
-    return <Redirect to="/auth" />;
-  }
+  
   // if () {
   //   return <Redirect to={"/active-games/" + props.gameId} />;
   // }

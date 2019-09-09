@@ -9,7 +9,7 @@ export const handshake = () => {
   };
 };
 
-export const serveToken = token => {
+export const serveReceivedAuthToken = token => {
   store.dispatch({
     type: "LOGIN_SUCCESS",
     authToken: token
