@@ -99,9 +99,10 @@ class TestUtilsCheckFleetComposition:
                 {(3, 1), (4, 1), (5, 1)},
                 {(1, 1), (1, 4), (1, 2), (1, 3)},
         ]
-        assert check_fleet_composition(fleet, size) == {
-            'not_allowed_ships': [{(10, 6), (10, 7), (10, 8), (10, 9), (10, 10)}],
-            }
+        real_case = check_fleet_composition(fleet, size)
+        real_keys = real_case.keys()
+        assert real_keys.__contains__("not_allowed_ships")
+        assert sorted(real_case['not_allowed_ships'][0]) == sorted([(10, 6), (10, 7), (10, 8), (10, 9), (10, 10)])
 
     def test_fail_ship_count(self):
         size = 10
@@ -153,7 +154,7 @@ class TestUtilsCheckFleetComposition:
         ]
         assert check_fleet_composition(fleet, size) == {
             'invalid_ship_composition': [
-                {(2, 7), (2, 8), (1, 8)}
+                [(2, 7), (2, 8), (1, 8)]
                 ]
             }
 

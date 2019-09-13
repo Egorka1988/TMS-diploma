@@ -9,3 +9,5 @@ export DB_HOST=localhost
 export PYTHONPATH=${PYTHONPATH}:${PWD}
 echo ...
 echo done
+
+pytest -v  --no-migrations ./sea_battle/

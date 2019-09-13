@@ -15,7 +15,8 @@ class PasswordTooWeak(graphene.ObjectType):
 
 
 class CreateUserSuccess(graphene.ObjectType):
-    token = graphene.String()
+    access = graphene.String()
+    refresh = graphene.String()
 
 
 class GameType(DjangoObjectType):

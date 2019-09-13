@@ -4,7 +4,7 @@ from sea_battle.services import handle_shoot, get_game_state
 
 import pytest
 
-from sea_battle.tests.factories import ActiveGameFactory, GameFactory, UserFactory
+from sea_battle.tests.factories import UserFactory, GameFactory, ActiveGameFactory
 
 
 @pytest.mark.django_db
@@ -27,7 +27,7 @@ class TestShootHandlerServices:
         assert Game.objects.get(pk=game.pk).turn == game.joiner
 
     def test_hit(self):
-
+       
         last_shoot = [0, 3]
 
         game = ActiveGameFactory()
@@ -71,7 +71,6 @@ class TestShootHandlerServices:
 class TestGetGameState:
 
     def test_wait_for_joiner(self):
-
         game = ActiveGameFactory()
         joiner = UserFactory()
         c_bm = game.battle_maps.filter(user=game.creator).first()

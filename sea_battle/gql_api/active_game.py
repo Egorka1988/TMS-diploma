@@ -58,7 +58,7 @@ class ActiveGameQueries(graphene.ObjectType):
 
 
 class ShootMutation(graphene.Mutation):
-    class Input:
+    class Arguments:
         shoot = graphene.List(graphene.Int)
         game_id = graphene.Int()
 

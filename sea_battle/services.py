@@ -29,7 +29,7 @@ class ShootResult(NamedTuple):
     dead_ship: List[Tuple[int, int]]
 
 
-class GameType(Game):
+class GameType(NamedTuple):
     creator_id: AutoField
     joiner_id: AutoField
     winner_id: AutoField

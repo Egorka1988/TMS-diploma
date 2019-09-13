@@ -4,7 +4,8 @@ import graphene
 from graphql_jwt.decorators import login_required
 
 from sea_battle import constants
-from sea_battle.api import validators, serializers
+from sea_battle.api import validators
+from sea_battle.gql_api.types import FleetErrorsType
 from sea_battle.services import create_game
 
 logger = logging.getLogger(__name__)
@@ -19,13 +20,13 @@ class NewGameQueries(graphene.ObjectType):
 
 
 class CreateGameMutation(graphene.Mutation):
-    class Input:
+    class Arguments:
         name = graphene.String()
         fleet = graphene.List(graphene.List(graphene.Int))
         size = graphene.Int()
 
     game_id = graphene.Int()
-    fleet_errors = graphene.JSONString()
+    fleet_errors = graphene.Field(FleetErrorsType)
 
     @login_required
     def mutate(self, info, *args, **kwargs):
@@ -43,10 +44,7 @@ class CreateGameMutation(graphene.Mutation):
         # Pass validated data to business logic (service)
         game, battlemap = create_game(validator.validated_data, info.context.user)
 
-        # Serialization
-        data = serializers.NewGameSerializer(game).data
-
-        return CreateGameMutation(game_id=data['id'])
+        return CreateGameMutation(game_id=game.id)
 
 
 class NewGameMutations(graphene.ObjectType):

@@ -2,6 +2,7 @@ from datetime import datetime
 
 import factory
 
+
 from django.contrib.auth.models import User
 from django.utils import timezone
 
@@ -14,7 +15,7 @@ class UserFactory(factory.django.DjangoModelFactory):
         model = User
 
     username = factory.Sequence(lambda n: 'john%s' % n)
-
+    password = User.objects.create_user
 
 class GameFactory(factory.django.DjangoModelFactory):
 

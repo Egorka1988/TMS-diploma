@@ -4,7 +4,6 @@ from graphene_django.filter import DjangoFilterConnectionField
 from graphql_jwt.decorators import login_required
 from graphene_django import DjangoObjectType
 
-from sea_battle.gql_api.types import GameType
 from sea_battle.models import Game
 
 
@@ -28,18 +27,20 @@ class DashboardQueries(graphene.ObjectType):
     available_games = DjangoFilterConnectionField(GameNode)
     all_my_games = DjangoFilterConnectionField(GameNode)
 
-    @login_required
+
+
+    # @login_required
     def resolve_available_games(self, info, **kwargs):
         return Game.objects.available_games(User.objects.get(username=info.context.user))
 
-    @login_required
+    # @login_required
     def resolve_all_my_games(self, info, **kwargs):
         return Game.objects.my_games(info.context.user)
 
-    @login_required
+    # @login_required
     def resolve_all_my_games_count(self, info, **kwargs):
         return Game.objects.my_games(info.context.user).count()
 
-    @login_required
+    # @login_required
     def resolve_available_games_count(self, info, **kwargs):
         return Game.objects.available_games(User.objects.get(username=info.context.user)).count()

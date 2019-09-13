@@ -1,5 +1,8 @@
 from typing import List, Optional, Tuple, Set, Any, Union, Iterable
 
+import redis
+from rest_framework_simplejwt.tokens import AccessToken
+
 from sea_battle import constants
 
 import logging
@@ -257,3 +260,26 @@ def mapped_shoots(
         shoots.append([*shoot, 'miss'])
 
     return shoots, list(set(dead_zone))
+
+
+def login_required(fn):
+    def wrapper(self, info, *args, **kwargs):
+        request = info.context
+        # import pdb; pdb.set_trace()
+        cond_1 = "Authorization" in request.headers
+        cond_2 = request.user.is_authenticated
+        if cond_1 and cond_2:
+            # verifying token
+            access = request.headers['Authorization']
+            r = redis.Redis()
+            # check if token is blacklisted
+            if not r.get(access):
+                AccessToken(access)
+            else:
+                raise Exception("Given token has been deactivated. Login again, please")
+        else:
+            raise Exception("Login, please")
+
+        return fn(self, info, *args, **kwargs)
+
+    return wrapper

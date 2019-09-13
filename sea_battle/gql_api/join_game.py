@@ -26,7 +26,7 @@ class JoinGameQueries(graphene.ObjectType):
 
 
 class JoinFleetMutation(graphene.Mutation):
-    class Input:
+    class Arguments:
         game_id = graphene.Int()
         fleet = graphene.List(graphene.List(graphene.Int))
         size = graphene.Int()
@@ -53,7 +53,7 @@ class JoinFleetMutation(graphene.Mutation):
 
 
 class JoinGameMutation(graphene.Mutation):
-    class Input:
+    class Arguments:
         game_id = graphene.Int()
 
     game = graphene.Field(GameType)
