@@ -28,7 +28,7 @@ django-filter==2.1.0
 django-guardian==1.5.0
 django-online-users==0.3
 django-postgres-extensions==0.9.3
-django-registration==3.0
+django-registration==3.1.2
 django-rest-knox==4.0.1
 django-silk==3.0.1
 djangorestframework==3.9.1
